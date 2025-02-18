@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 18, 2025 at 11:09 AM
+-- Generation Time: Feb 18, 2025 at 01:45 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -278,7 +278,33 @@ CREATE TABLE `student` (
 --
 
 INSERT INTO `student` (`id`, `student_id`, `name`, `department`) VALUES
-(1, 'MBC2022-0197', 'Kian Rodriguez', 'IT Department');
+(1, '1', 'q', 'q');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `students`
+--
+
+CREATE TABLE `students` (
+  `id` int(11) NOT NULL,
+  `voters_id` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `year_section` varchar(50) NOT NULL,
+  `course` varchar(100) NOT NULL,
+  `registered_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `students`
+--
+
+INSERT INTO `students` (`id`, `voters_id`, `name`, `year_section`, `course`, `registered_at`) VALUES
+(7, 'ktVGmlwiofvC7cZ', 'ree', 'yrye', 'rye', '2025-02-18 12:37:32'),
+(8, 'nqJ0QrxiqU', 'Rodriguez, Kian, Anthony', 'gegeg', 'rgege', '2025-02-18 12:38:31'),
+(9, 'lofy0JcdGO', 'Rodriguez, Kian, Anthony', 'gegeg', 'rgege', '2025-02-18 12:41:19'),
+(10, '2', 'Rodriguez, Kian, Anthony', 'gegeg', 'rgege', '2025-02-18 12:41:55'),
+(11, '3', 'Rodriguez, Kian, Anthony', 'gegeg', 'rgege', '2025-02-18 12:43:57');
 
 -- --------------------------------------------------------
 
@@ -458,10 +484,11 @@ ALTER TABLE `sessions`
   ADD KEY `sessions_last_activity_index` (`last_activity`);
 
 --
--- Indexes for table `student`
+-- Indexes for table `students`
 --
-ALTER TABLE `student`
-  ADD PRIMARY KEY (`id`);
+ALTER TABLE `students`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `voters_id` (`voters_id`);
 
 --
 -- Indexes for table `users`
@@ -540,10 +567,10 @@ ALTER TABLE `positions`
   MODIFY `position_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT for table `student`
+-- AUTO_INCREMENT for table `students`
 --
-ALTER TABLE `student`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+ALTER TABLE `students`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `users`
