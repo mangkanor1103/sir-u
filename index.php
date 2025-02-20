@@ -14,7 +14,10 @@
     <title>Mindoro State University Online Voting System</title>
     <style>
         body {
-            background-color: #000;
+          background-image: url('pics/bg.jpg'); /* Replace with your actual image path */
+    background-size: cover; /* Ensures the image covers the whole screen */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat;
             color: #fff;
             font-family: Arial, sans-serif;
             display: flex;
@@ -115,7 +118,7 @@
         }
     </style>
 </head>
-<body class="hold-transition login-page">
+<body>
     <div class="login-box">
         <div class="logo-left">
             <img src="pics/Picture5.jpg" alt="University Logo 1">
@@ -141,7 +144,7 @@
                 if(isset($_SESSION['error'])){
                     echo "
                         <div class='callout callout-danger text-center mt20' style='background-color: #e74c3c;'> <!-- Change callout background color to red -->
-                            <p>".$_SESSION['error']."</p> 
+                            <p>".$_SESSION['error']."</p>
                         </div>
                     ";
                     unset($_SESSION['error']);
