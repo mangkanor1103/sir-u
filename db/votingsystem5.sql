@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 18, 2025 at 01:45 PM
+-- Generation Time: Feb 20, 2025 at 06:10 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -43,7 +43,7 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`id`, `election_id`, `username`, `password`, `firstname`, `lastname`, `photo`, `created_on`) VALUES
-(1, 1, 'admin', '$2y$10$eoDZ8wGMOvMB/l/jF8UKEeBv2Co97I5CqmkIu.sUQxisnpqVFZ8wm', 'kian', 'Rodriguez', '440969875_1482253359391132_4061404540813449474_n.jpg', '2024-04-11');
+(1, 1, 'admin', '$2y$10$lQf6BzNGLpXmKLqlR0aulOBwCBthltGIMoGGIb5ro3HeHm8gpl8XC', 'kian', 'Rodriguez', '440969875_1482253359391132_4061404540813449474_n.jpg', '2024-04-11');
 
 -- --------------------------------------------------------
 
