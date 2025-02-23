@@ -78,7 +78,7 @@ $positions = getPositions($election_id);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Positions</title>
+    <title>Positions</title>
     <!-- Link to offline Bootstrap CSS -->
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -102,13 +102,13 @@ $positions = getPositions($election_id);
                         <a class="nav-link" href="home.php">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="candidates.php">Manage Candidates</a>
+                        <a class="nav-link" href="candidates.php">Candidates</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="positions.php">Manage Positions</a>
+                        <a class="nav-link active" href="positions.php">Positions</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="voters.php">Manage Voters</a>
+                        <a class="nav-link" href="voters.php">Voters</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="votes.php">Election Results</a>
@@ -125,7 +125,7 @@ $positions = getPositions($election_id);
 
     <div class="container mt-5">
         <div class="header text-center mb-4">
-            <h1>Manage Positions</h1>
+            <h1>Positions</h1>
             <a href="home.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Dashboard</a>
         </div>
         
