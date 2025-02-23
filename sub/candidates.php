@@ -137,7 +137,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Candidates</title>
+    <title>Candidates</title>
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
@@ -160,16 +160,16 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <a class="nav-link <?php echo $current_page == 'home.php' ? 'active' : ''; ?>" href="home.php">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'candidates.php' ? 'active' : ''; ?>" href="candidates.php">Manage Candidates</a>
+                        <a class="nav-link <?php echo $current_page == 'candidates.php' ? 'active' : ''; ?>" href="candidates.php">Candidates</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'positions.php' ? 'active' : ''; ?>" href="positions.php">Manage Positions</a>
+                        <a class="nav-link <?php echo $current_page == 'positions.php' ? 'active' : ''; ?>" href="positions.php">Positions</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'voters.php' ? 'active' : ''; ?>" href="voters.php">Manage Voters</a>
+                        <a class="nav-link <?php echo $current_page == 'voters.php' ? 'active' : ''; ?>" href="voters.php">Voters</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'votes.php' ? 'active' : ''; ?>" href="votes.php">Manage Votes</a>
+                        <a class="nav-link <?php echo $current_page == 'votes.php' ? 'active' : ''; ?>" href="votes.php">Votes</a>
                     </li>
                     <li class="nav-item">
                         <form method="POST" action="">
@@ -183,7 +183,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
     <div class="container mt-5">
         <div class="header text-center mb-4">
-            <h1>Manage Candidates</h1>
+            <h1>Candidates</h1>
             <a href="home.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Dashboard</a>
         </div>
 

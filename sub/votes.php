@@ -72,13 +72,13 @@ while ($row = $results->fetch_assoc()) {
                         <a class="nav-link" href="home.php">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="candidates.php">Manage Candidates</a>
+                        <a class="nav-link" href="candidates.php">Candidates</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="positions.php">Manage Positions</a>
+                        <a class="nav-link" href="positions.php">Positions</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="voters.php">Manage Voters</a>
+                        <a class="nav-link" href="voters.php">Voters</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" href="votes.php">Election Results</a>

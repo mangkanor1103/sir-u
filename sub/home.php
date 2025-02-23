@@ -85,16 +85,16 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     </li>
                     <!-- Other menu links -->
                     <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'candidates.php' ? 'active' : ''; ?>" href="candidates.php">Manage Candidates</a>
+                        <a class="nav-link <?php echo $current_page == 'candidates.php' ? 'active' : ''; ?>" href="candidates.php">Candidates</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'positions.php' ? 'active' : ''; ?>" href="positions.php">Manage Positions</a>
+                        <a class="nav-link <?php echo $current_page == 'positions.php' ? 'active' : ''; ?>" href="positions.php">Positions</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'voters.php' ? 'active' : ''; ?>" href="voters.php">Manage Voters</a>
+                        <a class="nav-link <?php echo $current_page == 'voters.php' ? 'active' : ''; ?>" href="voters.php">Voters</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'votes.php' ? 'active' : ''; ?>" href="votes.php">Election Results</a>
+                        <a class="nav-link <?php echo $current_page == 'votes.php' ? 'active' : ''; ?>" href="votes.php">Results</a>
                     </li>
                     <!-- Back to login -->
                     <li class="nav-item">
@@ -119,7 +119,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <div class="col-md-3">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Manage Candidates</h5>
+                        <h5 class="card-title">Candidates</h5>
                         <p class="card-text">Add, edit, or remove candidates for the election.</p>
                         <a href="candidates.php" class="btn btn-success">Go to Candidates</a>
                     </div>
@@ -128,7 +128,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <div class="col-md-3">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Manage Positions</h5>
+                        <h5 class="card-title">Positions</h5>
                         <p class="card-text">Set up positions and assign candidates.</p>
                         <a href="positions.php" class="btn btn-success">Go to Positions</a>
                     </div>
@@ -137,7 +137,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <div class="col-md-3">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Manage Voters</h5>
+                        <h5 class="card-title">Voters</h5>
                         <p class="card-text">Add or update voters participating in the election.</p>
                         <a href="voters.php" class="btn btn-success">Go to Voters</a>
                     </div>
