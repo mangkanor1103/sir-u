@@ -10,7 +10,7 @@
                     // Fetch the election details for the current voter
                     $sql = "SELECT * FROM elections WHERE id = (SELECT election_id FROM voters WHERE id = '" . $voter['id'] . "')";
                     $election_query = $conn->query($sql);
-                    
+
                     if ($election_query && $election_query->num_rows > 0) {
                         $election = $election_query->fetch_assoc();
                         echo "<h1 class='page-header text-center title' style='color: #70C237;'><b>" . strtoupper($election['name']) . "</b></h1>";
@@ -23,11 +23,11 @@
                         if ($voteCheckResult && $voteCheckResult->num_rows > 0) {
                             echo "<h3 class='text-center'>You have already voted. Here are your selections:</h3>";
                             $votesQuery = "
-                                SELECT v.*, c.firstname, c.lastname, p.description AS position_description 
-                                FROM votes v 
-                                JOIN candidates c ON v.candidate_id = c.id 
-                                JOIN positions p ON v.position_id = p.position_id 
-                                WHERE v.voters_id = '" . $voter['id'] . "' 
+                                SELECT v.*, c.firstname, c.lastname, p.description AS position_description
+                                FROM votes v
+                                JOIN candidates c ON v.candidate_id = c.id
+                                JOIN positions p ON v.position_id = p.position_id
+                                WHERE v.voters_id = '" . $voter['id'] . "'
                                 AND v.election_id = '" . $election['id'] . "'
                             ";
 
@@ -56,14 +56,14 @@
                                     // Insert each selected candidate's vote, ensuring it's only one vote per position
                                     foreach ($selected_candidates as $candidate_id) {
                                         // Check if the voter has already voted for this position
-                                        $existingVoteCheckQuery = "SELECT * FROM votes WHERE election_id = '" . $election['id'] . "' 
-                                                                    AND voters_id = '" . $voter['id'] . "' 
+                                        $existingVoteCheckQuery = "SELECT * FROM votes WHERE election_id = '" . $election['id'] . "'
+                                                                    AND voters_id = '" . $voter['id'] . "'
                                                                     AND position_id = '" . $position_id . "'";
                                         $existingVoteResult = $conn->query($existingVoteCheckQuery);
 
                                         // If the voter has not voted for this position, insert the vote
                                         if ($existingVoteResult->num_rows == 0) {
-                                            $insert_sql = "INSERT INTO votes (election_id, voters_id, candidate_id, position_id) 
+                                            $insert_sql = "INSERT INTO votes (election_id, voters_id, candidate_id, position_id)
                                                            VALUES ('" . $election['id'] . "', '" . $voter['id'] . "', '" . $candidate_id . "', '" . $position_id . "')";
                                             if (!$conn->query($insert_sql)) {
                                                 $hasError = true; // Set error flag if insertion fails
@@ -78,14 +78,14 @@
                                     echo "<div class='alert alert-success'>Votes submitted successfully!</div>";
                                     // Fetch and display the submitted votes
                                     $votesQuery = "
-                                        SELECT v.*, c.firstname, c.lastname, p.description AS position_description 
-                                        FROM votes v 
-                                        JOIN candidates c ON v.candidate_id = c.id 
-                                        JOIN positions p ON v.position_id = p.position_id 
-                                        WHERE v.voters_id = '" . $voter['id'] . "' 
+                                        SELECT v.*, c.firstname, c.lastname, p.description AS position_description
+                                        FROM votes v
+                                        JOIN candidates c ON v.candidate_id = c.id
+                                        JOIN positions p ON v.position_id = p.position_id
+                                        WHERE v.voters_id = '" . $voter['id'] . "'
                                         AND v.election_id = '" . $election['id'] . "'
                                     ";
-                                    
+
                                     $votesResult = $conn->query($votesQuery);
 
                                     if ($votesResult && $votesResult->num_rows > 0) {
@@ -117,14 +117,19 @@
                                                     <div class='box-body'>";
 
                                     // Fetch candidates for the current position
-                                    $sql_candidates = "SELECT * FROM candidates WHERE position_id = '" . $position['position_id'] . "'";
+                                    $sql_candidates = "SELECT id, firstname, lastname, photo FROM candidates WHERE position_id = '" . $position['position_id'] . "'";
                                     $candidates_query = $conn->query($sql_candidates);
                                     while ($candidate = $candidates_query->fetch_assoc()) {
                                         // Display candidate information and input fields (checkboxes or radio buttons)
-                                        echo "<label>
-                                                <input type='" . ($position['max_vote'] > 1 ? "checkbox" : "radio") . "' name='candidates[" . $position['position_id'] . "][]' value='" . $candidate['id'] . "'>
-                                                " . $candidate['firstname'] . " " . $candidate['lastname'] . "
-                                              </label><br>";
+                                        echo "<div class='candidate' style='display: flex; align-items: center; margin-bottom: 10px; cursor: pointer;'
+                                        onclick='selectCandidate(this, " . $candidate['id'] . ", " . $position['position_id'] . ", " . $position['max_vote'] . ")'>
+                                       <img src='sub/" . $candidate['photo'] . "' width='70' height='70' style='border-radius: 50%; margin-right: 10px; border: 3px solid transparent;'>
+                                       <span>" . $candidate['firstname'] . " " . $candidate['lastname'] . "</span>
+                                       <input type='hidden' name='candidates[" . $position['position_id'] . "][]' value='" . $candidate['id'] . "'>
+                                   </div>";
+
+
+
                                     }
 
                                     echo "          </div>
@@ -151,5 +156,36 @@
 </div>
 <?php include 'includes/scripts.php'; ?>
 <!-- Your JavaScript code -->
+<script>
+function selectCandidate(element, candidateId, positionId, maxVote) {
+    let positionContainer = document.getElementById(positionId);
+    let selectedCandidates = positionContainer.querySelectorAll(".selected");
+
+    if (maxVote === 1) {
+        // Single vote per position (radio button functionality)
+        selectedCandidates.forEach(c => {
+            c.classList.remove("selected");
+            c.querySelector("input").value = "";
+            c.querySelector("img").style.border = "3px solid transparent";
+        });
+    } else if (selectedCandidates.length >= maxVote) {
+        alert("You can only select up to " + maxVote + " candidates for this position.");
+        return;
+    }
+
+    if (element.classList.contains("selected")) {
+        // Deselect if already selected
+        element.classList.remove("selected");
+        element.querySelector("input").value = "";
+        element.querySelector("img").style.border = "3px solid transparent";
+    } else {
+        // Select the candidate
+        element.classList.add("selected");
+        element.querySelector("input").value = candidateId;
+        element.querySelector("img").style.border = "3px solid #70C237";
+    }
+}
+</script>
+
 </body>
 </html>

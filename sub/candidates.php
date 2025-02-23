@@ -38,7 +38,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $photo = uploadPhoto($_FILES['photo']);
         if ($photo) {
             if (createCandidate($election_id, $position_id, $firstname, $lastname, $photo, $platform)) {
-                echo "<div class='alert alert-success'>Candidate created successfully!</div>";
+              $_SESSION['message'] = "Candidate created successfully!";
+              header("Location: candidates.php");
+              exit();
+
             } else {
                 echo "<div class='alert alert-danger'>Error creating candidate!</div>";
             }
@@ -106,7 +109,7 @@ function uploadPhoto($file) {
     }
 
     // Limit the file size (example: 2MB)
-    if ($file["size"] > 2000000) {
+    if ($file["size"] > 20000000) {
         return false; // File is too large
     }
 
@@ -191,7 +194,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <h2>Create Candidate</h2>
             <form method="POST" action="" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="create_candidate">
-                
+
                 <!-- Position Selection Dropdown -->
                 <div class="form-group mb-3">
                     <label for="position">Position</label>
