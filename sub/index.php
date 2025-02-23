@@ -28,74 +28,100 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['election_code_submit']
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Futuristic Login</title>
-    <link rel="stylesheet" href="css/bootstrap.min.css"> <!-- Offline Bootstrap -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #0a0f0d;
-            color: #00ff99;
+            font-family: 'Orbitron', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle, #141e30, #243b55);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            font-family: 'Arial', sans-serif;
-            text-shadow: 0 0 10px #00ff99;
+            overflow: hidden;
         }
         .container {
-            background: rgba(10, 15, 13, 0.9);
-            padding: 50px;
-            border-radius: 20px;
-            box-shadow: 0 0 20px #00ff99;
+            width: 350px;
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 0 15px #00ffcc;
             text-align: center;
-            max-width: 600px;
-            width: 90%;
+            animation: fadeIn 1s ease-in-out;
         }
-        .form-control {
-            background: transparent;
-            border: 2px solid #00ff99;
-            color: #00ff99;
+        h1 {
+            color: #00ffcc;
+            margin-bottom: 20px;
+            text-transform: uppercase;
         }
-        .form-control:focus {
-            background: transparent;
-            box-shadow: 0 0 15px #00ff99;
-            border-color: #00ff99;
+        form {
+            display: flex;
+            flex-direction: column;
         }
-        .btn-custom {
-            background-color: #00ff99;
-            color: #0a0f0d;
-            font-weight: bold;
-            transition: all 0.3s ease-in-out;
+        label {
+            color: #00ffcc;
+            margin-bottom: 5px;
+        }
+        input[type="text"] {
+            width: 100%;
             padding: 12px;
-            font-size: 1.2em;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 1em;
+            text-align: center;
+            outline: none;
         }
-        .btn-custom:hover {
-            background-color: #007755;
-            box-shadow: 0 0 15px #00ff99;
+        input[type="text"]:focus {
+            box-shadow: 0 0 10px #00ffcc;
+        }
+        button {
+            padding: 12px;
+            margin-top: 15px;
+            background: linear-gradient(45deg, #00ffcc, #008080);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        .home-button {
+            margin-top: 20px;
         }
         .home-button a {
-            color: #00ff99;
+            color: #00ffcc;
             text-decoration: none;
-            font-size: 1.2em;
-            transition: all 0.3s ease;
+            font-weight: bold;
         }
-        .home-button a:hover {
-            text-shadow: 0 0 15px #00ff99;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Enter Election Code</h2>
+        <h1>Access Election</h1>
         <form method="POST" action="">
-            <div class="mb-3">
-                <label for="election_code" class="form-label">Election Code:</label>
-                <input type="text" id="election_code" name="election_code" class="form-control" required>
-            </div>
-            <button type="submit" name="election_code_submit" class="btn btn-custom w-100">Submit</button>
+            <label>Election Code:</label>
+            <input type="text" name="election_code" required>
+            <button type="submit" name="election_code_submit">Enter</button>
         </form>
-        <div class="home-button mt-3">
-            <a href="../index.php">Home</a>
+        <div class="home-button">
+            <a href="../index.php">Return Home</a>
         </div>
     </div>
-    <script src="js/bootstrap.bundle.min.js"></script> <!-- Offline Bootstrap -->
 </body>
 </html>
