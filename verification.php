@@ -42,16 +42,16 @@ if (isset($_POST['register'])) {
     exit();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verification</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Orbitron', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -95,10 +95,10 @@ if (isset($_POST['register'])) {
     <div class="container">
         <h2>Verification</h2>
         <?php if (isset($_SESSION['error'])): ?>
-            <p style="color: red;"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></p>
+            <p style="color: red;"> <?php echo $_SESSION['error']; unset($_SESSION['error']); ?> </p>
         <?php endif; ?>
         <?php if (isset($_SESSION['success'])): ?>
-            <p style="color: green;"><?php echo $_SESSION['success']; unset($_SESSION['success']); ?></p>
+            <p style="color: green;"> <?php echo $_SESSION['success']; unset($_SESSION['success']); ?> </p>
         <?php endif; ?>
 
         <form action="" method="POST">
