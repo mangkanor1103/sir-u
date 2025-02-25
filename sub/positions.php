@@ -128,7 +128,7 @@ $positions = getPositions($election_id);
             <h1>Positions</h1>
             <a href="home.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Dashboard</a>
         </div>
-        
+
         <div class="create-form mb-4">
             <h2>Create Position</h2>
             <form method="POST" action="">
