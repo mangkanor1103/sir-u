@@ -46,7 +46,6 @@ while ($row = $results->fetch_assoc()) {
         'total_votes' => $row['total_votes']
     ];
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -59,7 +58,6 @@ while ($row = $results->fetch_assoc()) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
       .navbar-nav .nav-link {
     font-family: 'Orbitron', sans-serif;
@@ -109,7 +107,7 @@ while ($row = $results->fetch_assoc()) {
     <!-- Navigation bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Election Dashboard</a>
+            <a class="navbar-brand" href="home.php">Election Dashboard</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -160,110 +158,51 @@ while ($row = $results->fetch_assoc()) {
     </nav>
 
     <div class="container mt-5">
-        <div class="header text-center mb-4">
-            <h1>Election Results</h1>
-            <a href="home.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Dashboard</a>
+    <div class="header text-center mb-4">
+        <h1>Election Results</h1>
+        <a href="home.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Dashboard</a>
+    </div>
+
+    <?php foreach ($positionsData as $position => $candidates): ?>
+        <?php
+        // Get the winner (first candidate in the sorted list)
+        $winner = reset($candidates);
+        ?>
+
+        <div class="winner-box p-3 mb-3 text-center text-white bg-success">
+            <h3>🏆 The winner for <strong><?php echo htmlspecialchars($position); ?></strong> is:</h3>
+            <h2 class="fw-bold"><?php echo htmlspecialchars($winner['candidate']); ?></h2>
+            <h4>with a total of <strong><?php echo htmlspecialchars($winner['total_votes']); ?></strong> votes!</h4>
         </div>
 
-        <!-- Results table -->
-        <h2>Results - Most Votes per Position</h2>
+        <h2 class="mt-4"><?php echo htmlspecialchars($position); ?></h2>
         <div class="table-responsive">
             <table class="table table-bordered">
                 <thead class="thead-light">
                     <tr>
-                        <th>Position</th>
                         <th>Candidate</th>
                         <th>Total Votes</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php
-                    // Resetting the result pointer to loop through it again
-                    foreach ($positionsData as $position => $candidates) {
-                        foreach ($candidates as $candidate) {
-                            echo "<tr>
-                                    <td>" . htmlspecialchars($position) . "</td>
-                                    <td>" . htmlspecialchars($candidate['candidate']) . "</td>
-                                    <td>" . htmlspecialchars($candidate['total_votes']) . "</td>
-                                  </tr>";
-                        }
-                    }
-                    ?>
+                    <?php foreach ($candidates as $candidate): ?>
+                        <tr class="<?php echo ($candidate === $winner) ? 'table-success fw-bold' : ''; ?>">
+                            <td><?php echo htmlspecialchars($candidate['candidate']); ?></td>
+                            <td><?php echo htmlspecialchars($candidate['total_votes']); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
+    <?php endforeach; ?>
+</div>
 
-        <!-- Chart Section for each position -->
-        <h2 class="mt-5">Results Bar Charts by Position</h2>
-        <?php foreach ($positionsData as $position => $candidates): ?>
-            <div class="position-chart mb-5">
-                <h3><?php echo htmlspecialchars($position); ?></h3>
-                <canvas id="chart-<?php echo htmlspecialchars(str_replace(' ', '-', $position)); ?>" width="400" height="200"></canvas>
-                <script>
-                    // Prepare data for the chart
-                    const labels = <?php echo json_encode(array_column($candidates, 'candidate')); ?>;
-                    const votesData = <?php echo json_encode(array_column($candidates, 'total_votes')); ?>;
+<style>
+    .winner-box {
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+</style>
 
-                    // Ensure all candidates are represented in the chart data
-                    const chartData = {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Total Votes',
-                            data: votesData,
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.2)',
-                                'rgba(54, 162, 235, 0.2)',
-                                'rgba(255, 206, 86, 0.2)',
-                                'rgba(75, 192, 192, 0.2)',
-                                'rgba(153, 102, 255, 0.2)',
-                                'rgba(255, 159, 64, 0.2)',
-                            ],
-                            borderColor: [
-                                'rgba(255, 99, 132, 1)',
-                                'rgba(54, 162, 235, 1)',
-                                'rgba(255, 206, 86, 1)',
-                                'rgba(75, 192, 192, 1)',
-                                'rgba(153, 102, 255, 1)',
-                                'rgba(255, 159, 64, 1)',
-                            ],
-                            borderWidth: 1
-                        }]
-                    };
-
-                    // Chart configuration
-                    const config = {
-                        type: 'bar', // Changed to bar graph
-                        data: chartData,
-                        options: {
-                            responsive: true,
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
-                            },
-                            plugins: {
-                                legend: {
-                                    position: 'top',
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Votes for <?php echo htmlspecialchars($position); ?>'
-                                }
-                            }
-                        }
-                    };
-
-                    // Creating the chart
-                    new Chart(
-                        document.getElementById('chart-<?php echo htmlspecialchars(str_replace(' ', '-', $position)); ?>'),
-                        config
-                    );
-                </script>
-            </div>
-        <?php endforeach; ?>
-    </div>
-
-    <!-- Bootstrap JS (Offline) -->
-    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
