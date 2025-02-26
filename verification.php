@@ -45,7 +45,6 @@ if (isset($_POST['register'])) {
     exit();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -59,19 +58,41 @@ if (isset($_POST['register'])) {
             background-color: #f8f9fa;
             font-family: 'Poppins', sans-serif;
         }
-        .container {
-            max-width: 500px;
-            margin-top: 50px;
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 128, 0, 0.5);
+        .verification-container {
+            max-width: 400px;
+            margin: 80px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
-        h2 {
+        .verification-container h2 {
             color: #28a745;
             font-weight: 700;
             margin-bottom: 20px;
+        }
+        .form-group {
+            text-align: left;
+        }
+        .form-control {
+            border-radius: 5px;
+            border: 1px solid #28a745;
+            padding: 10px;
+        }
+        .btn-custom {
+            background: #28a745;
+            color: white;
+            font-weight: bold;
+            border: none;
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .btn-custom:hover {
+            background: #218838;
         }
         .alert {
             padding: 10px;
@@ -89,68 +110,52 @@ if (isset($_POST['register'])) {
             color: #721c24;
             border-left: 5px solid #dc3545;
         }
-        .form-control {
-            background: #f0f0f0;
-            border: 1px solid #28a745;
-            color: #333;
-            padding: 10px;
-        }
-        .btn-custom {
-            background: #28a745;
-            color: white;
-            font-weight: bold;
-            border: none;
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 5px;
-        }
-        .btn-custom:hover {
-            background: #218838;
+        .back-button {
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-        <h2>Verification</h2>
+<div class="verification-container">
+    <h2>Verification</h2>
 
-        <?php if (isset($_SESSION['error'])): ?>
-            <div class="alert alert-danger">
-                <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if (isset($_SESSION['success'])): ?>
-            <div class="alert alert-success">
-                <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
-            </div>
-        <?php endif; ?>
-
-        <form action="" method="POST">
-            <div class="form-group">
-                <label><strong>Voter Code:</strong></label>
-                <input type="text" class="form-control" value="<?php echo htmlspecialchars($voter_id); ?>" disabled>
-            </div>
-            <div class="form-group">
-                <label><strong>Name:</strong></label>
-                <input type="text" class="form-control" name="name" required>
-            </div>
-            <div class="form-group">
-                <label><strong>Year & Section:</strong></label>
-                <input type="text" class="form-control" name="year_section" required>
-            </div>
-            <div class="form-group">
-                <label><strong>Course:</strong></label>
-                <input type="text" class="form-control" name="course" required>
-            </div>
-            <button type="submit" class="btn btn-custom" name="register">Register</button>
-        </form>
-
-        <div class="home-button" style="margin-top: 20px;">
-            <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="alert alert-danger">
+            <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
         </div>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="alert alert-success">
+            <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
+        </div>
+    <?php endif; ?>
+
+    <form action="" method="POST">
+        <div class="form-group">
+            <label><strong>Voter Code:</strong></label>
+            <input type="text" class="form-control" value="<?php echo htmlspecialchars($voter_id); ?>" disabled>
+        </div>
+        <div class="form-group">
+            <label><strong>Name:</strong></label>
+            <input type="text" class="form-control" name="name" required>
+        </div>
+        <div class="form-group">
+            <label><strong>Year & Section:</strong></label>
+            <input type="text" class="form-control" name="year_section" required>
+        </div>
+        <div class="form-group">
+            <label><strong>Course:</strong></label>
+            <input type="text" class="form-control" name="course" required>
+        </div>
+        <button type="submit" class="btn btn-custom" name="register">Register</button>
+    </form>
+
+    <div class="back-button">
+        <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
     </div>
+</div>
 
 </body>
 </html>
