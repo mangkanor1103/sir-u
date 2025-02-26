@@ -253,80 +253,96 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <a href="home.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Dashboard</a>
         </div>
 
-        <div class="card p-4 mb-4">
-            <h2>Create Candidate</h2>
-            <form method="POST" action="" enctype="multipart/form-data">
-                <input type="hidden" name="action" value="create_candidate">
+        <div class="card p-4 mb-4 bg-light border-success">
+    <h2 class="text-success">Create Candidate</h2>
+    <form method="POST" action="" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="create_candidate">
 
+        <div class="row">
+            <!-- Left Side -->
+            <div class="col-md-6">
                 <!-- Position Selection Dropdown -->
                 <div class="form-group mb-3">
-                    <label for="position">Position</label>
-                    <select class="form-control" name="position_id" required>
+                    <label for="position" class="text-success">Position</label>
+                    <select class="form-control border-success" name="position_id" required>
                         <option value="">Select Position</option>
                         <?php while ($position = $positions->fetch_assoc()): ?>
-                            <option value="<?php echo $position['position_id']; ?>"><?php echo $position['description']; ?></option>
+                            <option value="<?php echo $position['position_id']; ?>">
+                                <?php echo $position['description']; ?>
+                            </option>
                         <?php endwhile; ?>
                     </select>
                 </div>
 
                 <div class="form-group mb-3">
-                    <label for="firstname">First Name</label>
-                    <input type="text" class="form-control" name="firstname" placeholder="First Name" required>
+                    <label for="firstname" class="text-success">First Name</label>
+                    <input type="text" class="form-control border-success" name="firstname" placeholder="First Name" required>
                 </div>
 
                 <div class="form-group mb-3">
-                    <label for="lastname">Last Name</label>
-                    <input type="text" class="form-control" name="lastname" placeholder="Last Name" required>
+                    <label for="lastname" class="text-success">Last Name</label>
+                    <input type="text" class="form-control border-success" name="lastname" placeholder="Last Name" required>
+                </div>
+            </div>
+
+            <!-- Right Side -->
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="photo" class="text-success">Photo</label>
+                    <input type="file" class="form-control border-success" name="photo" accept="image/*" required>
                 </div>
 
                 <div class="form-group mb-3">
-                    <label for="photo">Photo</label>
-                    <input type="file" class="form-control" name="photo" accept="image/*" required>
+                    <label for="platform" class="text-success">Platform</label>
+                    <textarea class="form-control border-success" name="platform" rows="4" required></textarea>
                 </div>
-
-                <div class="form-group mb-3">
-                    <label for="platform">Platform</label>
-                    <textarea class="form-control" name="platform" rows="4" required></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Create Candidate</button>
-            </form>
+            </div>
         </div>
 
-        <div class="card p-4">
-            <h2>Existing Candidates</h2>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Position</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Photo</th>
-                        <th>Platform</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while ($candidate = $candidates->fetch_assoc()): ?>
-                        <tr>
-                            <td><?php echo $candidate['position_description']; ?></td>
-                            <td><?php echo $candidate['firstname']; ?></td>
-                            <td><?php echo $candidate['lastname']; ?></td>
-                            <td><img src="<?php echo $candidate['photo']; ?>" alt="Candidate Photo" style="width: 50px; height: 50px;"></td>
-                            <td><?php echo $candidate['platform']; ?></td>
-                            <td>
-                                <form method="POST" action="">
-                                    <input type="hidden" name="id" value="<?php echo $candidate['candidate_id']; ?>">
-                                    <input type="hidden" name="action" value="delete_candidate">
-                                    <button type="submit" class="btn btn-danger">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
+        <div class="text-center">
+            <button type="submit" class="btn btn-success">Create Candidate</button>
         </div>
-    </div>
+    </form>
+</div>
+
+
+<div class="card p-4 bg-light border-success">
+    <h2 class="text-success">Existing Candidates</h2>
+    <table class="table table-bordered table-hover">
+        <thead class="table-success">
+            <tr>
+                <th>Position</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Photo</th>
+                <th>Platform</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php while ($candidate = $candidates->fetch_assoc()): ?>
+                <tr>
+                    <td><?php echo $candidate['position_description']; ?></td>
+                    <td><?php echo $candidate['firstname']; ?></td>
+                    <td><?php echo $candidate['lastname']; ?></td>
+                    <td>
+                        <img src="<?php echo $candidate['photo']; ?>" alt="Candidate Photo" class="rounded-circle border border-success" style="width: 50px; height: 50px; object-fit: cover;">
+                    </td>
+                    <td><?php echo $candidate['platform']; ?></td>
+                    <td class="d-flex gap-1">
+                        <a href="edit_candidate.php?id=<?php echo $candidate['candidate_id']; ?>" class="btn btn-warning btn-sm">Edit</a>
+                        <form method="POST" action="">
+                            <input type="hidden" name="id" value="<?php echo $candidate['candidate_id']; ?>">
+                            <input type="hidden" name="action" value="delete_candidate">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
+        </tbody>
+    </table>
+</div>
+
 
     <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>

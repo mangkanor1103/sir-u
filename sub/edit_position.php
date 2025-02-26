@@ -4,36 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Position</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&family=Electrolize&display=swap');
         body {
-            background-color: #121212;
-            color: #ffffff;
-            font-family: 'Orbitron', sans-serif;
+            background-color: #f8f9fa;
+            font-family: 'Poppins', sans-serif;
+            color: #333;
         }
         .container {
             max-width: 500px;
             margin-top: 50px;
-            background: #1e1e1e;
+            background: #ffffff;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            box-shadow: 0 0 10px rgba(0, 128, 0, 0.5);
         }
         .form-control {
-            background: #2c2c2c;
-            border: 1px solid cyan;
-            color: white;
+            background: #f0f0f0;
+            border: 1px solid #28a745;
+            color: #333;
         }
         .btn-custom {
-            background: cyan;
-            color: black;
+            background: #28a745;
+            color: white;
             font-weight: bold;
             border: none;
         }
         .btn-custom:hover {
-            background: #00cccc;
+            background: #218838;
         }
     </style>
 </head>
@@ -85,8 +84,7 @@
                 <input type="number" class="form-control" name="priority" value="<?php echo $position['priority']; ?>" required>
             </div>
             <button type="submit" class="btn btn-custom w-100">Update Position</button>
-            <a href="positions.php" class="btn btn-secondary">Cancel</a>
-
+            <a href="positions.php" class="btn btn-secondary w-100 mt-2">Cancel</a>
         </form>
     </div>
 </body>

@@ -68,8 +68,44 @@ $voters = getVoters($election_id);
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
+              body {
+            background-color: #f8f9fa;
+            font-family: 'Poppins', sans-serif;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 128, 0, 0.5);
+        }
+        .form-control {
+            background: #f0f0f0;
+            border: 1px solid #28a745;
+            color: #333;
+        }
+        .btn-custom {
+            background: #28a745;
+            color: white;
+            font-weight: bold;
+            border: none;
+            width: 100%;
+        }
+        .btn-custom:hover {
+            background: #218838;
+        }
+        .table thead {
+            background: #28a745;
+            color: white;
+        }
+        .table tbody tr:hover {
+            background: #f1f1f1;
+        }
       .navbar-nav .nav-link {
     font-family: 'Orbitron', sans-serif;
     color: #e0e0e0;
@@ -168,7 +204,7 @@ $voters = getVoters($election_id);
         </div>
     </nav>
 
-    <div class="container mt-5">
+    <div class="container">
         <div class="header text-center mb-4">
             <h1>Generate Voter Codes</h1>
             <a href="home.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Dashboard</a>
@@ -181,14 +217,14 @@ $voters = getVoters($election_id);
                 <div class="form-group mb-3">
                     <input type="number" class="form-control" name="count" placeholder="Number of Codes to Generate" required>
                 </div>
-                <button type="submit" class="btn btn-success">Generate Codes</button>
+                <button type="submit" class="btn btn-custom">Generate Codes</button>
             </form>
         </div>
 
         <h2>Generated Voter Codes</h2>
         <div class="table-responsive">
             <table class="table table-bordered">
-                <thead class="thead-light">
+                <thead>
                     <tr>
                         <th>ID</th>
                         <th>Voter Code</th>
