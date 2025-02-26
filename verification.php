@@ -11,38 +11,40 @@ if (!isset($_SESSION['voter'])) {
 
 $voter_id = $_SESSION['voter'];
 
+// Check if voter is already registered
+$stmt = $conn->prepare("SELECT * FROM students WHERE voters_id = ?");
+$stmt->bind_param("s", $voter_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+// If voter is found, redirect to home.php
+if ($result->num_rows > 0) {
+    header('Location: home.php');
+    exit();
+}
+
+// If form is submitted
 if (isset($_POST['register'])) {
     $name = trim($_POST['name']);
     $year_section = trim($_POST['year_section']);
     $course = trim($_POST['course']);
 
-    // Check if voter is already registered
-    $stmt = $conn->prepare("SELECT * FROM students WHERE voters_id = ?");
-    $stmt->bind_param("s", $voter_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    // Insert voter details into students table
+    $stmt = $conn->prepare("INSERT INTO students (voters_id, name, year_section, course) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("ssss", $voter_id, $name, $year_section, $course);
 
-    if ($result->num_rows > 0) {
-        $_SESSION['error'] = 'You are already registered!';
+    if ($stmt->execute()) {
+        $_SESSION['success'] = 'Registration successful!';
+        header('Location: home.php'); // Redirect to home after successful registration
+        exit();
     } else {
-        // Insert voter details into students table
-        $stmt = $conn->prepare("INSERT INTO students (voters_id, name, year_section, course) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("ssss", $voter_id, $name, $year_section, $course);
-
-        if ($stmt->execute()) {
-            $_SESSION['success'] = 'Registration successful!';
-            header('Location: home.php'); // Redirect to home or voting page
-            exit();
-        } else {
-            $_SESSION['error'] = 'Registration failed!';
-        }
+        $_SESSION['error'] = 'Registration failed!';
     }
     $stmt->close();
     header('Location: verification.php');
     exit();
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -110,7 +112,7 @@ if (isset($_POST['register'])) {
 </head>
 <body>
 
-    <div class="container">
+<div class="container">
         <h2>Verification</h2>
 
         <?php if (isset($_SESSION['error'])): ?>
@@ -144,6 +146,10 @@ if (isset($_POST['register'])) {
             </div>
             <button type="submit" class="btn btn-custom" name="register">Register</button>
         </form>
+
+        <div class="home-button" style="margin-top: 20px;">
+            <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
+        </div>
     </div>
 
 </body>
