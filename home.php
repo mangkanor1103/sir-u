@@ -139,11 +139,10 @@
                                 }
 
 // Display voting buttons
-echo "<div class='text-center'>
-        <button type='submit' name='submit_votes' class='btn btn-success btn-flat' onclick='return confirmVote()'>
-            <i class='fa fa-check-square-o'></i> Submit Votes
-        </button>
-      </div>";
+echo "<button type='button' class='btn btn-success btn-flat' onclick='return showConfirmation()'>
+    <i class='fa fa-check-square-o'></i> Review & Submit Votes
+</button>
+";
 
                                 echo "</form>"; // Form tag closing added here
                             }
@@ -159,6 +158,30 @@ echo "<div class='text-center'>
 </div>
 <?php include 'includes/scripts.php'; ?>
 <!-- Your JavaScript code -->
+<script>
+function showConfirmation() {
+    let voteReviewList = document.getElementById("voteReviewList");
+    voteReviewList.innerHTML = "";
+
+    let selectedCandidates = document.querySelectorAll(".selected");
+
+    if (selectedCandidates.length === 0) {
+        alert("Please select at least one candidate before submitting.");
+        return;
+    }
+
+    selectedCandidates.forEach(candidate => {
+        let candidateName = candidate.querySelector("span").textContent;
+        let listItem = document.createElement("li");
+        listItem.classList.add("list-group-item");
+        listItem.textContent = candidateName;
+        voteReviewList.appendChild(listItem);
+    });
+
+    $("#confirmationModal").modal("show");  // Show modal
+}
+</script>
+
 <script>
 function confirmVote() {
     return confirm("Are you sure you want to submit your votes? Once submitted, you cannot change your selections.");
@@ -195,6 +218,24 @@ function selectCandidate(element, candidateId, positionId, maxVote) {
     }
 }
 </script>
+<div id="confirmationModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Confirm Your Votes</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h5 class="text-center">Please review your votes before submitting:</h5>
+                <ul id="voteReviewList" class="list-group"></ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Edit Choices</button>
+                <button type="submit" name="submit_votes" class="btn btn-success" form="voteForm">Submit Votes</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
