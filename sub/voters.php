@@ -50,6 +50,14 @@ function generateRandomString($length = 10) {
     return $randomString;
 }
 
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == "clear_voter_codes") {
+    $sql = "DELETE FROM voters WHERE election_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $election_id);
+    $stmt->execute();
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
 // Handle form submission for generating voter codes
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == "generate_voter_codes") {
     $count = $_POST['count'];
@@ -220,6 +228,27 @@ $voters = getVoters($election_id);
                 <button type="submit" class="btn btn-custom">Generate Codes</button>
             </form>
         </div>
+        <div class="d-flex gap-2 mt-3">
+    <form method="POST" action="">
+        <input type="hidden" name="action" value="clear_voter_codes">
+        <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Clear Codes</button>
+    </form>
+    <button onclick="printTable()" class="btn btn-primary"><i class="fas fa-print"></i> Print Codes</button>
+</div>
+
+<script>
+    function printTable() {
+        let printWindow = window.open('', '', 'width=800,height=600');
+        printWindow.document.write('<html><head><title>Print Voter Codes</title></head><body>');
+        printWindow.document.write('<h2>Generated Voter Codes</h2>');
+        printWindow.document.write(document.querySelector('.table-responsive').innerHTML);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+    }
+</script>
+
+
 
         <h2>Generated Voter Codes</h2>
         <div class="table-responsive">
