@@ -138,10 +138,13 @@
                                           </div>";
                                 }
 
-                                // Display voting buttons
-                                echo "<div class='text-center'>
-                                        <button type='submit' name='submit_votes' class='btn btn-success btn-flat'><i class='fa fa-check-square-o'></i> Submit Votes</button>
-                                      </div>";
+// Display voting buttons
+echo "<div class='text-center'>
+        <button type='submit' name='submit_votes' class='btn btn-success btn-flat' onclick='return confirmVote()'>
+            <i class='fa fa-check-square-o'></i> Submit Votes
+        </button>
+      </div>";
+
                                 echo "</form>"; // Form tag closing added here
                             }
                         }
@@ -156,6 +159,12 @@
 </div>
 <?php include 'includes/scripts.php'; ?>
 <!-- Your JavaScript code -->
+<script>
+function confirmVote() {
+    return confirm("Are you sure you want to submit your votes? Once submitted, you cannot change your selections.");
+}
+</script>
+
 <script>
 function selectCandidate(element, candidateId, positionId, maxVote) {
     let positionContainer = document.getElementById(positionId);
