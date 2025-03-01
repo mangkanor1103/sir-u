@@ -51,13 +51,22 @@ function generateRandomString($length = 10) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == "clear_voter_codes") {
+    // First, delete dependent feedback records
+    $sql = "DELETE FROM feedback WHERE voter_id IN (SELECT id FROM voters WHERE election_id = ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $election_id);
+    $stmt->execute();
+    
+    // Now, delete voters
     $sql = "DELETE FROM voters WHERE election_id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $election_id);
     $stmt->execute();
+
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
+
 // Handle form submission for generating voter codes
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == "generate_voter_codes") {
     $count = $_POST['count'];
