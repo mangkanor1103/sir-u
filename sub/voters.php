@@ -39,21 +39,6 @@ function generateVoterCodes($election_id, $count) {
     return $codes;
 }
 
-// Function to clear all voter codes
-function clearVoterCodes($election_id) {
-    global $conn;
-    $sql = "DELETE FROM voters WHERE election_id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $election_id);
-    $stmt->execute();
-}
-
-// Handle form submission for clearing voter codes
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == "clear_voter_codes") {
-    clearVoterCodes($election_id);
-}
-
-
 // Function to generate a random string
 function generateRandomString($length = 10) {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -234,29 +219,7 @@ $voters = getVoters($election_id);
                 </div>
                 <button type="submit" class="btn btn-custom">Generate Codes</button>
             </form>
-
         </div>
-
-        <div class="d-flex gap-2">
-            <form method="POST" action="" onsubmit="return confirmClear()">
-                    <input type="hidden" name="action" value="clear_voter_codes">
-                    <button type="submit" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Clear All Codes</button>
-            </form>
-
-                    <!-- Print Button -->
-                    <button onclick="printCodes()" class="btn btn-primary"><i class="fas fa-print"></i> Print Codes</button>
-        </div>
-
-            <script>
-                    function confirmClear() {
-                    return confirm("Are you sure you want to clear all voter codes? This action cannot be undone.");
-                }
-                    function printCodes() {
-                    window.print();
-                }
-            </script>
-
-
 
         <h2>Generated Voter Codes</h2>
         <div class="table-responsive">

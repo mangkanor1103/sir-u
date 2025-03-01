@@ -15,6 +15,8 @@
     <ul class="sidebar-menu" data-widget="tree">
       <li class="header">MANAGE</li>
       <li class=""><a href="sub_admins.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>Sub Admins</span></a></li> <!-- New menu item -->
+      <li class=""><a href="feedback.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>Feedbacks</span></a></li> <!-- New menu item -->
+
   </ul>
   </section>
   <!-- /.sidebar -->

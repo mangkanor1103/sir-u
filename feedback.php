@@ -20,49 +20,78 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['feedback_submit'])) {
 
     // Insert feedback into the database
     $sql = "INSERT INTO feedback (voter_id, election_id, feedback) VALUES ('$voter_id', '$election_id', '$feedback')";
-    
-    if ($conn->query($sql) === TRUE) {
-        echo "<div class='alert alert-success'>Feedback submitted successfully!</div>";
-    } else {
-        echo "<div class='alert alert-danger'>Error: " . $conn->error . "</div>";
-    }
+    $conn->query($sql); // Execute query without echoing messages
+
+    // Redirect to index.php after submission
+    header("Location: index.php");
+    exit();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Submit Feedback</title>
-    <!-- Offline Bootstrap CSS -->
+
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #d4f8e8, #a0e4b0);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+        }
+        .feedback-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.6s ease-in-out;
+            width: 100%;
+            max-width: 500px;
+        }
+        .btn-green {
+            background-color: #28a745;
+            border: none;
+        }
+        .btn-green:hover {
+            background-color: #218838;
+        }
+        .btn-red {
+            background-color: #dc3545;
+            border: none;
+        }
+        .btn-red:hover {
+            background-color: #c82333;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h2 class="mt-5">Submit Feedback</h2>
-
-        <!-- Feedback form -->
+    <div class="feedback-container animate__animated animate__fadeInUp">
+        <h2 class="text-center text-success">Submit Feedback</h2>
         <form action="feedback.php" method="POST">
-            <div class="form-group">
-                <label for="feedback">Your Feedback:</label>
+            <div class="form-group mt-3">
+                <label for="feedback" class="fw-bold">Your Feedback:</label>
                 <textarea class="form-control" id="feedback" name="feedback" rows="4" required></textarea>
             </div>
 
-            <!-- Pass the election ID via a hidden input field -->
-            <input type="hidden" name="election_id" value="1"> <!-- Set election ID dynamically if needed -->
+            <!-- Hidden election ID field -->
+            <input type="hidden" name="election_id" value="1">
 
-            <!-- Submit Feedback Button -->
-            <button type="submit" name="feedback_submit" class="btn btn-primary">Submit Feedback</button>
-
-            <!-- Exit Button -->
-            <button type="submit" name="exit" class="btn btn-danger">Exit</button>
+            <div class="d-flex justify-content-between mt-4">
+                <button type="submit" name="feedback_submit" class="btn btn-green px-4 py-2 text-white">Submit</button>
+                <button type="submit" name="exit" class="btn btn-red px-4 py-2 text-white">Exit</button>
+            </div>
         </form>
-
-        <!-- Success/Error messages will be echoed by the PHP script -->
     </div>
 
-    <!-- Offline Bootstrap JS -->
+    <!-- Bootstrap and jQuery -->
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.bundle.min.js"></script>
 </body>
