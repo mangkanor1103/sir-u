@@ -124,7 +124,7 @@
             <img src="pics/Picture5.jpg" alt="University Logo 1">
         </div>
         <div class="logo-right">
-            <img src="pics/logo1.jpg" alt="University Logo 2">
+            <img src="pics/logo.png" alt="University Logo 2">
         </div>
         <div class="login-logo">
             <b>Mindoro State University Online Voting System</b>

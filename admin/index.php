@@ -81,7 +81,7 @@
         }
         .btn i {
             margin-right: 5px;
-            
+
         }
         .btn + .btn {
             margin-top: 10px; /* Add margin between buttons */
@@ -119,7 +119,7 @@
             <img src="pics/Picture5.jpg" alt="University Logo 1">
         </div>
         <div class="logo-right">
-            <img src="pics/logo.jpg" alt="University Logo 2">
+            <img src="../pics/logo.png" alt="University Logo 2">
         </div>
         <div class="login-logo">
             <b>Mindoro State University Online Voting System</b>
@@ -143,7 +143,7 @@
                 if(isset($_SESSION['error'])){
                     echo "
                         <div class='callout callout-danger text-center mt20' style='background-color: #e74c3c;'>
-                            <p>".$_SESSION['error']."</p> 
+                            <p>".$_SESSION['error']."</p>
                         </div>
                     ";
                     unset($_SESSION['error']);
