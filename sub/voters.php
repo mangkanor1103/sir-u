@@ -56,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $election_id);
     $stmt->execute();
-    
+
     // Now, delete voters
     $sql = "DELETE FROM voters WHERE election_id = ?";
     $stmt = $conn->prepare($sql);
@@ -238,12 +238,40 @@ $voters = getVoters($election_id);
             </form>
         </div>
         <div class="d-flex gap-2 mt-3">
-    <form method="POST" action="">
-        <input type="hidden" name="action" value="clear_voter_codes">
-        <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Clear Codes</button>
-    </form>
+        <form method="POST" action="" onsubmit="return confirmDelete()">
+    <input type="hidden" name="action" value="clear_voter_codes">
+<!-- Delete Button -->
+<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+    <i class="fas fa-trash"></i> Clear Codes
+</button></form>
+
     <button onclick="printTable()" class="btn btn-primary"><i class="fas fa-print"></i> Print Codes</button>
 </div>
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="deleteModalLabel"><i class="fas fa-exclamation-triangle"></i> Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p>Are you sure you want to delete all voter codes?</p>
+        <p class="text-danger"><strong>This action cannot be undone!</strong></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form method="POST" action="">
+            <input type="hidden" name="action" value="clear_voter_codes">
+            <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Yes, Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 
 <script>
     function printTable() {
