@@ -3,6 +3,8 @@
 session_start();
 require 'conn.php';
 
+$error_message = ""; // Initialize error message variable
+
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['election_code_submit'])) {
     $election_code = $_POST['election_code'];
     $sql = "SELECT id FROM elections WHERE election_code = ?";
@@ -17,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['election_code_submit']
         header("Location: home.php");
         exit();
     } else {
-        echo "<div class='error'>Invalid election code</div>";
+        $error_message = "Invalid election code"; // Store error message
     }
 }
 ?>
@@ -116,6 +118,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['election_code_submit']
         .home-button a:hover {
             text-shadow: 0 0 10px #4caf50;
         }
+        .error {
+            color: red;
+            font-size: 1em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -136,8 +144,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['election_code_submit']
             <input type="text" name="election_code" required>
             <button type="submit" name="election_code_submit">Enter</button>
         </form>
+        <?php if (!empty($error_message)) : ?>
+            <div class="error"><?php echo $error_message; ?></div>
+        <?php endif; ?>
         <div class="home-button">
-            <a href="../index.php">Return Home</a>
+            <a href="../index.php">Back</a>
         </div>
     </div>
 </body>
