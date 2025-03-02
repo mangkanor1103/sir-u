@@ -21,25 +21,53 @@ if(isset($_POST['generate'])){
     header('location: sub_admins.php');
     exit();
 }
+
+
 if(isset($_POST['delete_election'])){
   $election_id = $_POST['election_id'];
 
-  // Delete all related records before deleting the election
-  $conn->query("DELETE FROM candidates WHERE election_id = '$election_id'") or die($conn->error);
-  $conn->query("DELETE FROM voters WHERE election_id = '$election_id'") or die($conn->error);
-  $conn->query("DELETE FROM votes WHERE election_id = '$election_id'") or die($conn->error);
-  $conn->query("DELETE FROM positions WHERE election_id = '$election_id'") or die($conn->error); // Fixes the error
+  // Start a transaction to ensure data integrity
+  $conn->begin_transaction();
 
-  // Now delete the election
-  $sql = "DELETE FROM elections WHERE id = '$election_id'";
-  if($conn->query($sql)){
+  try {
+      // Fetch election title
+      $result = $conn->query("SELECT name FROM elections WHERE id = '$election_id'");
+      if($result->num_rows > 0){
+          $row = $result->fetch_assoc();
+          $election_title = $row['name'];
+
+          // Store related data as a string in the history table (excluding feedback)
+          $history_sql = "INSERT INTO history (election_title, deleted_at, candidates, voters, votes, positions)
+                          VALUES ('$election_title', NOW(),
+                              (SELECT GROUP_CONCAT(CONCAT(id, '|', position_id, '|', firstname, '|', lastname, '|', photo, '|', platform) SEPARATOR ';') FROM candidates WHERE election_id = '$election_id'),
+                              (SELECT GROUP_CONCAT(CONCAT(id, '|', voters_id) SEPARATOR ';') FROM voters WHERE election_id = '$election_id'),
+                              (SELECT GROUP_CONCAT(CONCAT(id, '|', voters_id, '|', candidate_id, '|', position_id, '|', timestamp) SEPARATOR ';') FROM votes WHERE election_id = '$election_id'),
+                              (SELECT GROUP_CONCAT(CONCAT(position_id, '|', description, '|', max_vote, '|', priority) SEPARATOR ';') FROM positions WHERE election_id = '$election_id'))";
+          $conn->query($history_sql) or die($conn->error);
+      }
+
+      // Delete related data in the correct order (excluding feedback)
+      $conn->query("DELETE FROM votes WHERE election_id = '$election_id'") or die($conn->error);
+      $conn->query("DELETE FROM candidates WHERE election_id = '$election_id'") or die($conn->error);
+      $conn->query("DELETE FROM voters WHERE election_id = '$election_id'") or die($conn->error);
+      $conn->query("DELETE FROM positions WHERE election_id = '$election_id'") or die($conn->error);
+
+      // Finally, delete the election itself
+      $conn->query("DELETE FROM elections WHERE id = '$election_id'") or die($conn->error);
+
+      // Commit transaction
+      $conn->commit();
+
       $_SESSION['success'] = 'Election and all related records deleted successfully.';
-  } else {
-      $_SESSION['error'] = $conn->error;
+  } catch (Exception $e) {
+      $conn->rollback();
+      $_SESSION['error'] = "Failed to delete election: " . $e->getMessage();
   }
+
   header('location: sub_admins.php');
   exit();
 }
+
 
 ?>
 

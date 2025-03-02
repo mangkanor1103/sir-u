@@ -56,30 +56,25 @@ $result = $conn->query($sql);
               <table id="example1" class="table table-bordered">
                 <thead>
                   <th>#</th>
-                  <th>Voter ID</th>
-                  <th>Election ID</th>
+                  <th>Name</th>
                   <th>Feedback</th>
                   <th>Submitted At</th>
                 </thead>
                 <tbody>
                   <?php
-                    // Retrieve feedback from the database
-                    $sql = "SELECT * FROM feedback ORDER BY created_at DESC";
-                    $result = $conn->query($sql);
                     if ($result->num_rows > 0) {
                       while($row = $result->fetch_assoc()) {
                         echo "
                           <tr>
                             <td>".$row['id']."</td>
-                            <td>".$row['voter_id']."</td>
-                            <td>".$row['election_id']."</td>
+                            <td>".htmlspecialchars($row['name'])."</td>
                             <td>".htmlspecialchars($row['feedback'])."</td>
                             <td>".date('Y-m-d H:i:s', strtotime($row['created_at']))."</td>
                           </tr>
                         ";
                       }
                     } else {
-                      echo "<tr><td colspan='5' class='text-center'>No feedback found</td></tr>";
+                      echo "<tr><td colspan='4' class='text-center'>No feedback found</td></tr>";
                     }
                   ?>
                 </tbody>

@@ -1,26 +1,25 @@
 <?php
-// Include session management
+// Include database connection
 include 'includes/session.php';
 
-// Logic to destroy session when 'exit' is clicked
+// Destroy session when 'exit' is clicked
 if (isset($_POST['exit'])) {
     session_start();
-    session_unset(); // Unset all session variables
-    session_destroy(); // Destroy the session
-    header("Location: index.php"); // Redirect to the login page
+    session_unset();
+    session_destroy();
+    header("Location: index.php");
     exit();
 }
 
 // Feedback submission logic
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['feedback_submit'])) {
     // Sanitize and retrieve form input
+    $name = $conn->real_escape_string($_POST['name']);
     $feedback = $conn->real_escape_string($_POST['feedback']);
-    $voter_id = $voter['id']; // Assuming voter info is stored in session
-    $election_id = $_POST['election_id']; // Pass the election_id from the feedback form
 
     // Insert feedback into the database
-    $sql = "INSERT INTO feedback (voter_id, election_id, feedback) VALUES ('$voter_id', '$election_id', '$feedback')";
-    $conn->query($sql); // Execute query without echoing messages
+    $sql = "INSERT INTO feedback (name, feedback) VALUES ('$name', '$feedback')";
+    $conn->query($sql);
 
     // Redirect to index.php after submission
     header("Location: index.php");
@@ -33,11 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['feedback_submit'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Submit Feedback</title>
-
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-
     <style>
         body {
             background: linear-gradient(135deg, #d4f8e8, #a0e4b0);
@@ -77,21 +73,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['feedback_submit'])) {
         <h2 class="text-center text-success">Submit Feedback</h2>
         <form action="feedback.php" method="POST">
             <div class="form-group mt-3">
+                <label for="name" class="fw-bold">Your Name:</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="form-group mt-3">
                 <label for="feedback" class="fw-bold">Your Feedback:</label>
                 <textarea class="form-control" id="feedback" name="feedback" rows="4" required></textarea>
             </div>
-
-            <!-- Hidden election ID field -->
-            <input type="hidden" name="election_id" value="1">
-
             <div class="d-flex justify-content-between mt-4">
                 <button type="submit" name="feedback_submit" class="btn btn-green px-4 py-2 text-white">Submit</button>
                 <button type="submit" name="exit" class="btn btn-red px-4 py-2 text-white">Exit</button>
             </div>
         </form>
     </div>
-
-    <!-- Bootstrap and jQuery -->
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.bundle.min.js"></script>
 </body>
