@@ -75,7 +75,22 @@
 
                                 // Display submission result
                                 if (!$hasError) {
-                                    echo "<div class='alert alert-success'>Votes submitted successfully!</div>";
+                                  echo "<div class='alert alert-success alert-dismissible fade show text-center' role='alert' style='font-size: 18px; font-weight: bold;'>
+                                          <i class='fa fa-check-circle'></i> Your votes have been submitted successfully! Redirecting to feedback...
+                                          <button type='button' class='close' data-dismiss='alert' aria-label='Close'>
+                                              <span aria-hidden='true'>&times;</span>
+                                          </button>
+                                        </div>";
+
+                                  echo "<script>
+                                          setTimeout(function() {
+                                              window.location.href = 'feedback.php';
+                                          }, 500); // 3-second delay to show the alert
+                                        </script>";
+
+
+
+
                                     // Fetch and display the submitted votes
                                     $votesQuery = "
                                         SELECT v.*, c.firstname, c.lastname, p.description AS position_description
