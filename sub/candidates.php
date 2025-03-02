@@ -305,42 +305,43 @@ $current_page = basename($_SERVER['PHP_SELF']);
     </form>
 </div>
 
-
 <div class="card p-4 bg-light border-success">
     <h2 class="text-success">Existing Candidates</h2>
-    <table class="table table-bordered table-hover">
-        <thead class="table-success">
-            <tr>
-                <th>Position</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Photo</th>
-                <th>Platform</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php while ($candidate = $candidates->fetch_assoc()): ?>
+    <div style="max-height: 400px; overflow-y: auto;">
+        <table class="table table-bordered table-hover">
+            <thead class="table-success">
                 <tr>
-                    <td><?php echo $candidate['position_description']; ?></td>
-                    <td><?php echo $candidate['firstname']; ?></td>
-                    <td><?php echo $candidate['lastname']; ?></td>
-                    <td>
-                        <img src="<?php echo $candidate['photo']; ?>" alt="Candidate Photo" class="rounded-circle border border-success" style="width: 50px; height: 50px; object-fit: cover;">
-                    </td>
-                    <td><?php echo $candidate['platform']; ?></td>
-                    <td class="d-flex gap-1">
-                        <a href="edit_candidate.php?id=<?php echo $candidate['candidate_id']; ?>" class="btn btn-warning btn-sm">Edit</a>
-                        <form method="POST" action="">
-                            <input type="hidden" name="id" value="<?php echo $candidate['candidate_id']; ?>">
-                            <input type="hidden" name="action" value="delete_candidate">
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                        </form>
-                    </td>
+                    <th>Position</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Photo</th>
+                    <th>Platform</th>
+                    <th>Actions</th>
                 </tr>
-            <?php endwhile; ?>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <?php while ($candidate = $candidates->fetch_assoc()): ?>
+                    <tr>
+                        <td><?php echo $candidate['position_description']; ?></td>
+                        <td><?php echo $candidate['firstname']; ?></td>
+                        <td><?php echo $candidate['lastname']; ?></td>
+                        <td>
+                            <img src="<?php echo $candidate['photo']; ?>" alt="Candidate Photo" class="rounded-circle border border-success" style="width: 50px; height: 50px; object-fit: cover;">
+                        </td>
+                        <td><?php echo $candidate['platform']; ?></td>
+                        <td class="d-flex gap-1">
+                            <a href="edit_candidate.php?id=<?php echo $candidate['candidate_id']; ?>" class="btn btn-warning btn-sm">Edit</a>
+                            <form method="POST" action="">
+                                <input type="hidden" name="id" value="<?php echo $candidate['candidate_id']; ?>">
+                                <input type="hidden" name="action" value="delete_candidate">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 
