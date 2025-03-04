@@ -209,16 +209,21 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <i class="fas fa-home"></i> Home
         </a>
     </li>
+    </li>    <li class="nav-item">
+        <a class="nav-link <?php echo $current_page == 'partylist.php' ? 'active' : ''; ?>" href="partylist.php">
+            <i class="fas fa-users"></i> Partylist
+        </a>
+    </li>
+        <!-- Positions -->
+        <li class="nav-item">
+        <a class="nav-link <?php echo $current_page == 'positions.php' ? 'active' : ''; ?>" href="positions.php">
+            <i class="fas fa-user-tie"></i> Positions
+        </a>
+    </li>
     <!-- Candidates -->
     <li class="nav-item">
         <a class="nav-link <?php echo $current_page == 'candidates.php' ? 'active' : ''; ?>" href="candidates.php">
             <i class="fas fa-users"></i> Candidates
-        </a>
-    </li>
-    <!-- Positions -->
-    <li class="nav-item">
-        <a class="nav-link <?php echo $current_page == 'positions.php' ? 'active' : ''; ?>" href="positions.php">
-            <i class="fas fa-user-tie"></i> Positions
         </a>
     </li>
     <!-- Voters -->

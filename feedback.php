@@ -14,11 +14,19 @@ if (isset($_POST['exit'])) {
 // Feedback submission logic
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['feedback_submit'])) {
     // Sanitize and retrieve form input
-    $name = $conn->real_escape_string($_POST['name']);
     $feedback = $conn->real_escape_string($_POST['feedback']);
 
+    // Check if election_id is set in the session
+    if (!isset($_SESSION['election_id'])) {
+        $_SESSION['error'] = 'Election ID is not set.';
+        header("Location: index.php");
+        exit();
+    }
+
+    $election_id = $_SESSION['election_id']; // Get the election ID from the session
+
     // Insert feedback into the database
-    $sql = "INSERT INTO feedback (name, feedback) VALUES ('$name', '$feedback')";
+    $sql = "INSERT INTO feedback (election_id, feedback) VALUES ('$election_id', '$feedback')";
     $conn->query($sql);
 
     // Redirect to index.php after submission
@@ -73,15 +81,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['feedback_submit'])) {
         <h2 class="text-center text-success">Submit Feedback</h2>
         <form action="feedback.php" method="POST">
             <div class="form-group mt-3">
-                <label for="name" class="fw-bold">Your Name:</label>
-                <input type="text" class="form-control" id="name" name="name" required>
+                <label for="election_id" class="fw-bold">Election ID:</label>
+                <input type="text" class="form-control" id="election_id" name="election_id" value="<?php echo isset($_SESSION['election_id']) ? htmlspecialchars($_SESSION['election_id']) : ''; ?>" disabled>
             </div>
             <div class="form-group mt-3">
                 <label for="feedback" class="fw-bold">Your Feedback:</label>
                 <textarea class="form-control" id="feedback" name="feedback" rows="4" required></textarea>
             </div>
             <div class="d-flex justify-content-between mt-4">
-                <button type="submit" name="feedback_submit" class="btn btn-green px-4 py-2 text-white">Submit</button>
+                <button type="submit" name="feedback_submit" class="btn btn-green px-4 py-2 text-white"> Submit</button>
                 <button type="submit" name="exit" class="btn btn-red px-4 py-2 text-white">Exit</button>
             </div>
         </form>

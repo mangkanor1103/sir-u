@@ -29,9 +29,20 @@ if (isset($_POST['register'])) {
     $year_section = trim($_POST['year_section']);
     $course = trim($_POST['course']);
 
+    // Fetch the current election ID
+    $stmt = $conn->prepare("SELECT id FROM elections LIMIT 1"); // Fetch any election without filtering by active status
+    $stmt->execute();
+    $election_result = $stmt->get_result();
+    $election_id = null;
+
+    if ($election_result && $election_result->num_rows > 0) {
+        $election = $election_result->fetch_assoc();
+        $election_id = $election['id'];
+    }
+
     // Insert voter details into students table
-    $stmt = $conn->prepare("INSERT INTO students (voters_id, name, year_section, course) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssss", $voter_id, $name, $year_section, $course);
+    $stmt = $conn->prepare("INSERT INTO students (voters_id, name, year_section, course, election_id) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssssi", $voter_id, $name, $year_section, $course, $election_id);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = 'Registration successful!';
@@ -121,41 +132,35 @@ if (isset($_POST['register'])) {
     <h2>Verification</h2>
 
     <?php if (isset($_SESSION['error'])): ?>
-        <div class="alert alert-danger">
-            <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+        <div class ="alert alert-danger">
+            <?= $_SESSION['error']; unset($_SESSION['error']); ?>
         </div>
     <?php endif; ?>
 
     <?php if (isset($_SESSION['success'])): ?>
         <div class="alert alert-success">
-            <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
+            <?= $_SESSION['success']; unset($_SESSION['success']); ?>
         </div>
     <?php endif; ?>
 
-    <form action="" method="POST">
+    <form method="POST" action="">
         <div class="form-group">
-            <label><strong>Voter Code:</strong></label>
-            <input type="text" class="form-control" value="<?php echo htmlspecialchars($voter_id); ?>" disabled>
+            <label for="name">Name</label>
+            <input type="text" class="form-control" id="name" name="name" required>
         </div>
         <div class="form-group">
-            <label><strong>Name:</strong></label>
-            <input type="text" class="form-control" name="name" required>
+            <label for="year_section">Year and Section</label>
+            <input type="text" class="form-control" id="year_section" name="year_section" required>
         </div>
         <div class="form-group">
-            <label><strong>Year & Section:</strong></label>
-            <input type="text" class="form-control" name="year_section" required>
+            <label for="course">Course</label>
+            <input type="text" class="form-control" id="course" name="course" required>
         </div>
-        <div class="form-group">
-            <label><strong>Course:</strong></label>
-            <input type="text" class="form-control" name="course" required>
-        </div>
-        <button type="submit" class="btn btn-custom" name="register">Register</button>
+        <button type="submit" name="register" class="btn btn-custom">Register</button>
     </form>
-
-    <div class="back-button">
-        <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
-    </div>
+    <a href="index.php" class="btn btn-secondary back-button">Back to Home</a>
 </div>
 
+<script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

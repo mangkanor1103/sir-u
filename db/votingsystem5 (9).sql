@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 04, 2025 at 01:42 AM
+-- Generation Time: Mar 04, 2025 at 04:26 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -81,15 +81,18 @@ CREATE TABLE `candidates` (
   `firstname` varchar(30) NOT NULL,
   `lastname` varchar(30) NOT NULL,
   `photo` varchar(150) NOT NULL,
-  `platform` text NOT NULL
+  `platform` text NOT NULL,
+  `partylists_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `candidates`
 --
 
-INSERT INTO `candidates` (`id`, `election_id`, `position_id`, `firstname`, `lastname`, `photo`, `platform`) VALUES
-(24, 12, 12, 'Kian', 'A. Rodriguez', 'uploads/475712464_1547996512641952_3911195512472841382_n.jpg', 'wdfwqfdq');
+INSERT INTO `candidates` (`id`, `election_id`, `position_id`, `firstname`, `lastname`, `photo`, `platform`, `partylists_id`) VALUES
+(24, 12, 12, 'Kian', 'A. Rodriguez', 'uploads/475712464_1547996512641952_3911195512472841382_n.jpg', 'wdfwqfdq', NULL),
+(25, 12, 1, 'Kian', 'A. Rodriguez', 'uploads/detect.jpg', 'wdfwqfdq', NULL),
+(26, 12, 1, 'Kian', 'A. Rodriguez', 'uploads/c69fa31c-03f2-44ce-ac2d-5851aa08bf62.jpg', 'wdfwqfdq', NULL);
 
 -- --------------------------------------------------------
 
@@ -134,7 +137,7 @@ CREATE TABLE `failed_jobs` (
 
 CREATE TABLE `feedback` (
   `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `election_id` int(11) NOT NULL,
   `feedback` text NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -143,9 +146,8 @@ CREATE TABLE `feedback` (
 -- Dumping data for table `feedback`
 --
 
-INSERT INTO `feedback` (`id`, `name`, `feedback`, `created_at`) VALUES
-(1, 'Kian A. Rodriguez', 'ggregr', '2025-03-02 10:28:40'),
-(2, 'Kian A. Rodriguez', 'svvs', '2025-03-02 10:43:30');
+INSERT INTO `feedback` (`id`, `election_id`, `feedback`, `created_at`) VALUES
+(1, 12, 'qwewq', '2025-03-04 15:25:12');
 
 -- --------------------------------------------------------
 
@@ -325,6 +327,25 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `partylists`
+--
+
+CREATE TABLE `partylists` (
+  `partylist_id` int(11) NOT NULL,
+  `election_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `partylists`
+--
+
+INSERT INTO `partylists` (`partylist_id`, `election_id`, `name`) VALUES
+(2, 12, 'Republic Corp.');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `password_reset_tokens`
 --
 
@@ -343,17 +364,16 @@ CREATE TABLE `password_reset_tokens` (
 CREATE TABLE `positions` (
   `position_id` int(11) NOT NULL,
   `election_id` int(11) NOT NULL,
-  `description` varchar(50) NOT NULL,
-  `max_vote` int(11) NOT NULL,
-  `priority` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+  `description` varchar(255) NOT NULL,
+  `max_vote` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `positions`
 --
 
-INSERT INTO `positions` (`position_id`, `election_id`, `description`, `max_vote`, `priority`) VALUES
-(12, 12, 'pres', 1, 1);
+INSERT INTO `positions` (`position_id`, `election_id`, `description`, `max_vote`) VALUES
+(1, 12, 'pres', 1);
 
 -- --------------------------------------------------------
 
@@ -398,51 +418,19 @@ INSERT INTO `student` (`id`, `student_id`, `name`, `department`) VALUES
 
 CREATE TABLE `students` (
   `id` int(11) NOT NULL,
-  `voters_id` varchar(50) NOT NULL,
-  `name` varchar(100) NOT NULL,
+  `voters_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
   `year_section` varchar(50) NOT NULL,
   `course` varchar(100) NOT NULL,
-  `registered_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `election_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `students`
 --
 
-INSERT INTO `students` (`id`, `voters_id`, `name`, `year_section`, `course`, `registered_at`) VALUES
-(10, '2', 'Rodriguez, Kian, Anthony', 'gegeg', 'rgege', '2025-02-18 12:41:55'),
-(11, '3', 'Rodriguez, Kian, Anthony', 'gegeg', 'rgege', '2025-02-18 12:43:57'),
-(12, '13', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-02-23 09:21:33'),
-(13, '10', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-02-23 09:47:14'),
-(14, '14', 'Kian A. Rodriguez', 'bsit 3-1', 'it', '2025-02-23 09:53:39'),
-(15, '15', 'Kian A. Rodriguez', 'bsit 3-1', 'it', '2025-02-23 09:55:31'),
-(16, '16', 'Kian A. Rodriguez', 'bsit 3-1', 'it', '2025-02-23 10:02:42'),
-(17, '17', 'Kian A. Rodriguez', 'bsit 3-1', 'it', '2025-02-23 10:21:56'),
-(18, '5', 'Kian A. Rodriguez', 'bsit 3-1', 'it', '2025-02-26 11:59:12'),
-(19, '18', 'Kian A. Rodriguez', 'bsit 3-1', 'it', '2025-02-26 12:04:14'),
-(20, '6', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-02-26 12:15:33'),
-(21, '4', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-02-26 12:24:47'),
-(22, '19', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-02-26 12:25:31'),
-(23, '20', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-02-26 12:26:25'),
-(24, '21', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-02-26 12:27:29'),
-(25, '22', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-01 11:30:54'),
-(26, '23', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-01 11:34:20'),
-(27, '24', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-01 11:36:22'),
-(28, '25', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-01 11:37:27'),
-(29, '26', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-01 11:38:19'),
-(30, '27', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-01 11:48:11'),
-(31, '28', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-01 11:51:30'),
-(32, '29', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-01 11:52:06'),
-(33, '30', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-01 11:56:39'),
-(34, '81', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 02:26:49'),
-(35, '82', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 02:37:13'),
-(36, '83', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 02:38:22'),
-(37, '84', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 02:40:36'),
-(38, '85', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 02:42:04'),
-(39, '86', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 02:42:59'),
-(40, '87', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 10:17:16'),
-(41, '88', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 10:24:05'),
-(42, '89', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 10:43:22');
+INSERT INTO `students` (`id`, `voters_id`, `name`, `year_section`, `course`, `election_id`) VALUES
+(1, 95, 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', 12);
 
 -- --------------------------------------------------------
 
@@ -478,7 +466,13 @@ CREATE TABLE `voters` (
 --
 
 INSERT INTO `voters` (`id`, `election_id`, `voters_id`) VALUES
-(89, 12, 's72cwf9U7e');
+(89, 12, 's72cwf9U7e'),
+(90, 12, 'dp0Xn5aW3T'),
+(91, 12, 'tCh7HtFfwf'),
+(92, 12, '4kWdFU8sRN'),
+(93, 12, 'CCWUtuRGGO'),
+(94, 12, 'aqSZlGQuzg'),
+(95, 12, 'owP1VdX8s4');
 
 -- --------------------------------------------------------
 
@@ -488,10 +482,10 @@ INSERT INTO `voters` (`id`, `election_id`, `voters_id`) VALUES
 
 CREATE TABLE `votes` (
   `id` int(11) NOT NULL,
-  `election_id` int(11) NOT NULL,
-  `voters_id` int(11) NOT NULL,
-  `candidate_id` int(11) NOT NULL,
-  `position_id` int(11) NOT NULL,
+  `election_id` int(11) DEFAULT NULL,
+  `voters_id` int(11) DEFAULT NULL,
+  `candidate_id` int(11) DEFAULT NULL,
+  `position_id` int(11) DEFAULT NULL,
   `timestamp` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -500,7 +494,15 @@ CREATE TABLE `votes` (
 --
 
 INSERT INTO `votes` (`id`, `election_id`, `voters_id`, `candidate_id`, `position_id`, `timestamp`) VALUES
-(82, 12, 89, 24, 12, '2025-03-02 18:43:25');
+(82, 12, 89, 24, 12, '2025-03-02 18:43:25'),
+(83, 12, 90, 25, 1, '2025-03-04 22:38:33'),
+(84, 12, 90, 26, 1, '2025-03-04 22:38:33'),
+(85, 12, 91, 25, 1, '2025-03-04 22:39:45'),
+(86, 12, 91, 26, 1, '2025-03-04 22:39:45'),
+(87, 12, 92, 25, 1, '2025-03-04 23:00:20'),
+(88, 12, 93, 25, 1, '2025-03-04 23:04:55'),
+(90, 12, 94, 25, 1, '2025-03-04 23:07:50'),
+(91, 12, 95, 25, 1, '2025-03-04 23:16:35');
 
 --
 -- Indexes for dumped tables
@@ -543,7 +545,8 @@ ALTER TABLE `failed_jobs`
 -- Indexes for table `feedback`
 --
 ALTER TABLE `feedback`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `election_id` (`election_id`);
 
 --
 -- Indexes for table `history`
@@ -595,6 +598,13 @@ ALTER TABLE `migrations`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `partylists`
+--
+ALTER TABLE `partylists`
+  ADD PRIMARY KEY (`partylist_id`),
+  ADD KEY `election_id` (`election_id`);
+
+--
 -- Indexes for table `password_reset_tokens`
 --
 ALTER TABLE `password_reset_tokens`
@@ -620,7 +630,8 @@ ALTER TABLE `sessions`
 --
 ALTER TABLE `students`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `voters_id` (`voters_id`);
+  ADD KEY `voters_id` (`voters_id`),
+  ADD KEY `election_id` (`election_id`);
 
 --
 -- Indexes for table `users`
@@ -654,7 +665,7 @@ ALTER TABLE `votes`
 -- AUTO_INCREMENT for table `candidates`
 --
 ALTER TABLE `candidates`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `elections`
@@ -672,7 +683,7 @@ ALTER TABLE `failed_jobs`
 -- AUTO_INCREMENT for table `feedback`
 --
 ALTER TABLE `feedback`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `history`
@@ -717,16 +728,22 @@ ALTER TABLE `migrations`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT for table `partylists`
+--
+ALTER TABLE `partylists`
+  MODIFY `partylist_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `positions`
 --
 ALTER TABLE `positions`
-  MODIFY `position_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `position_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -738,13 +755,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `voters`
 --
 ALTER TABLE `voters`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
 
 --
 -- AUTO_INCREMENT for table `votes`
 --
 ALTER TABLE `votes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=92;
 
 --
 -- Constraints for dumped tables
@@ -757,10 +774,29 @@ ALTER TABLE `candidates`
   ADD CONSTRAINT `candidates_ibfk_1` FOREIGN KEY (`election_id`) REFERENCES `elections` (`id`);
 
 --
+-- Constraints for table `feedback`
+--
+ALTER TABLE `feedback`
+  ADD CONSTRAINT `feedback_ibfk_1` FOREIGN KEY (`election_id`) REFERENCES `elections` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `partylists`
+--
+ALTER TABLE `partylists`
+  ADD CONSTRAINT `partylists_ibfk_1` FOREIGN KEY (`election_id`) REFERENCES `elections` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `positions`
 --
 ALTER TABLE `positions`
-  ADD CONSTRAINT `positions_ibfk_1` FOREIGN KEY (`election_id`) REFERENCES `elections` (`id`);
+  ADD CONSTRAINT `positions_ibfk_1` FOREIGN KEY (`election_id`) REFERENCES `elections` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `students`
+--
+ALTER TABLE `students`
+  ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`voters_id`) REFERENCES `voters` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `students_ibfk_2` FOREIGN KEY (`election_id`) REFERENCES `elections` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `voters`

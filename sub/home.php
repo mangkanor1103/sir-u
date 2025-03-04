@@ -129,17 +129,19 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <a class="nav-link <?php echo $current_page == 'home.php' ? 'active' : ''; ?>" href="home.php">
             <i class="fas fa-home"></i> Home
         </a>
-    </li>
-    <!-- Candidates -->
-    <li class="nav-item">
-        <a class="nav-link <?php echo $current_page == 'candidates.php' ? 'active' : ''; ?>" href="candidates.php">
-            <i class="fas fa-users"></i> Candidates
+    </li>    <li class="nav-item">
+        <a class="nav-link <?php echo $current_page == 'partylist.php' ? 'active' : ''; ?>" href="partylist.php">
+            <i class="fas fa-users"></i> Partylist
         </a>
     </li>
-    <!-- Positions -->
     <li class="nav-item">
         <a class="nav-link <?php echo $current_page == 'positions.php' ? 'active' : ''; ?>" href="positions.php">
-            <i class="fas fa-user-tie"></i> Positions
+            <i class="fas fa-users"></i> Positions
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link <?php echo $current_page == 'candidates.php' ? 'active' : ''; ?>" href="candidates.php">
+            <i class="fas fa-user-tie"></i> Candidates
         </a>
     </li>
     <!-- Voters -->
@@ -169,54 +171,99 @@ $current_page = basename($_SERVER['PHP_SELF']);
             </div>
         </div>
     </nav>
+    <style>
+    body {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        font-family: Arial, sans-serif;
+    }
+    .step-container {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    .card {
+        background-color: white;
+        border: 2px solid #2e7d32;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        transition: transform 0.3s ease-in-out;
+        width: 200px;
+    }
+    .card:hover {
+        transform: scale(1.05);
+    }
+    .card-title {
+        font-weight: bold;
+    }
+    .btn-primary {
+        background-color: #2e7d32;
+        border: none;
+    }
+    .btn-primary:hover {
+        background-color: #1b5e20;
+    }
+    .final-step {
+        background-color: #2e7d32;
+        color: white;
+        border: none;
+        font-weight: bold;
+    }
+</style>
 
-    <!-- Main content -->
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h1>Welcome to the Election Dashboard</h1>
-                <p class="lead">Current Election: <?php echo htmlspecialchars($election_name); ?></p>
+<!-- Main content -->
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12 text-center">
+            <h1>Welcome to the Election Dashboard</h1>
+            <p class="lead">Current Election: <?php echo htmlspecialchars($election_name); ?></p>
+        </div>
+    </div>
+
+    <!-- Step-by-step horizontal layout -->
+    <div class="step-container mt-4">
+    <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Step 1: Positions</h5>
+                <p class="card-text">Set up positions.</p>
             </div>
         </div>
-        <div class="row mt-4">
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Candidates</h5>
-                        <p class="card-text">Add, edit, or remove candidates for the election.</p>
-                        <a href="candidates.php" class="btn btn-success">Go to Candidates</a>
-                    </div>
-                </div>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Step 2: Partylists</h5>
+                <p class="card-text">Set up Partylists.</p>
             </div>
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Positions</h5>
-                        <p class="card-text">Set up positions and assign candidates.</p>
-                        <a href="positions.php" class="btn btn-success">Go to Positions</a>
-                    </div>
-                </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Step 3: Candidates</h5>
+                <p class="card-text">Set up candidates.</p>
             </div>
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Voters</h5>
-                        <p class="card-text">Add or update voters participating in the election.</p>
-                        <a href="voters.php" class="btn btn-success">Go to Voters</a>
-                    </div>
-                </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Step 4: Voters</h5>
+                <p class="card-text">Set up voters.</p>
             </div>
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Election Results</h5>
-                        <p class="card-text">View the election results.</p>
-                        <a href="votes.php" class="btn btn-success">Go to Election Results</a>
-                    </div>
-                </div>
+        </div>
+        <div class="card final-step">
+            <div class="card-body">
+                <h5 class="card-title">Final Step: Election Results</h5>
+                <p class="card-text">Review and finalize the election results.</p>
             </div>
         </div>
     </div>
+
+    <!-- Next Button at the Bottom -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="partylist.php" class="btn btn-primary">Next: Set Up Partylists</a>
+        </div>
+    </div>
+</div>
 
     <!-- Link to offline Bootstrap JS -->
     <script src="bootstrap/js/bootstrap.bundle.min.js"></script>

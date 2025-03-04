@@ -56,14 +56,14 @@
             $id = $_POST['id'];
             $description = $_POST['description'];
             $max_vote = $_POST['max_vote'];
-            $priority = $_POST['priority'];
 
-            $sql = "UPDATE positions SET description = ?, max_vote = ?, priority = ? WHERE position_id = ?";
+            $sql = "UPDATE positions SET description = ?, max_vote = ? WHERE position_id = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("siii", $description, $max_vote, $priority, $id);
+            $stmt->bind_param("sii", $description, $max_vote, $id);
             if ($stmt->execute()) {
-                echo "<div class='alert alert-success'>Position updated successfully!</div>";
-            } else {
+              header("Location: positions.php"); // 🔄 Redirect to positions.php after update
+              exit; // 🚀 Ensure script stops execution after redirection
+                        } else {
                 echo "<div class='alert alert-danger'>Error updating position.</div>";
             }
         }
@@ -78,10 +78,6 @@
             <div class="form-group mb-3">
                 <label>Max Vote</label>
                 <input type="number" class="form-control" name="max_vote" value="<?php echo $position['max_vote']; ?>" required>
-            </div>
-            <div class="form-group mb-3">
-                <label>Priority</label>
-                <input type="number" class="form-control" name="priority" value="<?php echo $position['priority']; ?>" required>
             </div>
             <button type="submit" class="btn btn-custom w-100">Update Position</button>
             <a href="positions.php" class="btn btn-secondary w-100 mt-2">Cancel</a>

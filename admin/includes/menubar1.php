@@ -14,11 +14,10 @@
     <!-- sidebar menu: : style can be found in sidebar.less -->
     <ul class="sidebar-menu" data-widget="tree">
       <li class="header">MANAGE</li>
-      <li class=""><a href="sub_admins.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>Sub Admins</span></a></li> <!-- New menu item -->
+      <li class=""><a href="home.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>Home</span></a></li> <!-- New menu item -->
+      <li class=""><a href="sub_admins.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>Elections</span></a></li> <!-- New menu item -->
       <li class=""><a href="feedback.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>Feedbacks</span></a></li> <!-- New menu item -->
       <li class=""><a href="history.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>History</span></a></li> <!-- New menu item -->
-
-
   </ul>
   </section>
   <!-- /.sidebar -->

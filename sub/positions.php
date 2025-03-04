@@ -6,40 +6,35 @@ if (!isset($_SESSION['election_id'])) {
     header("Location: index.php");
     exit();
 }
-if (isset($_POST['back'])) {
-    unset($_SESSION['election_id']);
-    header("Location: index.php");
-    exit();
-}
+
 $election_id = $_SESSION['election_id'];
 $current_page = basename($_SERVER['PHP_SELF']);
-
 
 // Function to fetch positions
 function getPositions($election_id) {
     global $conn;
-    $sql = "SELECT * FROM positions WHERE election_id = ?";
+    $sql = "SELECT position_id, description, max_vote FROM positions WHERE election_id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $election_id);
     $stmt->execute();
     return $stmt->get_result();
 }
 
-// Function to create a new position
-function createPosition($election_id, $description, $max_vote, $priority) {
+// Function to create a new position (Removed priority)
+function createPosition($election_id, $description, $max_vote) {
     global $conn;
-    $sql = "INSERT INTO positions (election_id, description, max_vote, priority) VALUES (?, ?, ?, ?)";
+    $sql = "INSERT INTO positions (election_id, description, max_vote) VALUES (?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("isii", $election_id, $description, $max_vote, $priority);
+    $stmt->bind_param("isi", $election_id, $description, $max_vote);
     return $stmt->execute();
 }
 
-// Function to update an existing position
-function updatePosition($id, $description, $max_vote, $priority) {
+// Function to update an existing position (Removed priority)
+function updatePosition($id, $description, $max_vote) {
     global $conn;
-    $sql = "UPDATE positions SET description = ?, max_vote = ?, priority = ? WHERE position_id = ?";
+    $sql = "UPDATE positions SET description = ?, max_vote = ? WHERE position_id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("siii", $description, $max_vote, $priority, $id);
+    $stmt->bind_param("sii", $description, $max_vote, $id);
     return $stmt->execute();
 }
 
@@ -60,13 +55,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($action == "create_position") {
         $description = $_POST['description'];
         $max_vote = $_POST['max_vote'];
-        $priority = $_POST['priority'];
-        createPosition($election_id, $description, $max_vote, $priority);
+        createPosition($election_id, $description, $max_vote);
     } elseif ($action == "update_position") {
         $description = $_POST['description'];
         $max_vote = $_POST['max_vote'];
-        $priority = $_POST['priority'];
-        updatePosition($id, $description, $max_vote, $priority);
+        updatePosition($id, $description, $max_vote);
     } elseif ($action == "delete_position") {
         deletePosition($id);
     }
@@ -74,6 +67,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 $positions = getPositions($election_id);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -179,16 +173,20 @@ $positions = getPositions($election_id);
             <i class="fas fa-home"></i> Home
         </a>
     </li>
-    <!-- Candidates -->
     <li class="nav-item">
-        <a class="nav-link <?php echo $current_page == 'candidates.php' ? 'active' : ''; ?>" href="candidates.php">
-            <i class="fas fa-users"></i> Candidates
+        <a class="nav-link <?php echo $current_page == 'partylist.php' ? 'active' : ''; ?>" href="partylist.php">
+            <i class="fas fa-users"></i> Partylist
         </a>
     </li>
     <!-- Positions -->
     <li class="nav-item">
         <a class="nav-link <?php echo $current_page == 'positions.php' ? 'active' : ''; ?>" href="positions.php">
             <i class="fas fa-user-tie"></i> Positions
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link <?php echo $current_page == 'candidates.php' ? 'active' : ''; ?>" href="candidates.php">
+            <i class="fas fa-user-tie"></i> Candidates
         </a>
     </li>
     <!-- Voters -->
@@ -217,10 +215,14 @@ $positions = getPositions($election_id);
         </div>
     </nav>
     <div class="container">
-        <div class="header text-center mb-4">
-            <h1>Positions</h1>
-            <a href="home.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Dashboard</a>
-        </div>
+    <div class="header text-center mb-4">
+    <h1>Positions</h1>
+    <div class="d-flex justify-content-between">
+        <a href="home.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Dashboard</a>
+        <a href="candidates.php" class="btn btn-success">Next: Set Up Candidates <i class="fas fa-arrow-right"></i></a>
+    </div>
+</div>
+
 
         <div class="create-form mb-4">
             <h2>Create Position</h2>
@@ -231,9 +233,6 @@ $positions = getPositions($election_id);
                 </div>
                 <div class="form-group mb-3">
                     <input type="number" class="form-control" name="max_vote" placeholder="Max Vote" required>
-                </div>
-                <div class="form-group mb-3">
-                    <input type="number" class="form-control" name="priority" placeholder="Priority" required>
                 </div>
                 <button type="submit" class="btn btn-custom w-100">Create Position</button>
             </form>
@@ -247,7 +246,6 @@ $positions = getPositions($election_id);
                         <th>ID</th>
                         <th>Description</th>
                         <th>Max Vote</th>
-                        <th>Priority</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -257,7 +255,6 @@ $positions = getPositions($election_id);
                         <td><?php echo $row['position_id']; ?></td>
                         <td><?php echo $row['description']; ?></td>
                         <td><?php echo $row['max_vote']; ?></td>
-                        <td><?php echo $row['priority']; ?></td>
                         <td class="actions">
                             <button class="btn btn-info btn-sm" onclick="editPosition(<?php echo $row['position_id']; ?>)"><i class="fas fa-edit"></i> Edit</button>
                             <button class="btn btn-danger btn-sm" onclick="deletePosition(<?php echo $row['position_id']; ?>)"><i class="fas fa-trash-alt"></i> Delete</button>
