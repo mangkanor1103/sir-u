@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 01, 2025 at 02:19 PM
+-- Generation Time: Mar 04, 2025 at 01:42 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -42,7 +42,7 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`id`, `username`, `password`, `firstname`, `lastname`, `photo`, `created_on`) VALUES
-(1, 1, 'admin', '$2y$10$lQf6BzNGLpXmKLqlR0aulOBwCBthltGIMoGGIb5ro3HeHm8gpl8XC', 'kian', 'Rodriguez', '440969875_1482253359391132_4061404540813449474_n.jpg', '2024-04-11');
+(1, 'admin', '$2y$10$lQf6BzNGLpXmKLqlR0aulOBwCBthltGIMoGGIb5ro3HeHm8gpl8XC', 'kian', 'Rodriguez', '440969875_1482253359391132_4061404540813449474_n.jpg', '2024-04-11');
 
 -- --------------------------------------------------------
 
@@ -89,15 +89,7 @@ CREATE TABLE `candidates` (
 --
 
 INSERT INTO `candidates` (`id`, `election_id`, `position_id`, `firstname`, `lastname`, `photo`, `platform`) VALUES
-(11, 1, 4, 'asfaf', 'afffafaf', 'uploads/rs logo.jpg', 'faf'),
-(13, 1, 3, 'asfaf', 'afffafaf', 'uploads/OIP.jfif', 'htjrykjtfkytfk'),
-(14, 1, 6, 'rerhehe', 'rhdhdhs', 'uploads/OIP.jfif', 'wfafafa'),
-(15, 1, 3, 'kian', 'reeeyeye', 'uploads/OIP.jfif', 'hdjd'),
-(16, 1, 3, 'sfwetwtw', 'ryteyey', 'uploads/458804344_1108143657387022_7368374457459692655_n.jpg', 'ryeyey'),
-(17, 4, 7, 'Kian', 'A. Rodriguez', 'uploads/Your paragraph text.jpg', 'fwefwffwf'),
-(18, 3, 9, 'Rodriguez', 'Kian, Anthony', 'uploads/Your paragraph text.jpg', 'hj,hk,hk,'),
-(19, 3, 9, 'ewfgw', 'rgttegre', 'uploads/rs bg.jpg', 'wefwf'),
-(20, 3, 9, 'Rodriguez', 'Kian, Anthony', 'uploads/468220162_1772873700136936_5029136730132378084_n.jpg', 'g');
+(24, 12, 12, 'Kian', 'A. Rodriguez', 'uploads/475712464_1547996512641952_3911195512472841382_n.jpg', 'wdfwqfdq');
 
 -- --------------------------------------------------------
 
@@ -116,10 +108,7 @@ CREATE TABLE `elections` (
 --
 
 INSERT INTO `elections` (`id`, `name`, `election_code`) VALUES
-(1, 'General Election 2024', '$2y$10$samplehashedpassword'),
-(2, 'Student Council Election 2024', '$2y$10$samplehashedpassword2'),
-(3, 'usg election', '7xbKFkUZTM'),
-(4, 'it', 'rFMZ8CKtgN');
+(12, 'usg election', 'tRwKihXZO6');
 
 -- --------------------------------------------------------
 
@@ -145,11 +134,137 @@ CREATE TABLE `failed_jobs` (
 
 CREATE TABLE `feedback` (
   `id` int(11) NOT NULL,
-  `voter_id` int(11) DEFAULT NULL,
-  `election_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
   `feedback` text NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `feedback`
+--
+
+INSERT INTO `feedback` (`id`, `name`, `feedback`, `created_at`) VALUES
+(1, 'Kian A. Rodriguez', 'ggregr', '2025-03-02 10:28:40'),
+(2, 'Kian A. Rodriguez', 'svvs', '2025-03-02 10:43:30');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `history`
+--
+
+CREATE TABLE `history` (
+  `id` int(11) NOT NULL,
+  `election_title` varchar(255) NOT NULL,
+  `deleted_at` datetime DEFAULT current_timestamp(),
+  `candidates` text DEFAULT NULL,
+  `voters` text DEFAULT NULL,
+  `votes` text DEFAULT NULL,
+  `positions` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `history`
+--
+
+INSERT INTO `history` (`id`, `election_title`, `deleted_at`, `candidates`, `voters`, `votes`, `positions`) VALUES
+(1, 'usg election', '2025-03-02 18:17:57', '22|10|Kian|A. Rodriguez|uploads/head.jpg|sqqs', '87|E245k9oHxR', '80|87|22|10|2025-03-02 18:17:19', '10|pres|2|1'),
+(2, 'usg election', '2025-03-02 18:31:58', '23|11|Kian|A. Rodriguez|uploads/sand.jpg|asfasf', '88|4V1HqF9tix', '81|88|23|11|2025-03-02 18:24:08', '11|pres|2|1');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `history_candidates`
+--
+
+CREATE TABLE `history_candidates` (
+  `id` int(11) NOT NULL,
+  `election_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `position_id` int(11) NOT NULL,
+  `votes` int(11) DEFAULT 0,
+  `deleted_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `history_candidates`
+--
+
+INSERT INTO `history_candidates` (`id`, `election_id`, `name`, `position_id`, `votes`, `deleted_at`) VALUES
+(1, 1, '', 4, 0, '2025-03-02 09:49:14');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `history_elections`
+--
+
+CREATE TABLE `history_elections` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `election_code` varchar(50) NOT NULL,
+  `deleted_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `history_elections`
+--
+
+INSERT INTO `history_elections` (`id`, `name`, `election_code`, `deleted_at`) VALUES
+(1, 'General Election 2024', '$2y$10$samplehashedpassword', '2025-03-02 09:49:14'),
+(2, 'General Election 2024', '$2y$10$samplehashedpassword', '2025-03-02 09:50:27');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `history_positions`
+--
+
+CREATE TABLE `history_positions` (
+  `id` int(11) NOT NULL,
+  `election_id` int(11) NOT NULL,
+  `position_name` varchar(255) NOT NULL,
+  `max_vote` int(11) NOT NULL,
+  `deleted_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `history_positions`
+--
+
+INSERT INTO `history_positions` (`id`, `election_id`, `position_name`, `max_vote`, `deleted_at`) VALUES
+(1, 1, '', 1, '2025-03-02 09:49:14'),
+(2, 1, '', 1, '2025-03-02 09:49:14'),
+(3, 1, '', 1, '2025-03-02 09:49:14'),
+(4, 1, '', 1, '2025-03-02 09:50:27'),
+(5, 1, '', 1, '2025-03-02 09:50:27'),
+(6, 1, '', 1, '2025-03-02 09:50:28');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `history_votes`
+--
+
+CREATE TABLE `history_votes` (
+  `id` int(11) NOT NULL,
+  `election_id` int(11) NOT NULL,
+  `voter_id` int(11) NOT NULL,
+  `candidate_id` int(11) NOT NULL,
+  `deleted_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `history_votes`
+--
+
+INSERT INTO `history_votes` (`id`, `election_id`, `voter_id`, `candidate_id`, `deleted_at`) VALUES
+(1, 1, 0, 21, '2025-03-02 09:49:14'),
+(2, 1, 0, 21, '2025-03-02 09:49:14'),
+(3, 1, 0, 21, '2025-03-02 09:49:14'),
+(4, 1, 0, 21, '2025-03-02 09:49:14'),
+(5, 1, 0, 21, '2025-03-02 09:49:14'),
+(6, 1, 0, 21, '2025-03-02 09:49:14');
 
 -- --------------------------------------------------------
 
@@ -238,11 +353,7 @@ CREATE TABLE `positions` (
 --
 
 INSERT INTO `positions` (`position_id`, `election_id`, `description`, `max_vote`, `priority`) VALUES
-(3, 1, 'vice president', 1, 2),
-(4, 1, 'president', 1, 1),
-(6, 1, 'sec', 1, 1),
-(7, 4, 'pres', 1, 100),
-(9, 3, 'pres', 1, 100);
+(12, 12, 'pres', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -322,7 +433,16 @@ INSERT INTO `students` (`id`, `voters_id`, `name`, `year_section`, `course`, `re
 (30, '27', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-01 11:48:11'),
 (31, '28', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-01 11:51:30'),
 (32, '29', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-01 11:52:06'),
-(33, '30', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-01 11:56:39');
+(33, '30', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-01 11:56:39'),
+(34, '81', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 02:26:49'),
+(35, '82', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 02:37:13'),
+(36, '83', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 02:38:22'),
+(37, '84', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 02:40:36'),
+(38, '85', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 02:42:04'),
+(39, '86', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 02:42:59'),
+(40, '87', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 10:17:16'),
+(41, '88', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 10:24:05'),
+(42, '89', 'Rodriguez, Kian, Anthony', 'bsit 3-1', 'it', '2025-03-02 10:43:22');
 
 -- --------------------------------------------------------
 
@@ -358,16 +478,7 @@ CREATE TABLE `voters` (
 --
 
 INSERT INTO `voters` (`id`, `election_id`, `voters_id`) VALUES
-(10, 3, 'ZwsLyhfKbN'),
-(13, 4, 'Xqzj5tKrFH'),
-(14, 3, '4YuRARdYjg'),
-(15, 3, '3kFWS4bPMT'),
-(16, 3, 'aT7MNztB3v'),
-(17, 3, 'szmdlbfuDh'),
-(19, 3, 'o4adNYUkPy'),
-(20, 3, 'W46Tjde6BE'),
-(21, 3, 'aWGhiJ78FE'),
-(28, 3, 'W6OTf5QT86');
+(89, 12, 's72cwf9U7e');
 
 -- --------------------------------------------------------
 
@@ -389,23 +500,11 @@ CREATE TABLE `votes` (
 --
 
 INSERT INTO `votes` (`id`, `election_id`, `voters_id`, `candidate_id`, `position_id`, `timestamp`) VALUES
-(31, 3, 10, 18, 9, '2025-02-23 17:51:39'),
-(32, 3, 14, 18, 9, '2025-02-23 17:54:41'),
-(34, 3, 15, 18, 9, '2025-02-23 18:01:54'),
-(41, 3, 19, 18, 9, '2025-02-26 20:25:33'),
-(42, 3, 20, 18, 9, '2025-02-26 20:26:28'),
-(43, 3, 21, 18, 9, '2025-02-26 20:34:54');
+(82, 12, 89, 24, 12, '2025-03-02 18:43:25');
 
 --
 -- Indexes for dumped tables
 --
-
---
--- Indexes for table `admin`
---
-ALTER TABLE `admin`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `election_id` (`election_id`);
 
 --
 -- Indexes for table `cache`
@@ -444,9 +543,37 @@ ALTER TABLE `failed_jobs`
 -- Indexes for table `feedback`
 --
 ALTER TABLE `feedback`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `voter_id` (`voter_id`),
-  ADD KEY `election_id` (`election_id`);
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `history`
+--
+ALTER TABLE `history`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `history_candidates`
+--
+ALTER TABLE `history_candidates`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `history_elections`
+--
+ALTER TABLE `history_elections`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `history_positions`
+--
+ALTER TABLE `history_positions`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `history_votes`
+--
+ALTER TABLE `history_votes`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `jobs`
@@ -524,22 +651,16 @@ ALTER TABLE `votes`
 --
 
 --
--- AUTO_INCREMENT for table `admin`
---
-ALTER TABLE `admin`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
 -- AUTO_INCREMENT for table `candidates`
 --
 ALTER TABLE `candidates`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `elections`
 --
 ALTER TABLE `elections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `failed_jobs`
@@ -551,7 +672,37 @@ ALTER TABLE `failed_jobs`
 -- AUTO_INCREMENT for table `feedback`
 --
 ALTER TABLE `feedback`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `history`
+--
+ALTER TABLE `history`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `history_candidates`
+--
+ALTER TABLE `history_candidates`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `history_elections`
+--
+ALTER TABLE `history_elections`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `history_positions`
+--
+ALTER TABLE `history_positions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `history_votes`
+--
+ALTER TABLE `history_votes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `jobs`
@@ -569,13 +720,13 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT for table `positions`
 --
 ALTER TABLE `positions`
-  MODIFY `position_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `position_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -587,36 +738,23 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `voters`
 --
 ALTER TABLE `voters`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
 
 --
 -- AUTO_INCREMENT for table `votes`
 --
 ALTER TABLE `votes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
 
 --
 -- Constraints for dumped tables
 --
 
 --
--- Constraints for table `admin`
---
-ALTER TABLE `admin`
-  ADD CONSTRAINT `admin_ibfk_1` FOREIGN KEY (`election_id`) REFERENCES `elections` (`id`);
-
---
 -- Constraints for table `candidates`
 --
 ALTER TABLE `candidates`
   ADD CONSTRAINT `candidates_ibfk_1` FOREIGN KEY (`election_id`) REFERENCES `elections` (`id`);
-
---
--- Constraints for table `feedback`
---
-ALTER TABLE `feedback`
-  ADD CONSTRAINT `feedback_ibfk_1` FOREIGN KEY (`voter_id`) REFERENCES `voters` (`id`),
-  ADD CONSTRAINT `feedback_ibfk_2` FOREIGN KEY (`election_id`) REFERENCES `elections` (`id`);
 
 --
 -- Constraints for table `positions`
