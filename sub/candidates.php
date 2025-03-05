@@ -33,11 +33,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $firstname = $_POST['firstname'];
         $lastname = $_POST['lastname'];
         $platform = $_POST['platform'];
+        $partylist_id = $_POST['partylist_id']; // Added partylist_id
 
         // Handle photo upload
         $photo = uploadPhoto($_FILES['photo']);
         if ($photo) {
-            if (createCandidate($election_id, $position_id, $firstname, $lastname, $photo, $platform)) {
+            if (createCandidate($election_id, $position_id, $firstname, $lastname, $photo, $platform, $partylist_id)) {
               $_SESSION['message'] = "Candidate created successfully!";
               header("Location: candidates.php");
               exit();
@@ -68,13 +69,25 @@ function getPositions($election_id) {
     return $stmt->get_result();
 }
 
-// Function to fetch candidates with position descriptions
+// Function to fetch partylists for a specific election
+function getPartylists($election_id) {
+    global $conn;
+    $sql = "SELECT * FROM partylists WHERE election_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $election_id);
+    $stmt->execute();
+    return $stmt->get_result();
+}
+
+// Function to fetch candidates with position descriptions and partylist names
 function getCandidates($election_id) {
     global $conn;
     $sql = "
-        SELECT c.id AS candidate_id, c.firstname, c.lastname, c.photo, c.platform, p.description AS position_description
+        SELECT c.id AS candidate_id, c.firstname, c.lastname, c.photo, c.platform,
+               p.description AS position_description, pl.name AS partylist_name
         FROM candidates c
         JOIN positions p ON c.position_id = p.position_id
+        LEFT JOIN partylists pl ON c.partylist_id = pl.partylist_id
         WHERE c.election_id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $election_id);
@@ -83,11 +96,12 @@ function getCandidates($election_id) {
 }
 
 // Function to create a new candidate
-function createCandidate($election_id, $position_id, $firstname, $lastname, $photo, $platform) {
+function createCandidate($election_id, $position_id, $firstname, $lastname, $photo, $platform, $partylist_id) {
     global $conn;
-    $sql = "INSERT INTO candidates (election_id, position_id, firstname, lastname, photo, platform) VALUES (?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO candidates (election_id, position_id, firstname, lastname, photo, platform, partylist_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("iissss", $election_id, $position_id, $firstname, $lastname, $photo, $platform);
+    $stmt->bind_param("iissssi", $election_id, $position_id, $firstname, $lastname, $photo, $platform, $partylist_id);
     return $stmt->execute();
 }
 
@@ -127,9 +141,10 @@ function uploadPhoto($file) {
     }
 }
 
-// Fetch candidates and positions for the display
+// Fetch candidates, positions, and partylists for the display
 $candidates = getCandidates($election_id);
 $positions = getPositions($election_id);
+$partylists = getPartylists($election_id); // Fetch partylists
 
 // Get the current file name to determine active page
 $current_page = basename($_SERVER['PHP_SELF']);
@@ -279,19 +294,32 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     </select>
                 </div>
 
+                <!-- Partylist Selection Dropdown -->
                 <div class="form-group mb-3">
-                    <label for="firstname" class="text-success">First Name</label>
-                    <input type="text" class="form-control border-success" name="firstname" placeholder="First Name" required>
+                    <label for="partylist" class="text-success">Partylist</label>
+                    <select class="form-control border-success" name="partylist_id" required>
+                        <option value="">Select Partylist</option>
+                        <?php while ($partylist = $partylists->fetch_assoc()): ?>
+                            <option value="<?php echo $partylist['partylist_id']; ?>">
+                                <?php echo $partylist['name']; ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
                 </div>
 
                 <div class="form-group mb-3">
-                    <label for="lastname" class="text-success">Last Name</label>
-                    <input type="text" class="form-control border-success" name="lastname" placeholder="Last Name" required>
+                    <label for="firstname" class="text-success">First Name</label>
+                    <input type="text" class="form-control border-success" name="firstname" placeholder="First Name" required>
                 </div>
             </div>
 
             <!-- Right Side -->
             <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="lastname" class="text-success">Last Name</label>
+                    <input type="text" class="form-control border-success" name="lastname" placeholder="Last Name" required>
+                </div>
+
                 <div class="form-group mb-3">
                     <label for="photo" class="text-success">Photo</label>
                     <input type="file" class="form-control border-success" name="photo" accept="image/*" required>
@@ -319,6 +347,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <th>Position</th>
                     <th>First Name</th>
                     <th>Last Name</th>
+                    <th>Partylist</th>
                     <th>Photo</th>
                     <th>Platform</th>
                     <th>Actions</th>
@@ -330,6 +359,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <td><?php echo $candidate['position_description']; ?></td>
                         <td><?php echo $candidate['firstname']; ?></td>
                         <td><?php echo $candidate['lastname']; ?></td>
+                        <td><?php echo $candidate['partylist_name'] ?? 'None'; ?></td>
                         <td>
                             <img src="<?php echo $candidate['photo']; ?>" alt="Candidate Photo" class="rounded-circle border border-success" style="width: 50px; height: 50px; object-fit: cover;">
                         </td>

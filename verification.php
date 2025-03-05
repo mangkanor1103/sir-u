@@ -29,6 +29,18 @@ if (isset($_POST['register'])) {
     $year_section = trim($_POST['year_section']);
     $course = trim($_POST['course']);
 
+    // Check if the name already exists in the database
+    $stmt = $conn->prepare("SELECT * FROM students WHERE name = ?");
+    $stmt->bind_param("s", $name);
+    $stmt->execute();
+    $name_result = $stmt->get_result();
+
+    if ($name_result->num_rows > 0) {
+        $_SESSION['error'] = 'This name is already registered. For security reasons, each student can only register once.';
+        header('Location: verification.php');
+        exit();
+    }
+
     // Fetch the current election ID
     $stmt = $conn->prepare("SELECT id FROM elections LIMIT 1"); // Fetch any election without filtering by active status
     $stmt->execute();
