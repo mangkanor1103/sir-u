@@ -2,8 +2,8 @@
 // Include session management and database connection
 include 'includes/session.php';
 
-// Fetch feedback data
-$sql = "SELECT election_id, feedback, created_at FROM feedback ORDER BY created_at DESC"; // Removed ID from the query
+// Fetch students data
+$sql = "SELECT voters_id, name, year_section, course, election_id FROM students ORDER BY voters_id ASC"; // Adjust the query as needed
 $result = $conn->query($sql);
 ?>
 <?php include 'includes/header.php'; ?>
@@ -14,10 +14,10 @@ $result = $conn->query($sql);
 
   <div class="content-wrapper">
     <section class="content-header">
-      <h1>User Feedback</h1>
+      <h1>Registered Students</h1>
       <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Feedback</li>
+        <li class="active">Students</li>
       </ol>
     </section>
 
@@ -49,15 +49,17 @@ $result = $conn->query($sql);
         <div class="col-xs-12">
           <div class="box">
             <div class="box-header with-border">
-              <h3 class="box-title">All Feedback</h3>
+              <h3 class="box-title">All Registered Students</h3>
             </div>
 
             <div class="box-body">
               <table id="example1" class="table table-bordered">
                 <thead>
-                  <th>Election ID</th> <!-- Only Election ID -->
-                  <th>Feedback</th>
-                  <th>Submitted At</th>
+                  <th>Voter ID</th>
+                  <th>Name</th>
+                  <th>Year & Section</th>
+                  <th>Course</th>
+                  <th>Election ID</th>
                 </thead>
                 <tbody>
                   <?php
@@ -65,14 +67,16 @@ $result = $conn->query($sql);
                       while($row = $result->fetch_assoc()) {
                         echo "
                           <tr>
-                            <td>".htmlspecialchars($row['election_id'])."</td> <!-- Display Election ID -->
-                            <td>".htmlspecialchars($row['feedback'])."</td>
-                            <td>".date('Y-m-d H:i:s', strtotime($row['created_at']))."</td>
+                            <td>".htmlspecialchars($row['voters_id'])."</td>
+                            <td>".htmlspecialchars($row['name'])."</td>
+                            <td>".htmlspecialchars($row['year_section'])."</td>
+                            <td>".htmlspecialchars($row['course'])."</td>
+                            <td>".htmlspecialchars($row['election_id'])."</td>
                           </tr>
                         ";
                       }
                     } else {
-                      echo "<tr><td colspan='3' class='text-center'>No feedback found</td></tr>";
+                      echo "<tr><td colspan='5' class='text-center'>No students found</td></tr>";
                     }
                   ?>
                 </tbody>
