@@ -14,14 +14,34 @@ if (isset($_POST['back'])) {
 $election_id = $_SESSION['election_id'];
 $current_page = basename($_SERVER['PHP_SELF']);
 
-// Function to fetch voters
-function getVoters($election_id) {
+// Function to fetch voters with pagination
+function getVoters($election_id, $limit = null, $offset = null) {
     global $conn;
-    $sql = "SELECT * FROM voters WHERE election_id = ?";
+
+    if ($limit !== null && $offset !== null) {
+        $sql = "SELECT * FROM voters WHERE election_id = ? LIMIT ? OFFSET ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("iii", $election_id, $limit, $offset);
+    } else {
+        $sql = "SELECT * FROM voters WHERE election_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $election_id);
+    }
+
+    $stmt->execute();
+    return $stmt->get_result();
+}
+
+// Function to count total voters
+function countVoters($election_id) {
+    global $conn;
+    $sql = "SELECT COUNT(*) as total FROM voters WHERE election_id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $election_id);
     $stmt->execute();
-    return $stmt->get_result();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    return $row['total'];
 }
 
 // Function to generate voter codes
@@ -73,7 +93,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     generateVoterCodes($election_id, $count);
 }
 
-$voters = getVoters($election_id);
+// Pagination logic
+$limit = 10; // Number of voters per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page number
+$offset = ($page - 1) * $limit;
+
+// Get total number of voters for pagination
+$totalVoters = countVoters($election_id);
+$totalPages = ceil($totalVoters / $limit);
+
+// Get voters for current page
+$voters = getVoters($election_id, $limit, $offset);
 ?>
 
 <!DOCTYPE html>
@@ -163,6 +193,18 @@ $voters = getVoters($election_id);
 /* Icons Styling */
 .navbar-nav .nav-link i {
     margin-right: 8px;
+}
+
+/* Pagination styling */
+.pagination .page-item.active .page-link {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+.pagination .page-link {
+    color: #28a745;
+}
+.pagination .page-link:hover {
+    color: #218838;
 }
 
     </style>
@@ -275,9 +317,6 @@ $voters = getVoters($election_id);
   </div>
 </div>
 
-
-
-
 <script>
     function printTable() {
         let printWindow = window.open('', '', 'width=800,height=600');
@@ -290,8 +329,6 @@ $voters = getVoters($election_id);
     }
 </script>
 
-
-
         <h2>Generated Voter Codes</h2>
         <div class="table-responsive">
             <table class="table table-bordered">
@@ -302,14 +339,86 @@ $voters = getVoters($election_id);
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while ($row = $voters->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo $row['id']; ?></td>
-                        <td><?php echo $row['voters_id']; ?></td>
-                    </tr>
-                    <?php endwhile; ?>
+                    <?php if ($voters->num_rows > 0): ?>
+                        <?php while ($row = $voters->fetch_assoc()): ?>
+                        <tr>
+                            <td><?php echo $row['id']; ?></td>
+                            <td><?php echo $row['voters_id']; ?></td>
+                        </tr>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="2" class="text-center">No voter codes generated yet.</td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
+        </div>
+
+        <!-- Pagination Links -->
+        <?php if ($totalPages > 0): ?>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <?php if ($page > 1): ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<?php echo $page-1; ?>" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+                <?php
+                // Show limited page numbers with current page in the middle
+                $startPage = max(1, $page - 2);
+                $endPage = min($totalPages, $page + 2);
+
+                // Always show first page
+                if ($startPage > 1) {
+                    echo '<li class="page-item"><a class="page-link" href="?page=1">1</a></li>';
+                    if ($startPage > 2) {
+                        echo '<li class="page-item disabled"><a class="page-link">...</a></li>';
+                    }
+                }
+
+                // Display page numbers
+                for ($i = $startPage; $i <= $endPage; $i++) {
+                    echo '<li class="page-item ' . ($i == $page ? 'active' : '') . '">
+                            <a class="page-link" href="?page=' . $i . '">' . $i . '</a>
+                          </li>';
+                }
+
+                // Always show last page
+                if ($endPage < $totalPages) {
+                    if ($endPage < $totalPages - 1) {
+                        echo '<li class="page-item disabled"><a class="page-link">...</a></li>';
+                    }
+                    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '">' . $totalPages . '</a></li>';
+                }
+                ?>
+
+                <?php if ($page < $totalPages): ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<?php echo $page+1; ?>" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<?php echo $totalPages; ?>" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                <?php endif; ?>
+            </ul>
+        </nav>
+        <?php endif; ?>
+
+        <div class="text-center mt-3">
+            <p>Showing <?php echo min(($page-1)*$limit+1, $totalVoters); ?> to <?php echo min($page*$limit, $totalVoters); ?> of <?php echo $totalVoters; ?> entries</p>
         </div>
     </div>
 
