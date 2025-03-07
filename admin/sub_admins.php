@@ -40,63 +40,52 @@ if(isset($_POST['start_election'])){
     exit();
 }
 
-// Handle ending an election (same as delete but renamed)
+// Handle ending an election
 if(isset($_POST['end_election'])){
-  $election_id = $_POST['election_id'];
+    $election_id = $_POST['election_id'];
 
-  // Start a transaction to ensure data integrity
-  $conn->begin_transaction();
+    // Start a transaction to ensure data integrity
+    $conn->begin_transaction();
 
-  try {
-      // First, check the structure of the partylists table to determine column names
-      $partylist_columns_query = "SHOW COLUMNS FROM partylists";
-      $partylist_columns_result = $conn->query($partylist_columns_query);
-      $partylist_columns = [];
-      while($column = $partylist_columns_result->fetch_assoc()) {
-          $partylist_columns[] = $column['Field'];
-      }
+    try {
+        // Fetch election title
+        $result = $conn->query("SELECT name FROM elections WHERE id = '$election_id'");
+        if($result->num_rows > 0){
+            $row = $result->fetch_assoc();
+            $election_title = $row['name'];
 
-      // Determine if 'description' exists or if there's another column to use
-      $partylist_desc_column = in_array('description', $partylist_columns) ? 'description' : 'name';
+            // Store related data as a string in the history table
+            $history_sql = "INSERT INTO history (election_title, deleted_at, candidates, voters, votes, positions, partylists)
+                            VALUES ('$election_title', NOW(),
+                                (SELECT GROUP_CONCAT(CONCAT(id, '|', position_id, '|', firstname, '|', lastname, '|', photo, '|', platform, '|', partylist_id) SEPARATOR ';') FROM candidates WHERE election_id = '$election_id'),
+                                (SELECT GROUP_CONCAT(CONCAT(id, '|', voters_id) SEPARATOR ';') FROM voters WHERE election_id = '$election_id'),
+                                (SELECT GROUP_CONCAT(CONCAT(id, '|', voters_id, '|', candidate_id, '|', position_id, '|', timestamp) SEPARATOR ';') FROM votes WHERE election_id = '$election_id'),
+                                (SELECT GROUP_CONCAT(CONCAT(position_id, '|', description, '|', max_vote) SEPARATOR ';') FROM positions WHERE election_id = '$election_id'),
+                                (SELECT GROUP_CONCAT(CONCAT(partylist_id, '|', name) SEPARATOR ';') FROM partylists WHERE election_id = '$election_id'))";
+            $conn->query($history_sql) or die($conn->error);
+        }
 
-      // Fetch election title
-      $result = $conn->query("SELECT name FROM elections WHERE id = '$election_id'");
-      if($result->num_rows > 0){
-          $row = $result->fetch_assoc();
-          $election_title = $row['name'];
+        // Delete related data in the correct order
+        $conn->query("DELETE FROM votes WHERE election_id = '$election_id'") or die($conn->error);
+        $conn->query("DELETE FROM candidates WHERE election_id = '$election_id'") or die($conn->error);
+        $conn->query("DELETE FROM voters WHERE election_id = '$election_id'") or die($conn->error);
+        $conn->query("DELETE FROM positions WHERE election_id = '$election_id'") or die($conn->error);
+        $conn->query("DELETE FROM partylists WHERE election_id = '$election_id'") or die($conn->error);
 
-          // Store related data as a string in the history table (excluding feedback)
-          $history_sql = "INSERT INTO history (election_title, deleted_at, candidates, voters, votes, positions, partylists)
-                          VALUES ('$election_title', NOW(),
-                              (SELECT GROUP_CONCAT(CONCAT(id, '|', position_id, '|', firstname, '|', lastname, '|', photo, '|', platform, '|', partylist_id) SEPARATOR ';') FROM candidates WHERE election_id = '$election_id'),
-                              (SELECT GROUP_CONCAT(CONCAT(id, '|', voters_id) SEPARATOR ';') FROM voters WHERE election_id = '$election_id'),
-                              (SELECT GROUP_CONCAT(CONCAT(id, '|', voters_id, '|', candidate_id, '|', position_id, '|', timestamp) SEPARATOR ';') FROM votes WHERE election_id = '$election_id'),
-                              (SELECT GROUP_CONCAT(CONCAT(position_id, '|', description, '|', max_vote) SEPARATOR ';') FROM positions WHERE election_id = '$election_id'),
-                              (SELECT GROUP_CONCAT(CONCAT(partylist_id, '|', name) SEPARATOR ';') FROM partylists WHERE election_id = '$election_id'))";
-          $conn->query($history_sql) or die($conn->error);
-      }
+        // Finally, delete the election itself
+        $conn->query("DELETE FROM elections WHERE id = '$election_id'") or die($conn->error);
 
-      // Delete related data in the correct order (excluding feedback)
-      $conn->query("DELETE FROM votes WHERE election_id = '$election_id'") or die($conn->error);
-      $conn->query("DELETE FROM candidates WHERE election_id = '$election_id'") or die($conn->error);
-      $conn->query("DELETE FROM voters WHERE election_id = '$election_id'") or die($conn->error);
-      $conn->query("DELETE FROM positions WHERE election_id = '$election_id'") or die($conn->error);
-      $conn->query("DELETE FROM partylists WHERE election_id = '$election_id'") or die($conn->error);
+        // Commit transaction
+        $conn->commit();
 
-      // Finally, delete the election itself
-      $conn->query("DELETE FROM elections WHERE id = '$election_id'") or die($conn->error);
+        $_SESSION['success'] = 'Election has ended and all related records have been archived.';
+    } catch (Exception $e) {
+        $conn->rollback();
+        $_SESSION['error'] = "Failed to end election: " . $e->getMessage();
+    }
 
-      // Commit transaction
-      $conn->commit();
-
-      $_SESSION['success'] = 'Election has ended and all related records have been archived.';
-  } catch (Exception $e) {
-      $conn->rollback();
-      $_SESSION['error'] = "Failed to end election: " . $e->getMessage();
-  }
-
-  header('location: sub_admins.php');
-  exit();
+    header('location: sub_admins.php');
+    exit();
 }
 ?>
 
@@ -202,6 +191,10 @@ if(isset($_POST['end_election'])){
                               <input type='hidden' name='election_id' value='".$row['id']."'>
                               <button type='submit' name='end_election' class='btn btn-danger btn-sm'>End Election</button>
                             </form>
+                            <form method='GET' action='result.php' style='display:inline;'>
+                              <input type='hidden' name='election_id' value='".$row['id']."'>
+                              <button type='submit' class='btn btn-info btn-sm'>View Results</button>
+                            </form>
                             </td>
                           </tr>";
                       }
@@ -216,6 +209,7 @@ if(isset($_POST['end_election'])){
           </div>
         </div>
       </div>
+
     </section>
   </div>
 

@@ -173,7 +173,7 @@
 
                                 // Fetch candidates for the current position
                                 $stmt = $conn->prepare("
-                                    SELECT c.id, c.firstname, c.lastname, c.photo, c.platform, c.course, c.year_section, c.age, c.sex, c.address, p.name AS partylist_name
+                                    SELECT c.id, c.firstname, c.lastname, c.photo, p.name AS partylist_name
                                     FROM candidates c
                                     LEFT JOIN partylists p ON c.partylist_id = p.partylist_id
                                     WHERE c.position_id = ?
@@ -196,7 +196,6 @@
                                             <span style='text-align: center;'>" . htmlspecialchars($candidate['firstname'] . " " . $candidate['lastname']) . "</span>
                                             " . $partylist_display . "
                                             <input type='hidden' name='candidates[" . htmlspecialchars($position['position_id']) . "][]' value=''>
-                                            <button type='button' class='btn btn-info btn-sm mt-2' onclick='viewCandidateInfo(" . json_encode($candidate) . ")'>View Info</button>
                                         </div>";
                                     }
 
@@ -335,42 +334,21 @@ function handleAbstain(checkbox, positionId) {
         });
     }
 }
-
-function viewCandidateInfo(candidate) {
-    // Populate the modal with candidate information
-    document.getElementById('candidateName').textContent = candidate.firstname + ' ' + candidate.lastname;
-    document.getElementById('candidatePhoto').src = 'sub/' + candidate.photo;
-    document.getElementById('candidatePlatform').textContent = candidate.platform;
-    document.getElementById('candidateCourse').textContent = candidate.course;
-    document.getElementById('candidateYearSection').textContent = candidate.year_section;
-    document.getElementById('candidateAge').textContent = candidate.age;
-    document.getElementById('candidateSex').textContent = candidate.sex;
-    document.getElementById('candidateAddress').textContent = candidate.address;
-
-    // Show the modal
-    $('#candidateInfoModal').modal('show');
-}
 </script>
-
-<!-- Candidate Info Modal -->
-<div id="candidateInfoModal" class="modal fade" tabindex="-1" role="dialog">
+<div id="confirmationModal" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Candidate Information</h4>
+                <h4 class="modal-title">Confirm Your Votes</h4>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="text-center">
-                    <img id="candidatePhoto" src="" alt="Candidate Photo" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
-                </div>
-                <h5 id="candidateName" class="text-center"></h5>
-                <p><strong>Platform:</strong> <span id="candidatePlatform"></span></p>
-                <p><strong>Course:</strong> <span id="candidateCourse"></span></p>
-                <p><strong>Year and Section:</strong> <span id="candidateYearSection"></span></p>
-                <p><strong>Age:</strong> <span id="candidateAge"></span></p>
-                <p><strong>Sex:</strong> <span id="candidateSex"></span></p>
-                <p><strong>Address:</strong> <span id="candidateAddress"></span></p>
+                <h5 class="text-center">Please review your votes before submitting:</h5>
+                <ul id="voteReviewList" class="list-group"></ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Edit Choices</button>
+                <button type="submit" name="submit_votes" class="btn btn-success" form="voteForm">Submit Votes</button>
             </div>
         </div>
     </div>
