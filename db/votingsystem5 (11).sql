@@ -96,7 +96,7 @@ CREATE TABLE `candidates` (
 --
 
 INSERT INTO `candidates` (`id`, `election_id`, `position_id`, `firstname`, `lastname`, `photo`, `platform`, `partylist_id`, `course`, `year_section`, `age`, `sex`, `address`, `info_enabled`) VALUES
-(33, 18, 5, '3y43yy', '3y43y3', 'uploads/67ca5259514bb.png', 'sqwdqwq', 8, 'it', '4f1', 18, 'Male', '231214112efw', 1);
+(0, 18, 5, '3y43yy', '3y43y3', 'uploads/67ca5259514bb.png', 'sqwdqwq', 8, 'it', '4f1', 18, 'Male', '231214112efw', 1);
 
 -- --------------------------------------------------------
 
@@ -115,7 +115,7 @@ CREATE TABLE `courses` (
 --
 
 INSERT INTO `courses` (`id`, `course`, `year_section`) VALUES
-(4, 'it', '4f1');
+(0, 'it', '4f1');
 
 -- --------------------------------------------------------
 
@@ -135,9 +135,7 @@ CREATE TABLE `elections` (
 --
 
 INSERT INTO `elections` (`id`, `name`, `election_code`, `status`) VALUES
-(18, 'its', 'QKJ4tE7aR9', 1),
-(19, 'itsa', 'mJx2qrt1Hi', 0);
-
+(0, 'its', 'QKJ4tE7aR9', 1),
 -- --------------------------------------------------------
 
 --
@@ -170,14 +168,6 @@ CREATE TABLE `feedback` (
 --
 -- Dumping data for table `feedback`
 --
-
-INSERT INTO `feedback` (`id`, `election_id`, `feedback`, `created_at`) VALUES
-(5, 18, 'wffafwa', '2025-03-07 02:08:32'),
-(6, 18, 'dafaf', '2025-03-07 02:18:22'),
-(7, 18, 'fwefw', '2025-03-07 02:23:55'),
-(8, 18, 'wgwgwegwg', '2025-03-07 02:29:06'),
-(9, 18, 'affa', '2025-03-07 02:37:13');
-
 -- --------------------------------------------------------
 
 --
@@ -198,15 +188,6 @@ CREATE TABLE `history` (
 --
 -- Dumping data for table `history`
 --
-
-INSERT INTO `history` (`id`, `election_title`, `deleted_at`, `candidates`, `voters`, `votes`, `positions`, `partylists`) VALUES
-(1, 'usg election', '2025-03-05 20:37:34', '28|1|ad|asd|uploads/553838_Hollow Block picture.jpg|wfwwgw|2', '89|s72cwf9U7e;90|dp0Xn5aW3T;91|tCh7HtFfwf;92|4kWdFU8sRN;93|CCWUtuRGGO;94|aqSZlGQuzg;95|owP1VdX8s4;96|Oa97gF47YM;97|p5F1nNk1WF;98|516z4gl8VB;99|tEuoKidF1q;100|JlIiW0IqGk;101|UvnjPSRkyi;102|5otq4bWsmY;103|OZOYI8CyDq;104|pcteMPDJwS;105|48FMtyfsSU;106|y2RLS8g081;107|7nxuw3K8hB;108|DtCLgiLLBZ;109|kbEaaVuFbq;110|RBtDE34sJt;111|6Xd9zM0kD5;112|rNgoCwQfKP;113|JJla2BNGJ4;114|OnzgGxn1Po;115|ouLpXR7wds;116|ijSq3j4grB;117|U0L0zxcGou;118|HbGxM8rStG;119|F8m0oZostk;120|KGy5THJEM3;121|1lRO1Vqi1Y;122|FQmwThED4X;123|nk155DDyLq;124|YXXwF0weUF;125|Rz4z0E1iex;126|Iahd6b9Ygj;127|rbiLdEhpae;128|Ny861fNCbE;129|TEvSDqw5S9;130|oxtlyV8F97;131|6vn9B0huZt;132|hY6gDuIgR7;133|h6X9tlbqyO;134|md9cse88eq;135|dr78SYNchN;136|3yU81BFhr7;137|5yopbkPVuM;138|bZ1RByLKYw;139|YtrxQq6ZIL;140|PP8cM0bPi3;141|ba0540DnGg;142|qF4ynuUgfy;143|KaDgUDgSEc;144|rTbWoqmzLm;145|K0xASt1QvN;146|AwwDoiNyLo;147|ZrZplKnTcK;148|yr4oEJ0ANM;149|VxKcrzmlpw;150|ue1qIuPXLV;151|0tW4Fn5uTF;152|e63gbKxy0w;153|KRqlq6wwUw;154|z9QuNztfpA;155|iA99i10I81', '82|89|24|12|2025-03-02 18:43:25;83|90|25|1|2025-03-04 22:38:33;84|90|26|1|2025-03-04 22:38:33;85|91|25|1|2025-03-04 22:39:45;86|91|26|1|2025-03-04 22:39:45;87|92|25|1|2025-03-04 23:00:20;88|93|25|1|2025-03-04 23:04:55;90|94|25|1|2025-03-04 23:07:50;91|95|25|1|2025-03-04 23:16:35', '1|pres|1', '2|Republic Corp.'),
-(2, 'usg election', '2025-03-07 07:57:10', '29|2|ad|asd|uploads/4c1eb3fb-bf37-40f2-a495-f1d061784156.jpg|2r2r2|3', '156|sjtgYnNvX4;157|nyINhVQUM8;158|hvRBVSkn3Z;159|1jTEeGNjeB;160|C4TunqRZQ0;161|RTRFQFIMBXE8R;162|RTRJ9YM3H4LJB;163|RTRSWJ652Y9BY;164|RTR25J0S1NHND;165|RTRYLMJ6DKEO9;166|RTRD66BOI1GCI;167|RTR5A8JIDE2XE;168|RTRGCTNCUARA9;169|RTR3IHF68NNMA;170|RTRW7ASLNOQRU', '93|157|29|2|2025-03-05 20:48:09', '2|pres|1', '3|Republic Corp.'),
-(3, 'usg election', '2025-03-07 07:57:25', '30|3|eyey|erheh|uploads/rsz_republic_cement_2.jpg|eryeye|4;31|3|4y54y4|y4y45y|uploads/cheat.jpg|4y4y4|4;32|4|3y43yy|3y43y3|uploads/power_tools.jpg|3y3y43|4', '181|RTRTO8Y8H;182|RTR3K0QLL;183|RTRZYZUZ2;184|RTRPVPHPU;185|RTRB0L3HH;186|RTRZ6NZJN;187|RTRX5UQ39;188|RTRTH9YMN;189|RTR6AELCW;190|RTR2WNICS', '94|190|30|3|2025-03-07 07:56:46;95|190|32|4|2025-03-07 07:56:46', '3|pres|1;4|vpres|1', '4|Kian A. Rodriguez'),
-(4, 'usg election', '2025-03-07 08:02:04', NULL, '171|RTRA0BRZ4;172|RTRRD18KN;173|RTRHX7OB8;174|RTR7NBU1V;175|RTRZ7UQ4E;176|RTR3S58DH;177|RTRTF62SE;178|RTR1WRAA7;179|RTR00NTR4;180|RTR2F6W55', NULL, NULL, NULL),
-(5, 'usg election', '2025-03-07 09:41:29', NULL, NULL, NULL, NULL, '5|Republic Corp.'),
-(6, 'it', '2025-03-07 10:37:31', NULL, '191|RTRQI92NZ;192|RTR43RN6D;193|RTRITFT36;194|RTR67JGE9;195|RTRE51EAL;196|RTRR4U8FR;197|RTRGGUYCM;198|RTRTQWK0M;199|RTR84MJLW;200|RTR9VO60G', NULL, NULL, '6|Republic Corp.;7|Independent');
-
 -- --------------------------------------------------------
 
 --
@@ -226,9 +207,6 @@ CREATE TABLE `history_candidates` (
 -- Dumping data for table `history_candidates`
 --
 
-INSERT INTO `history_candidates` (`id`, `election_id`, `name`, `position_id`, `votes`, `deleted_at`) VALUES
-(1, 1, '', 4, 0, '2025-03-02 09:49:14');
-
 -- --------------------------------------------------------
 
 --
@@ -245,10 +223,6 @@ CREATE TABLE `history_elections` (
 --
 -- Dumping data for table `history_elections`
 --
-
-INSERT INTO `history_elections` (`id`, `name`, `election_code`, `deleted_at`) VALUES
-(1, 'General Election 2024', '$2y$10$samplehashedpassword', '2025-03-02 09:49:14'),
-(2, 'General Election 2024', '$2y$10$samplehashedpassword', '2025-03-02 09:50:27');
 
 -- --------------------------------------------------------
 
@@ -268,14 +242,6 @@ CREATE TABLE `history_positions` (
 -- Dumping data for table `history_positions`
 --
 
-INSERT INTO `history_positions` (`id`, `election_id`, `position_name`, `max_vote`, `deleted_at`) VALUES
-(1, 1, '', 1, '2025-03-02 09:49:14'),
-(2, 1, '', 1, '2025-03-02 09:49:14'),
-(3, 1, '', 1, '2025-03-02 09:49:14'),
-(4, 1, '', 1, '2025-03-02 09:50:27'),
-(5, 1, '', 1, '2025-03-02 09:50:27'),
-(6, 1, '', 1, '2025-03-02 09:50:28');
-
 -- --------------------------------------------------------
 
 --
@@ -293,14 +259,6 @@ CREATE TABLE `history_votes` (
 --
 -- Dumping data for table `history_votes`
 --
-
-INSERT INTO `history_votes` (`id`, `election_id`, `voter_id`, `candidate_id`, `deleted_at`) VALUES
-(1, 1, 0, 21, '2025-03-02 09:49:14'),
-(2, 1, 0, 21, '2025-03-02 09:49:14'),
-(3, 1, 0, 21, '2025-03-02 09:49:14'),
-(4, 1, 0, 21, '2025-03-02 09:49:14'),
-(5, 1, 0, 21, '2025-03-02 09:49:14'),
-(6, 1, 0, 21, '2025-03-02 09:49:14');
 
 -- --------------------------------------------------------
 
@@ -374,9 +332,6 @@ CREATE TABLE `partylists` (
 -- Dumping data for table `partylists`
 --
 
-INSERT INTO `partylists` (`partylist_id`, `election_id`, `name`) VALUES
-(8, 18, 'Republic Corp.');
-
 -- --------------------------------------------------------
 
 --
@@ -405,9 +360,6 @@ CREATE TABLE `positions` (
 --
 -- Dumping data for table `positions`
 --
-
-INSERT INTO `positions` (`position_id`, `election_id`, `description`, `max_vote`) VALUES
-(5, 18, 'vpres', 1);
 
 -- --------------------------------------------------------
 
@@ -441,9 +393,6 @@ CREATE TABLE `student` (
 -- Dumping data for table `student`
 --
 
-INSERT INTO `student` (`id`, `student_id`, `name`, `department`) VALUES
-(1, '1', 'q', 'q');
-
 -- --------------------------------------------------------
 
 --
@@ -462,14 +411,6 @@ CREATE TABLE `students` (
 --
 -- Dumping data for table `students`
 --
-
-INSERT INTO `students` (`id`, `voters_id`, `name`, `year_section`, `course`, `election_id`) VALUES
-(7, 210, 'Kian A. Rodriguez', '4f1', 'it', 18),
-(9, 209, 'Kian A. Rodriguez1', '4f1', 'it', 18),
-(10, 208, 'Kian A. Rodriguez11', '4f1', 'it', 18),
-(11, 207, 'Kian A. Rodriguez111', '4f1', 'it', 18),
-(12, 206, 'Kian A. Rodriguez1111', '4f1', 'it', 18);
-
 -- --------------------------------------------------------
 
 --
@@ -501,20 +442,6 @@ CREATE TABLE `voters` (
 
 --
 -- Dumping data for table `voters`
---
-
-INSERT INTO `voters` (`id`, `election_id`, `voters_id`) VALUES
-(201, 18, 'ITSKOD3CF'),
-(202, 18, 'ITSVXMIM8'),
-(203, 18, 'ITSGDBK4X'),
-(204, 18, 'ITS16917C'),
-(205, 18, 'ITSKSBH1P'),
-(206, 18, 'ITSC7PITS'),
-(207, 18, 'ITS7SBL64'),
-(208, 18, 'ITSJZL0H0'),
-(209, 18, 'ITSL7Y2Q6'),
-(210, 18, 'ITS2KHCFJ');
-
 -- --------------------------------------------------------
 
 --
@@ -532,16 +459,7 @@ CREATE TABLE `votes` (
 
 --
 -- Dumping data for table `votes`
---
 
-INSERT INTO `votes` (`id`, `election_id`, `voters_id`, `candidate_id`, `position_id`, `timestamp`) VALUES
-(96, 18, 210, 33, 5, '2025-03-07 10:08:26'),
-(97, 18, 209, 33, 5, '2025-03-07 10:18:19'),
-(98, 18, 208, 33, 5, '2025-03-07 10:23:35'),
-(99, 18, 207, 33, 5, '2025-03-07 10:29:02'),
-(100, 18, 206, 33, 5, '2025-03-07 10:36:57');
-
---
 -- Indexes for dumped tables
 --
 
