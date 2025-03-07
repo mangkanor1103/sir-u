@@ -152,14 +152,13 @@ $result = $stmt->get_result();
             <i class="fas fa-id-card"></i> Voters
         </a>
     </li>
-    <!-- Back to Login -->
-    <li class="nav-item">
-        <form method="POST" action="">
-            <button type="submit" name="back" class="btn btn-danger">
-                <i class="fas fa-sign-out-alt"></i> Back to Login
-            </button>
-        </form>
-    </li>
+                        <!-- Back to Login -->
+<li class="nav-item">
+    <a class="btn btn-danger text-white fw-bold" href="../index.php">
+        <i class="fas fa-id-card"></i> Logout
+    </a>
+</li>
+
 </ul>
 
                     </li>

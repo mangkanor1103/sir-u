@@ -79,7 +79,7 @@ include 'includes/header.php';
 
                     <!-- Feedbacks -->
                     <div class="col-lg-6 col-md-6 mb-4">
-                        <a href="feedbacks.php" class="text-decoration-none">
+                        <a href="feedback.php" class="text-decoration-none">
                             <div class="info-box" style="background: white; border-left: 5px solid #2e7d32; padding: 20px; border-radius: 8px;">
                                 <span class="info-box-icon" style="font-size: 40px; color: #2e7d32;">
                                     <i class="fa fa-comments"></i>

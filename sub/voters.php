@@ -350,13 +350,12 @@ if ($row = $result->fetch_assoc()) {
                         </a>
                     </li>
                     <!-- Back to Login -->
-                    <li class="nav-item">
-                        <form method="POST" action="">
-                            <button type="submit" name="back" class="btn btn-danger">
-                                <i class="fas fa-sign-out-alt"></i> Back to Login
-                            </button>
-                        </form>
-                    </li>
+<li class="nav-item">
+    <a class="btn btn-danger text-white fw-bold" href="../index.php">
+        <i class="fas fa-id-card"></i> Logout
+    </a>
+</li>
+
                 </ul>
             </div>
         </div>
@@ -366,7 +365,7 @@ if ($row = $result->fetch_assoc()) {
         <div class="header text-center mb-4">
             <h1>Generate Voter Codes</h1>
             <h5 class="text-muted">Election: <?php echo htmlspecialchars($election_name); ?></h5>
-            <a href="home.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Dashboard</a>
+            <a href="candidates.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Candidates</a>
         </div>
 
         <?php if (isset($_GET['generated']) && $_GET['generated'] == 'true'): ?>

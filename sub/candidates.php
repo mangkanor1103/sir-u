@@ -225,13 +225,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             <i class="fas fa-id-card"></i> Voters
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <form method="POST" action="">
-                            <button type="submit" name="back" class="btn btn-danger">
-                                <i class="fas fa-sign-out-alt"></i> Back to Login
-                            </button>
-                        </form>
-                    </li>
+                                        <!-- Back to Login -->
+<li class="nav-item">
+    <a class="btn btn-danger text-white fw-bold" href="../index.php">
+        <i class="fas fa-id-card"></i> Logout
+    </a>
+</li>
+
                 </ul>
             </div>
         </div>
@@ -241,6 +241,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <div class="header text-center mb-4">
             <h1>Candidate Management</h1>
         </div>
+        <div class="d-flex justify-content-between">
+        <a href="positions.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Positions</a>
+        <a href="voters.php" class="btn btn-success">Next: Set Up Voters <i class="fas fa-arrow-right"></i></a>
+    </div>
 
         <!-- Create Candidate Form -->
         <div class="card p-4 mb-4 bg-light border-success">
