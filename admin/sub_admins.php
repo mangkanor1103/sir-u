@@ -11,7 +11,8 @@ if(isset($_POST['generate'])){
         $set = '123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $election_code = substr(str_shuffle($set), 0, 10);
 
-        $sql = "INSERT INTO elections (name, election_code) VALUES ('$election_name', '$election_code')";
+        // Set status to 0 (not started) by default
+        $sql = "INSERT INTO elections (name, election_code, status) VALUES ('$election_name', '$election_code', 0)";
         if($conn->query($sql)){
             $_SESSION['success'] = 'Election code generated successfully for ' . $election_name . '. Code: ' . $election_code;
         } else {
@@ -22,8 +23,25 @@ if(isset($_POST['generate'])){
     exit();
 }
 
+// Handle starting an election
+if(isset($_POST['start_election'])){
+    $election_id = $_POST['election_id'];
 
-if(isset($_POST['delete_election'])){
+    // Update the election status to 1 (started)
+    $sql = "UPDATE elections SET status = 1 WHERE id = '$election_id'";
+
+    if($conn->query($sql)){
+        $_SESSION['success'] = 'Election has been started successfully.';
+    } else {
+        $_SESSION['error'] = $conn->error;
+    }
+
+    header('location: sub_admins.php');
+    exit();
+}
+
+// Handle ending an election (same as delete but renamed)
+if(isset($_POST['end_election'])){
   $election_id = $_POST['election_id'];
 
   // Start a transaction to ensure data integrity
@@ -71,17 +89,15 @@ if(isset($_POST['delete_election'])){
       // Commit transaction
       $conn->commit();
 
-      $_SESSION['success'] = 'Election and all related records deleted successfully.';
+      $_SESSION['success'] = 'Election has ended and all related records have been archived.';
   } catch (Exception $e) {
       $conn->rollback();
-      $_SESSION['error'] = "Failed to delete election: " . $e->getMessage();
+      $_SESSION['error'] = "Failed to end election: " . $e->getMessage();
   }
 
   header('location: sub_admins.php');
   exit();
 }
-
-
 ?>
 
 <?php include 'includes/header.php'; ?>
@@ -151,6 +167,7 @@ if(isset($_POST['delete_election'])){
                 <thead>
                   <th>Election Name</th>
                   <th>Election Code</th>
+                  <th>Status</th>
                   <th>Actions</th>
                 </thead>
                 <tbody>
@@ -161,20 +178,35 @@ if(isset($_POST['delete_election'])){
 
                     if ($result->num_rows > 0) {
                       while($row = $result->fetch_assoc()) {
+                        $status = ($row['status'] == 1) ? '<span class="label label-success">Active</span>' : '<span class="label label-default">Not Started</span>';
+                        $election_code = ($row['status'] == 1) ? '<span class="text-muted">Hidden (Election Active)</span>' : $row['election_code'];
+
                         echo "
                           <tr>
                             <td>".$row['name']."</td>
-                            <td>".$row['election_code']."</td>
-                            <td>
-                              <form method='POST' action='' onsubmit='return confirm(\"Are you sure you want to delete this election?\");'>
-                                <input type='hidden' name='election_id' value='".$row['id']."'>
-                                <button type='submit' name='delete_election' class='btn btn-danger btn-sm'>Delete</button>
-                              </form>
+                            <td>".$election_code."</td>
+                            <td>".$status."</td>
+                            <td>";
+
+                        // Show Start button only if election is not started
+                        if($row['status'] == 0) {
+                          echo "
+                            <form method='POST' action='' style='display:inline;'>
+                              <input type='hidden' name='election_id' value='".$row['id']."'>
+                              <button type='submit' name='start_election' class='btn btn-success btn-sm'>Start Election</button>
+                            </form> ";
+                        }
+
+                        echo "
+                            <form method='POST' action='' style='display:inline;' onsubmit='return confirm(\"Are you sure you want to end this election? All data will be archived.\");'>
+                              <input type='hidden' name='election_id' value='".$row['id']."'>
+                              <button type='submit' name='end_election' class='btn btn-danger btn-sm'>End Election</button>
+                            </form>
                             </td>
                           </tr>";
                       }
                     } else {
-                      echo "<tr><td colspan='3'>No elections found</td></tr>";
+                      echo "<tr><td colspan='4'>No elections found</td></tr>";
                     }
                   ?>
                 </tbody>

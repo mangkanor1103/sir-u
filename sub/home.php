@@ -58,6 +58,18 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 // Get the current file name to determine active page
 $current_page = basename($_SERVER['PHP_SELF']);
+
+// Handle Start Election
+if (isset($_POST['start_election'])) {
+    $update_query = "UPDATE elections SET status = 1 WHERE id = ?";
+    $update_stmt = $connection->prepare($update_query);
+    $update_stmt->bind_param("i", $election_id);
+    $update_stmt->execute();
+
+    // Redirect to index.php after updating the status
+    header("Location: ../index.php");
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -66,52 +78,98 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <!-- Link to offline Bootstrap CSS -->
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-      .navbar-nav .nav-link {
-    font-family: 'Orbitron', sans-serif;
-    color: #e0e0e0;
-    font-size: 16px;
-    transition: color 0.3s ease, transform 0.3s ease;
-    position: relative;
-    padding: 10px 15px;
-}
+        .navbar-nav .nav-link {
+            font-family: 'Orbitron', sans-serif;
+            color: #e0e0e0;
+            font-size: 16px;
+            transition: color 0.3s ease, transform 0.3s ease;
+            position: relative;
+            padding: 10px 15px;
+        }
 
-/* Hover Effect */
-.navbar-nav .nav-link:hover {
-    color: #00ffcc;
-    transform: translateY(-2px); /* Slight lift effect */
-}
+        /* Hover Effect */
+        .navbar-nav .nav-link:hover {
+            color: #00ffcc;
+            transform: translateY(-2px); /* Slight lift effect */
+        }
 
-/* Active Page Indicator */
-.navbar-nav .nav-link.active {
-    color: #00ffcc;
-    font-weight: bold;
-    text-shadow: 0px 0px 8px rgba(0, 255, 204, 0.8);
-}
+        /* Active Page Indicator */
+        .navbar-nav .nav-link.active {
+            color: #00ffcc;
+            font-weight: bold;
+            text-shadow: 0px 0px 8px rgba(0, 255, 204, 0.8);
+        }
 
-/* Underline Animation */
-.navbar-nav .nav-link::after {
-    content: "";
-    display: block;
-    width: 0;
-    height: 2px;
-    background: #00ffcc;
-    transition: width 0.3s ease;
-    margin-top: 3px;
-}
+        /* Underline Animation */
+        .navbar-nav .nav-link::after {
+            content: "";
+            display: block;
+            width: 0;
+            height: 2px;
+            background: #00ffcc;
+            transition: width 0.3s ease;
+            margin-top: 3px;
+        }
 
-.navbar-nav .nav-link:hover::after {
-    width: 100%;
-}
+        .navbar-nav .nav-link:hover::after {
+            width: 100%;
+        }
 
-/* Icons Styling */
-.navbar-nav .nav-link i {
-    margin-right: 8px;
-}
+        /* Icons Styling */
+        .navbar-nav .nav-link i {
+            margin-right: 8px;
+        }
 
+        body {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            font-family: Arial, sans-serif;
+        }
+
+        .step-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background-color: white;
+            border: 2px solid #2e7d32;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s ease-in-out;
+            width: 200px;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card-title {
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: #2e7d32;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #1b5e20;
+        }
+
+        .final-step {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -123,147 +181,97 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-    <!-- Home -->
-    <li class="nav-item">
-        <a class="nav-link <?php echo $current_page == 'home.php' ? 'active' : ''; ?>" href="home.php">
-            <i class="fas fa-home"></i> Home
-        </a>
-    </li>    <li class="nav-item">
-        <a class="nav-link <?php echo $current_page == 'partylist.php' ? 'active' : ''; ?>" href="partylist.php">
-            <i class="fas fa-users"></i> Partylist
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link <?php echo $current_page == 'positions.php' ? 'active' : ''; ?>" href="positions.php">
-            <i class="fas fa-users"></i> Positions
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link <?php echo $current_page == 'candidates.php' ? 'active' : ''; ?>" href="candidates.php">
-            <i class="fas fa-user-tie"></i> Candidates
-        </a>
-    </li>
-    <!-- Voters -->
-    <li class="nav-item">
-        <a class="nav-link <?php echo $current_page == 'voters.php' ? 'active' : ''; ?>" href="voters.php">
-            <i class="fas fa-id-card"></i> Voters
-        </a>
-    </li>
-    <!-- Election Results -->
-    <li class="nav-item">
-        <a class="nav-link <?php echo $current_page == 'votes.php' ? 'active' : ''; ?>" href="votes.php">
-            <i class="fas fa-chart-bar"></i> Election Results
-        </a>
-    </li>
-    <!-- Back to Login -->
-    <li class="nav-item">
-        <form method="POST" action="">
-            <button type="submit" name="back" class="btn btn-danger">
-                <i class="fas fa-sign-out-alt"></i> Back to Login
-            </button>
-        </form>
-    </li>
-</ul>
-
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo $current_page == 'home.php' ? 'active' : ''; ?>" href="home.php">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo $current_page == 'partylist.php' ? 'active' : ''; ?>" href="partylist.php">
+                            <i class="fas fa-users"></i> Partylist
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo $current_page == 'positions.php' ? 'active' : ''; ?>" href="positions.php">
+                            <i class="fas fa-users"></i> Positions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo $current_page == 'candidates.php' ? 'active' : ''; ?>" href="candidates.php">
+                            <i class="fas fa-user-tie"></i> Candidates
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo $current_page == 'voters.php' ? 'active' : ''; ?>" href="voters.php">
+                            <i class="fas fa-id-card"></i> Voters
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <form method="POST" action="">
+                            <button type="submit" name="back" class="btn btn-danger">
+                                <i class="fas fa-sign-out-alt"></i> Back to Login
+                            </button>
+                        </form>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
-    <style>
-    body {
-        background-color: #e8f5e9;
-        color: #2e7d32;
-        font-family: Arial, sans-serif;
-    }
-    .step-container {
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        gap: 20px;
-        flex-wrap: wrap;
-    }
-    .card {
-        background-color: white;
-        border: 2px solid #2e7d32;
-        border-radius: 10px;
-        padding: 15px;
-        text-align: center;
-        transition: transform 0.3s ease-in-out;
-        width: 200px;
-    }
-    .card:hover {
-        transform: scale(1.05);
-    }
-    .card-title {
-        font-weight: bold;
-    }
-    .btn-primary {
-        background-color: #2e7d32;
-        border: none;
-    }
-    .btn-primary:hover {
-        background-color: #1b5e20;
-    }
-    .final-step {
-        background-color: #2e7d32;
-        color: white;
-        border: none;
-        font-weight: bold;
-    }
-</style>
 
-<!-- Main content -->
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-12 text-center">
-            <h1>Welcome to the Election Dashboard</h1>
-            <p class="lead">Current Election: <?php echo htmlspecialchars($election_name); ?></p>
+    <!-- Main content -->
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1>Welcome to the Election Dashboard</h1>
+                <p class="lead">Current Election: <?php echo htmlspecialchars($election_name); ?></p>
+            </div>
         </div>
-    </div>
 
-    <!-- Step-by-step horizontal layout -->
-    <div class="step-container mt-4">
-    <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Step 1: Positions</h5>
-                <p class="card-text">Set up positions.</p>
+        <!-- Step-by-step horizontal layout -->
+        <div class="step-container mt-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Step 1: Positions</h5>
+                    <p class="card-text">Set up positions.</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Step 2: Partylists</h5>
+                    <p class="card-text">Set up Partylists.</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Step 3: Candidates</h5>
+                    <p class="card-text">Set up candidates.</p>
+                </div>
+            </div>
+            <div class="card final-step">
+                <div class="card-body">
+                    <h5 class="card-title">Final Step: Voters</h5>
+                    <p class="card-text">Set up voters.</p>
+                </div>
             </div>
         </div>
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Step 2: Partylists</h5>
-                <p class="card-text">Set up Partylists.</p>
+
+        <!-- Start Election Button -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <form method="POST" action="">
+                    <button type="submit" name="start_election" class="btn btn-primary">Start Election</button>
+                </form>
             </div>
         </div>
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Step 3: Candidates</h5>
-                <p class="card-text">Set up candidates.</p>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Step 4: Voters</h5>
-                <p class="card-text">Set up voters.</p>
-            </div>
-        </div>
-        <div class="card final-step">
-            <div class="card-body">
-                <h5 class="card-title">Final Step: Election Results</h5>
-                <p class="card-text">Review and finalize the election results.</p>
+
+        <!-- Next Button at the Bottom -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <a href="partylist.php" class="btn btn-primary">Next: Set Up Partylists</a>
             </div>
         </div>
     </div>
-
-    <!-- Next Button at the Bottom -->
-    <div class="row mt-4">
-        <div class="col-12 text-center">
-            <a href="partylist.php" class="btn btn-primary">Next: Set Up Partylists</a>
-        </div>
-    </div>
-</div>
 
     <!-- Link to offline Bootstrap JS -->
     <script src="bootstrap/js/bootstrap.bundle.min.js"></script>

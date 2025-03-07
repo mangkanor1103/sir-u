@@ -3,25 +3,30 @@ session_start();
 include 'includes/conn.php';
 
 // Check if voter session is set
-if (!isset($_SESSION['voter'])) {
+if (!isset($_SESSION['voter']) || !isset($_SESSION['election_id'])) {
     $_SESSION['error'] = 'Unauthorized access!';
     header('Location: index.php');
     exit();
 }
 
 $voter_id = $_SESSION['voter'];
+$election_id = $_SESSION['election_id'];
 
-// Check if voter is already registered
-$stmt = $conn->prepare("SELECT * FROM students WHERE voters_id = ?");
-$stmt->bind_param("s", $voter_id);
+// Check if voter is already registered for this specific election
+$stmt = $conn->prepare("SELECT * FROM students WHERE voters_id = ? AND election_id = ?");
+$stmt->bind_param("si", $voter_id, $election_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// If voter is found, redirect to home.php
+// If voter is found in current election, redirect to home.php
 if ($result->num_rows > 0) {
     header('Location: home.php');
     exit();
 }
+
+// Fetch courses for dropdown
+$courses_query = "SELECT * FROM courses"; // Adjust this query if needed
+$courses_result = $conn->query($courses_query);
 
 // If form is submitted
 if (isset($_POST['register'])) {
@@ -29,36 +34,25 @@ if (isset($_POST['register'])) {
     $year_section = trim($_POST['year_section']);
     $course = trim($_POST['course']);
 
-    // Check if the name already exists in the database
-    $stmt = $conn->prepare("SELECT * FROM students WHERE name = ?");
-    $stmt->bind_param("s", $name);
+    // Check if the student has already voted in this specific election
+    $stmt = $conn->prepare("SELECT * FROM students WHERE name = ? AND election_id = ?");
+    $stmt->bind_param("si", $name, $election_id);
     $stmt->execute();
     $name_result = $stmt->get_result();
 
     if ($name_result->num_rows > 0) {
-        $_SESSION['error'] = 'This name is already registered. For security reasons, each student can only register once.';
+        $_SESSION['error'] = 'This student has already registered for this election.';
         header('Location: verification.php');
         exit();
     }
 
-    // Fetch the current election ID
-    $stmt = $conn->prepare("SELECT id FROM elections LIMIT 1"); // Fetch any election without filtering by active status
-    $stmt->execute();
-    $election_result = $stmt->get_result();
-    $election_id = null;
-
-    if ($election_result && $election_result->num_rows > 0) {
-        $election = $election_result->fetch_assoc();
-        $election_id = $election['id'];
-    }
-
-    // Insert voter details into students table
+    // Insert voter details into students table with election_id
     $stmt = $conn->prepare("INSERT INTO students (voters_id, name, year_section, course, election_id) VALUES (?, ?, ?, ?, ?)");
     $stmt->bind_param("ssssi", $voter_id, $name, $year_section, $course, $election_id);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = 'Registration successful!';
-        header('Location: home.php'); // Redirect to home after successful registration
+        header('Location: home.php');
         exit();
     } else {
         $_SESSION['error'] = 'Registration failed!';
@@ -68,6 +62,7 @@ if (isset($_POST['register'])) {
     exit();
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -162,11 +157,31 @@ if (isset($_POST['register'])) {
         </div>
         <div class="form-group">
             <label for="year_section">Year and Section</label>
-            <input type="text" class="form-control" id="year_section" name="year_section" required>
+            <select class="form-control" id="year_section" name="year_section" required>
+                <option value="">Select Year and Section</option>
+                <?php
+                // Fetch year and section from courses
+                $courses_query = "SELECT year_section FROM courses"; // Adjust this query if needed
+                $courses_result = $conn->query($courses_query);
+                while ($row = $courses_result->fetch_assoc()) {
+                    echo "<option value='" . htmlspecialchars($row['year_section']) . "'>" . htmlspecialchars($row['year_section']) . "</option>";
+                }
+                ?>
+            </select>
         </div>
         <div class="form-group">
             <label for="course">Course</label>
-            <input type="text" class="form-control" id="course" name="course" required>
+            <select class="form-control" id="course" name="course" required>
+                <option value="">Select Course</option>
+                <?php
+                // Fetch courses for dropdown
+                $courses_query = "SELECT course FROM courses"; // Adjust this query if needed
+                $courses_result = $conn->query($courses_query);
+                while ($row = $courses_result->fetch_assoc()) {
+                    echo "<option value='" . htmlspecialchars($row['course']) . "'>" . htmlspecialchars($row['course']) . "</option>";
+                }
+                ?>
+            </select>
         </div>
         <button type="submit" name="register" class="btn btn-custom">Register</button>
     </form>

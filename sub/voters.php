@@ -349,12 +349,6 @@ if ($row = $result->fetch_assoc()) {
                             <i class="fas fa-id-card"></i> Voters
                         </a>
                     </li>
-                    <!-- Election Results -->
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'votes.php' ? 'active' : ''; ?>" href="votes.php">
-                            <i class="fas fa-chart-bar"></i> Election Results
-                        </a>
-                    </li>
                     <!-- Back to Login -->
                     <li class="nav-item">
                         <form method="POST" action="">

@@ -19,6 +19,7 @@
       <li class=""><a href="feedback.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>Feedbacks</span></a></li> <!-- New menu item -->
       <li class=""><a href="history.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>History</span></a></li> <!-- New menu item -->
       <li class=""><a href="students.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>Students</span></a></li> <!-- New menu item -->
+      <li class=""><a href="info.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>Info</span></a></li> <!-- New menu item -->
 
   </ul>
   </section>

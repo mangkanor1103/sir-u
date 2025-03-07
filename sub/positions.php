@@ -82,6 +82,13 @@ $positions = getPositions($election_id);
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
+          .btn-primary {
+        background-color: #2e7d32;
+        border: none;
+    }
+    .btn-primary:hover {
+        background-color: #1b5e20;
+    }
         body {
             background-color: #f8f9fa;
             font-family: 'Poppins', sans-serif;
@@ -158,8 +165,8 @@ $positions = getPositions($election_id);
     </style>
 </head>
 <body>
-    <!-- Navigation bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+   <!-- Navigation bar -->
+   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="home.php">Election Dashboard</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -172,16 +179,14 @@ $positions = getPositions($election_id);
         <a class="nav-link <?php echo $current_page == 'home.php' ? 'active' : ''; ?>" href="home.php">
             <i class="fas fa-home"></i> Home
         </a>
-    </li>
-    <li class="nav-item">
+    </li>    <li class="nav-item">
         <a class="nav-link <?php echo $current_page == 'partylist.php' ? 'active' : ''; ?>" href="partylist.php">
             <i class="fas fa-users"></i> Partylist
         </a>
     </li>
-    <!-- Positions -->
     <li class="nav-item">
         <a class="nav-link <?php echo $current_page == 'positions.php' ? 'active' : ''; ?>" href="positions.php">
-            <i class="fas fa-user-tie"></i> Positions
+            <i class="fas fa-users"></i> Positions
         </a>
     </li>
     <li class="nav-item">
@@ -195,12 +200,6 @@ $positions = getPositions($election_id);
             <i class="fas fa-id-card"></i> Voters
         </a>
     </li>
-    <!-- Election Results -->
-    <li class="nav-item">
-        <a class="nav-link <?php echo $current_page == 'votes.php' ? 'active' : ''; ?>" href="votes.php">
-            <i class="fas fa-chart-bar"></i> Election Results
-        </a>
-    </li>
     <!-- Back to Login -->
     <li class="nav-item">
         <form method="POST" action="">
@@ -211,6 +210,8 @@ $positions = getPositions($election_id);
     </li>
 </ul>
 
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>

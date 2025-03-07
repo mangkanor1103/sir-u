@@ -247,12 +247,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <i class="fas fa-id-card"></i> Voters
         </a>
     </li>
-    <!-- Election Results -->
-    <li class="nav-item">
-        <a class="nav-link <?php echo $current_page == 'votes.php' ? 'active' : ''; ?>" href="votes.php">
-            <i class="fas fa-chart-bar"></i> Election Results
-        </a>
-    </li>
     <!-- Back to Login -->
     <li class="nav-item">
         <form method="POST" action="">
@@ -268,10 +262,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
     </nav>
 
     <div class="container mt-5">
-        <div class="header text-center mb-4">
-            <h1>Candidates</h1>
-            <a href="home.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Dashboard</a>
-        </div>
+    <div class="header text-center mb-4">
+    <h1>Positions</h1>
+    <div class="d-flex justify-content-between">
+        <a href="home.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Dashboard</a>
+        <a href="candidates.php" class="btn btn-success">Next: Set Up Candidates <i class="fas fa-arrow-right"></i></a>
+    </div>
 
         <div class="card p-4 mb-4 bg-light border-success">
     <h2 class="text-success">Create Candidate</h2>
