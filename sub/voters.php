@@ -104,12 +104,6 @@ function generateRandomString($length = 6) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == "clear_voter_codes") {
-    // First, delete dependent feedback records
-    $sql = "DELETE FROM feedback WHERE voter_id IN (SELECT id FROM voters WHERE election_id = ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $election_id);
-    $stmt->execute();
-
     // Now, delete votes
     $sql = "DELETE FROM votes WHERE voters_id IN (SELECT id FROM voters WHERE election_id = ?)";
     $stmt = $conn->prepare($sql);
@@ -435,7 +429,6 @@ if ($row = $result->fetch_assoc()) {
             <table class="table table-bordered" id="voterCodesTable">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Voter Code</th>
                     </tr>
                 </thead>
@@ -443,7 +436,6 @@ if ($row = $result->fetch_assoc()) {
                     <?php if ($voters->num_rows > 0): ?>
                         <?php while ($row = $voters->fetch_assoc()): ?>
                         <tr>
-                            <td><?php echo $row['id']; ?></td>
                             <td class="code-format"><?php echo $row['voters_id']; ?></td>
                         </tr>
                         <?php endwhile; ?>

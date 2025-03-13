@@ -168,7 +168,7 @@ if(isset($_POST['end_election'])){
                     if ($result->num_rows > 0) {
                       while($row = $result->fetch_assoc()) {
                         $status = ($row['status'] == 1) ? '<span class="label label-success">Active</span>' : '<span class="label label-default">Not Started</span>';
-                        $election_code = ($row['status'] == 1) ? '<span class="text-muted">Hidden (Election Active)</span>' : $row['election_code'];
+                        $election_code = $row['election_code'];
 
                         echo "
                           <tr>

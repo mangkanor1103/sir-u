@@ -15,8 +15,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['election_code_submit']
 
   if ($election) {
       if ($election['status'] == 1) {
-          $error_message = "Election is active. You cannot log in.";
-      } else {
+        $_SESSION['election_id'] = $election['id'];
+        header("Location: votes.php");
+        exit();
+            } else {
           $_SESSION['election_id'] = $election['id'];
           header("Location: home.php");
           exit();

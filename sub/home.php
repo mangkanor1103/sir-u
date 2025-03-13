@@ -81,8 +81,14 @@ if (isset($_POST['start_election'])) {
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
+        body {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            font-family: 'Poppins', sans-serif;
+            transition: background-color 0.5s ease;
+        }
+
         .navbar-nav .nav-link {
-            font-family: 'Orbitron', sans-serif;
             color: #e0e0e0;
             font-size: 16px;
             transition: color 0.3s ease, transform 0.3s ease;
@@ -90,43 +96,15 @@ if (isset($_POST['start_election'])) {
             padding: 10px 15px;
         }
 
-        /* Hover Effect */
         .navbar-nav .nav-link:hover {
             color: #00ffcc;
-            transform: translateY(-2px); /* Slight lift effect */
+            transform: translateY(-2px);
         }
 
-        /* Active Page Indicator */
         .navbar-nav .nav-link.active {
             color: #00ffcc;
             font-weight: bold;
             text-shadow: 0px 0px 8px rgba(0, 255, 204, 0.8);
-        }
-
-        /* Underline Animation */
-        .navbar-nav .nav-link::after {
-            content: "";
-            display: block;
-            width: 0;
-            height: 2px;
-            background: #00ffcc;
-            transition: width 0.3s ease;
-            margin-top: 3px;
-        }
-
-        .navbar-nav .nav-link:hover::after {
-            width: 100%;
-        }
-
-        /* Icons Styling */
-        .navbar-nav .nav-link i {
-            margin-right: 8px;
-        }
-
-        body {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            font-family: Arial, sans-serif;
         }
 
         .step-container {
@@ -143,21 +121,26 @@ if (isset($_POST['start_election'])) {
             border-radius: 10px;
             padding: 15px;
             text-align: center;
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
             width: 200px;
+            animation: fadeIn 0.5s ease forwards;
         }
 
         .card:hover {
             transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
 
         .card-title {
             font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
         }
 
         .btn-primary {
             background-color: #2e7d32;
             border: none;
+            transition: background-color 0.3s ease;
         }
 
         .btn-primary:hover {
@@ -169,6 +152,11 @@ if (isset($_POST['start_election'])) {
             color: white;
             border: none;
             font-weight: bold;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 </head>
@@ -194,7 +182,7 @@ if (isset($_POST['start_election'])) {
                     </li>
                     <li class="nav-item">
                         <a class="nav-link <?php echo $current_page == 'positions.php' ? 'active' : ''; ?>" href="positions.php">
-                            <i class="fas fa-users"></i> Positions
+                            <i class="fas fa-user-tie"></i> Positions
                         </a>
                     </li>
                     <li class="nav-item">
@@ -207,13 +195,11 @@ if (isset($_POST['start_election'])) {
                             <i class="fas fa-id-card"></i> Voters
                         </a>
                     </li>
-                                        <!-- Back to Login -->
-<li class="nav-item">
-    <a class="btn btn-danger text-white fw-bold" href="../index.php">
-        <i class="fas fa-id-card"></i> Logout
-    </a>
-</li>
-
+                    <li class="nav-item">
+                        <a class="btn btn-danger text-white fw-bold" href="../index.php">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -252,7 +238,7 @@ if (isset($_POST['start_election'])) {
                 <div class="card-body">
                     <h5 class="card-title">Final Step: Voters</h5>
                     <p class="card-text">Set up voters.</p>
-                </div>
+                </ </div>
             </div>
         </div>
 

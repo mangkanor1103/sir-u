@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 include 'includes/conn.php';
@@ -34,6 +35,29 @@ if (isset($_POST['register'])) {
     $year_section = trim($_POST['year_section']);
     $course = trim($_POST['course']);
 
+    // Handle photo upload
+    if (isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
+        $targetDir = "pics/students/"; // Directory to save uploaded photos
+        $fileName = basename($_FILES['photo']['name']);
+        $targetFilePath = $targetDir . $fileName;
+
+        // Check if the uploads directory exists, if not create it
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0755, true);
+        }
+
+        // Move the uploaded file to the target directory
+        if (!move_uploaded_file($_FILES['photo']['tmp_name'], $targetFilePath)) {
+            $_SESSION['error'] = 'Photo upload failed!';
+            header('Location: verification.php');
+            exit();
+        }
+    } else {
+        $_SESSION['error'] = 'No photo uploaded or there was an error.';
+        header('Location: verification.php');
+        exit();
+    }
+
     // Check if the student has already voted in this specific election
     $stmt = $conn->prepare("SELECT * FROM students WHERE name = ? AND election_id = ?");
     $stmt->bind_param("si", $name, $election_id);
@@ -46,9 +70,9 @@ if (isset($_POST['register'])) {
         exit();
     }
 
-    // Insert voter details into students table with election_id
-    $stmt = $conn->prepare("INSERT INTO students (voters_id, name, year_section, course, election_id) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssi", $voter_id, $name, $year_section, $course, $election_id);
+    // Insert voter details into students table with election_id and photo path
+    $stmt = $conn->prepare("INSERT INTO students (voters_id, name, year_section, course, election_id, photo) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssssss", $voter_id, $name, $year_section, $course, $election_id, $targetFilePath);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = 'Registration successful!';
@@ -69,7 +93,7 @@ if (isset($_POST['register'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verification</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2 ?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <style>
         body {
@@ -139,7 +163,7 @@ if (isset($_POST['register'])) {
     <h2>Verification</h2>
 
     <?php if (isset($_SESSION['error'])): ?>
-        <div class ="alert alert-danger">
+        <div class="alert alert-danger">
             <?= $_SESSION['error']; unset($_SESSION['error']); ?>
         </div>
     <?php endif; ?>
@@ -150,7 +174,7 @@ if (isset($_POST['register'])) {
         </div>
     <?php endif; ?>
 
-    <form method="POST" action="">
+    <form method="POST" action="" enctype="multipart/form-data">
         <div class="form-group">
             <label for="name">Name</label>
             <input type="text" class="form-control" id="name" name="name" required>
@@ -183,10 +207,15 @@ if (isset($_POST['register'])) {
                 ?>
             </select>
         </div>
+        <div class="form-group">
+            <label for="cameraInput">Take Photo</label>
+            <input type="file" class="form-control" id="cameraInput" name="photo" accept="image/*" capture="environment" required>
+            <small class="text-muted">Use your camera to take a photo for verification.</small>
+        </div>
         <button type="submit" name="register" class="btn btn-custom">Register</button>
     </form>
     <a href="index.php" class="btn btn-secondary back-button">Back to Home</a>
-</div>
+ </div>
 
 <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
