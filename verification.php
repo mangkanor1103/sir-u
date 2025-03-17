@@ -209,7 +209,7 @@ if (isset($_POST['register'])) {
         </div>
         <div class="form-group">
             <label for="cameraInput">Take Photo</label>
-            <input type="file" class="form-control" id="cameraInput" name="photo" accept="image/*" capture="environment" required>
+            <input type="file" class="form-control" id="cameraInput" name="photo" accept="image/*" capture="user" required>
             <small class="text-muted">Use your camera to take a photo for verification.</small>
         </div>
         <button type="submit" name="register" class="btn btn-custom">Register</button>

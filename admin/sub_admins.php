@@ -2,7 +2,7 @@
 include 'includes/session.php';
 
 // Handle form submission to generate codes
-if(isset($_POST['generate'])){
+if (isset($_POST['generate'])) {
     $election_name = $_POST['election_name'];
     $quantity = intval($_POST['quantity']); // Assuming you have a field in your form to input the quantity of codes
 
@@ -13,7 +13,7 @@ if(isset($_POST['generate'])){
 
         // Set status to 0 (not started) by default
         $sql = "INSERT INTO elections (name, election_code, status) VALUES ('$election_name', '$election_code', 0)";
-        if($conn->query($sql)){
+        if ($conn->query($sql)) {
             $_SESSION['success'] = 'Election code generated successfully for ' . $election_name . '. Code: ' . $election_code;
         } else {
             $_SESSION['error'] = $conn->error;
@@ -24,13 +24,13 @@ if(isset($_POST['generate'])){
 }
 
 // Handle starting an election
-if(isset($_POST['start_election'])){
+if (isset($_POST['start_election'])) {
     $election_id = $_POST['election_id'];
 
     // Update the election status to 1 (started)
     $sql = "UPDATE elections SET status = 1 WHERE id = '$election_id'";
 
-    if($conn->query($sql)){
+    if ($conn->query($sql)) {
         $_SESSION['success'] = 'Election has been started successfully.';
     } else {
         $_SESSION['error'] = $conn->error;
@@ -41,7 +41,7 @@ if(isset($_POST['start_election'])){
 }
 
 // Handle ending an election
-if(isset($_POST['end_election'])){
+if (isset($_POST['end_election'])) {
     $election_id = $_POST['election_id'];
 
     // Start a transaction to ensure data integrity
@@ -50,7 +50,7 @@ if(isset($_POST['end_election'])){
     try {
         // Fetch election title
         $result = $conn->query("SELECT name FROM elections WHERE id = '$election_id'");
-        if($result->num_rows > 0){
+        if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
             $election_title = $row['name'];
 
@@ -106,19 +106,19 @@ if(isset($_POST['end_election'])){
 
     <section class="content">
       <?php
-        if(isset($_SESSION['error'])){
+        if (isset($_SESSION['error'])) {
           echo "<div class='alert alert-danger alert-dismissible'>
                   <button type='button' class='close' data-dismiss='alert'>&times;</button>
                   <h4><i class='icon fa fa-warning'></i> Error!</h4>
-                  ".$_SESSION['error']."
+                  " . $_SESSION['error'] . "
                 </div>";
           unset($_SESSION['error']);
         }
-        if(isset($_SESSION['success'])){
+        if (isset($_SESSION['success'])) {
           echo "<div class='alert alert-success alert-dismissible'>
                   <button type='button' class='close' data-dismiss='alert'>&times;</button>
                   <h4><i class='icon fa fa-check'></i> Success!</h4>
-                  ".$_SESSION['success']."
+                  " . $_SESSION['success'] . "
                 </div>";
           unset($_SESSION['success']);
         }
@@ -151,13 +151,15 @@ if(isset($_POST['end_election'])){
               </form>
             </div>
 
-            <div class="box-body">
+            <div class="box-body" style="overflow-x: auto;"> <!-- Make the box body scrollable horizontally -->
               <table id="example1" class="table table-bordered">
                 <thead>
-                  <th>Election Name</th>
-                  <th>Election Code</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <tr>
+                    <th>Election Name</th>
+                    <th>Election Code</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
                 </thead>
                 <tbody>
                   <?php
@@ -166,33 +168,33 @@ if(isset($_POST['end_election'])){
                     $result = $conn->query($sql);
 
                     if ($result->num_rows > 0) {
-                      while($row = $result->fetch_assoc()) {
+                      while ($row = $result->fetch_assoc()) {
                         $status = ($row['status'] == 1) ? '<span class="label label-success">Active</span>' : '<span class="label label-default">Not Started</span>';
                         $election_code = $row['election_code'];
 
                         echo "
                           <tr>
-                            <td>".$row['name']."</td>
-                            <td>".$election_code."</td>
-                            <td>".$status."</td>
+                            <td>" . $row['name'] . "</td>
+                            <td>" . $election_code . "</td>
+                            <td>" . $status . "</td>
                             <td>";
 
                         // Show Start button only if election is not started
-                        if($row['status'] == 0) {
+                        if ($row['status'] == 0) {
                           echo "
                             <form method='POST' action='' style='display:inline;'>
-                              <input type='hidden' name='election_id' value='".$row['id']."'>
+                              <input type='hidden' name='election_id' value='" . $row['id'] . "'>
                               <button type='submit' name='start_election' class='btn btn-success btn-sm'>Start Election</button>
                             </form> ";
                         }
 
                         echo "
                             <form method='POST' action='' style='display:inline;' onsubmit='return confirm(\"Are you sure you want to end this election? All data will be archived.\");'>
-                              <input type='hidden' name='election_id' value='".$row['id']."'>
+                              <input type='hidden' name='election_id' value='" . $row['id'] . "'>
                               <button type='submit' name='end_election' class='btn btn-danger btn-sm'>End Election</button>
                             </form>
                             <form method='GET' action='result.php' style='display:inline;'>
-                              <input type='hidden' name='election_id' value='".$row['id']."'>
+                              <input type='hidden' name='election_id' value='" . $row['id'] . "'>
                               <button type='submit' class='btn btn-info btn-sm'>View Results</button>
                             </form>
                             </td>

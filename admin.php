@@ -99,12 +99,12 @@ if (isset($_SESSION['admin'])) {
             margin-top: 20px;
         }
         .btn-admin {
-            background-color: #dc3545; /* Red for Admin */
+            background-color: #28a745; /* Green for Sign In */
             color: #fff;
             width: 48%; /* Adjust width to fit two buttons */
         }
         .btn-subadmin {
-            background-color: #ffc107; /* Yellow for Sub Admin */
+            background-color: #007bff; /* Blue for Result */
             color: #fff;
             width: 48%; /* Adjust width to fit two buttons */
         }
@@ -167,21 +167,11 @@ if (isset($_SESSION['admin'])) {
             <b>Mindoro State University Online Voting System</b>
         </div>
         <div class="login-box-body">
-            <p class="login-box-msg">Sign in to start your session</p>
-            <form action="process.php" method="POST">
-                <div class="form-group has-feedback">
-                    <input type="text" class="form-control" name="voter" placeholder="Enter Voter's ID" required>
-                    <span class="glyphicon glyphicon-user form-control-feedback"></span>
-                </div>
-                <div class="button-container">
-                    <button type="submit" class="btn btn-signin" name="login">
-                        <i class="fa fa-sign-in"></i> Sign In
-                    </button>
-                    <button type="submit" class="btn btn-result" name="result">
-                        <i class="fa fa-bar-chart"></i> Result
-                    </button>
-                </div>
-            </form>
+            <p class="login-box-msg">Manage an Election</p>
+            <div class="admin-buttons">
+                <a href="admin/index.php" class="btn btn-admin"><i class="fa fa-lock"></i> Admin</a>
+                <a href="sub/index.php" class="btn btn-subadmin"><i class="fa fa-lock"></i> Sub Admin</a>
+            </div>
 
             <?php
                 if (isset($_SESSION['error'])) {
@@ -194,21 +184,7 @@ if (isset($_SESSION['admin'])) {
                 }
             ?>
 
-            <p class="mt20">If you want to create your own election, please <a href="https://www.facebook.com/kianr873" style="color: green; text-decoration: underline;">contact us</a>.</p>
-
-            <!-- Steps for Voters -->
-            <div class="steps">
-                <h4>Steps for Voters:</h4>
-                <ul>
-                    <li>Input the given Voter's ID code.</li>
-                    <li>Click "Sign In" to verify your identity.</li>
-                    <li>After voting, you can see the real-time results.</li>
-                    <li>Re-enter your Voter's ID and click "Result" to view the results.</li>
-                </ul>
-            </div>
-
-            <p class="mt20">Manage an Election <a href="admin.php" style="color: green; text-decoration: underline;">Click here.</a>.</p>
-
+            <p class="mt20">Go <a href="index.php" style="color: green; text-decoration: underline;">Back</a>.</p>
         </div>
     </div>
 
