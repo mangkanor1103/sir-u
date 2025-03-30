@@ -1,31 +1,30 @@
 <?php
-// index.php
 session_start();
-require 'conn.php';
+include 'conn.php';
 
 $error_message = ""; // Initialize error message variable
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['election_code_submit'])) {
-  $election_code = $_POST['election_code'];
-  $sql = "SELECT id, status FROM elections WHERE election_code = ?";
-  $stmt = $conn->prepare($sql);
-  $stmt->bind_param("s", $election_code);
-  $stmt->execute();
-  $result = $stmt->get_result();
-  $election = $result->fetch_assoc();
+    $election_code = $_POST['election_code'];
+    $sql = "SELECT id, status FROM elections WHERE election_code = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $election_code);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $election = $result->fetch_assoc();
 
-  if ($election) {
-      if ($election['status'] == 1) {
-        $_SESSION['election_id'] = $election['id'];
-        header("Location: votes.php");
-        exit();
-            } else {
-          $_SESSION['election_id'] = $election['id'];
-          header("Location: home.php");
-          exit();
-      }
-  } else {
-      $error_message = "Invalid election code";
-  }
+    if ($election) {
+        if ($election['status'] == 1) {
+            $_SESSION['election_id'] = $election['id'];
+            header("Location: votes.php");
+            exit();
+        } else {
+            $_SESSION['election_id'] = $election['id'];
+            header("Location: home.php");
+            exit();
+        }
+    } else {
+        $error_message = "Invalid election code";
+    }
 }
 ?>
 

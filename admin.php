@@ -12,20 +12,32 @@ if (isset($_SESSION['admin'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mindoro State University Online Voting System</title>
     <style>
-        body {
-            background-image: url('pics/bg.jpg'); /* Replace with your actual image path */
-            background-size: cover; /* Ensures the image covers the whole screen */
-            background-position: center; /* Centers the image */
-            background-repeat: no-repeat;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            height: 100vh;
-            margin: 0;
-            padding-top: 100px; /* Adjusted to push the login box down */
-        }
+body {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+    margin: 0;
+    padding-top: 100px;
+    animation: slideshow 12s infinite linear;
+}
+
+@keyframes slideshow {
+    0% { background-image: url('pics/bg1.jpg'); }
+    24% { background-image: url('pics/bg1.jpg'); }
+    25% { background-image: url('pics/bg2.jpg'); }
+    49% { background-image: url('pics/bg2.jpg'); }
+    50% { background-image: url('pics/bg3.jpg'); }
+    74% { background-image: url('pics/bg3.jpg'); }
+    75% { background-image: url('pics/bg4.jpg'); }
+    100% { background-image: url('pics/bg4.jpg'); }
+}
+
         .login-box {
             background: rgba(0, 0, 0, 0.7);
             padding: 20px;

@@ -48,7 +48,7 @@ if (isset($_POST['voter'])) {
         }
 
         // Redirect to results page with election ID
-        header("Location: sub/result.php?election_id=" . $election_id);
+        header("Location: result.php?election_id=" . $election_id);
         exit();
     }
 } else {
