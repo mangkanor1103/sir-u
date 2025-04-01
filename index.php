@@ -88,10 +88,12 @@ if (isset($_SESSION['admin'])) {
         .btn-signin {
             background-color: #28a745; /* Green for Sign In */
             color: #fff;
+            width: calc(50% - 8px); /* Change from 100% to make room for the gap */
         }
         .btn-result {
             background-color: #007bff; /* Blue for Result */
             color: #fff;
+            width: calc(50% - 8px); /* Change from 100% to make room for the gap */
         }
         .admin-buttons {
             display: flex;
@@ -112,6 +114,7 @@ if (isset($_SESSION['admin'])) {
             display: flex;
             justify-content: space-between; /* Space between Sign In and Result buttons */
             margin-bottom: 20px; /* Space below the button container */
+            gap: 15px; /* Add this line to create space between buttons */
         }
         .steps {
             margin-top: 20px;

@@ -40,6 +40,8 @@ $result = $stmt->get_result();
     <title>Manage Partylists</title>
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
         body {
             background-color: #e8f5e9;
@@ -102,7 +104,17 @@ $result = $stmt->get_result();
             font-weight: bold;
             text-shadow: 0px 0px 8px rgba(0, 255, 204, 0.8);
         }
-
+        .btn-lg-custom {
+            padding: 10px 20px;
+            font-size: 1rem;
+            white-space: nowrap; /* Prevent text from wrapping */
+        }
+        @media (max-width: 767.98px) {
+            .btn-lg-custom {
+                width: 100%; /* Full width on small screens */
+                margin-bottom: 10px; /* Add spacing between stacked buttons */
+            }
+        }
     </style>
 </head>
 <body>
@@ -155,16 +167,6 @@ $result = $stmt->get_result();
             Manage Partylists for <?php echo $election_name; ?>
         </h2>
 
-        <div class="d-flex justify-content-between mb-3">
-            <a href="add_partylist.php" class="btn btn-success">
-                <i class="fas fa-plus"></i> Add Partylist
-            </a>
-            <div>
-                <a href="home.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Dashboard</a>
-                <a href="positions.php" class="btn btn-success">Next: Set Up Positions <i class="fas fa-arrow-right"></i></a>
-            </div>
-        </div>
-
         <p class="text-center">Here you can manage the partylists for the current election. You can add new partylists, edit existing ones, or delete them as needed.</p>
 
         <div class="table-responsive">
@@ -183,7 +185,7 @@ $result = $stmt->get_result();
                             <a href="edit_partylist.php?id=<?php echo $row['partylist_id']; ?>" class="btn btn-warning text-white">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
-                            <a href="partylist.php?delete=<?php echo $row['partylist_id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this partylist?');">
+                            <a href="partylist.php?delete=<?php echo $row['partylist_id']; ?>" class="btn btn-danger delete-btn">
                                 <i class="fas fa-trash-alt"></i> Delete
                             </a>
                         </td>
@@ -192,7 +194,52 @@ $result = $stmt->get_result();
                 </tbody>
             </table>
         </div>
+
+        <!-- Buttons Section -->
+        <div class="d-flex flex-column flex-md-row justify-content-between mt-3">
+            <!-- Add Partylist Button (Left) -->
+            <a href="add_partylist.php" class="btn btn-success btn-lg-custom mb-2 mb-md-0">
+                <i class="fas fa-plus"></i> Add Partylist
+            </a>
+
+            <!-- Grouped Buttons (Right) -->
+            <div class="d-flex flex-column flex-md-row gap-2">
+                <a href="home.php" class="btn btn-success btn-lg-custom">
+                    <i class="fas fa-home"></i> Back to Dashboard
+                </a>
+                <a href="positions.php" class="btn btn-success btn-lg-custom">
+                    Next: Set Up Positions <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
     </div>
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Add event listener to all delete buttons
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent the default link behavior
+
+                // SweetAlert2 confirmation dialog
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#dc3545',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Redirect to the delete URL if confirmed
+                        window.location.href = button.getAttribute('href');
+                    }
+                });
+            });
+        });
+    </script>
 
     <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>

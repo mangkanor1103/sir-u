@@ -108,23 +108,38 @@ if (isset($_POST['start_election'])) {
         }
 
         .step-container {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+    flex-wrap: wrap;
+    margin: 0 auto;
+    max-width: 950px;
+}
 
-        .card {
-            background-color: white;
-            border: 2px solid #2e7d32;
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
-            width: 200px;
-            animation: fadeIn 0.5s ease forwards;
-        }
+.card {
+    background-color: white;
+    border: 2px solid #2e7d32;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
+    width: 190px;
+    height: 160px; /* Setting a fixed height for all cards */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.final-step {
+    background-color: #2e7d32;
+    color: white;
+    border: none;
+    font-weight: bold;
+    width: 190px; /* Same width as other cards */
+    height: 160px; /* Same height as other cards */
+}
 
         .card:hover {
             transform: scale(1.05);
@@ -138,14 +153,17 @@ if (isset($_POST['start_election'])) {
         }
 
         .btn-primary {
-            background-color: #2e7d32;
-            border: none;
-            transition: background-color 0.3s ease;
-        }
+    background-color: #2e7d32;
+    border: none;
+    transition: background-color 0.3s ease;
+    padding: 10px 20px; /* Increased padding */
+    font-size: 1.1rem; /* Increased font size */
+    font-weight: 500; /* Added some font weight */
+}
 
-        .btn-primary:hover {
-            background-color: #1b5e20;
-        }
+.btn-primary:hover {
+    background-color: #1b5e20;
+}
 
         .final-step {
             background-color: #2e7d32;
@@ -215,49 +233,45 @@ if (isset($_POST['start_election'])) {
         </div>
 
         <!-- Step-by-step horizontal layout -->
-        <div class="step-container mt-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Step 1: Positions</h5>
-                    <p class="card-text">Set up positions.</p>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Step 2: Partylists</h5>
-                    <p class="card-text">Set up Partylists.</p>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Step 3: Candidates</h5>
-                    <p class="card-text">Set up candidates.</p>
-                </div>
-            </div>
-            <div class="card final-step">
-                <div class="card-body">
-                    <h5 class="card-title">Final Step: Voters</h5>
-                    <p class="card-text">Set up voters.</p>
-                </ </div>
-            </div>
-        </div>
-
-        <!-- Start Election Button -->
-        <div class="row mt-4">
-            <div class="col-12 text-center">
-                <form method="POST" action="">
-                    <button type="submit" name="start_election" class="btn btn-primary">Start Election</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Next Button at the Bottom -->
-        <div class="row mt-4">
-            <div class="col-12 text-center">
-                <a href="partylist.php" class="btn btn-primary">Next: Set Up Partylists</a>
-            </div>
+        <!-- Step-by-step horizontal layout -->
+<div class="step-container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Step 1: Partylists</h5>
+            <p class="card-text">Set up partylists.</p>
         </div>
     </div>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Step 2: Positions</h5>
+            <p class="card-text">Set up positions.</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Step 3: Candidates</h5>
+            <p class="card-text">Set up candidates.</p>
+        </div>
+    </div>
+    <div class="card final-step">
+        <div class="card-body">
+            <h5 class="card-title">Final Step: Voters</h5>
+            <p class="card-text">Set up voters.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Buttons below the steps -->
+<div class="row mt-5">
+    <div class="col-12 text-center">
+        <div class="d-flex justify-content-center gap-4">
+            <form method="POST" action="">
+                <button type="submit" name="start_election" class="btn btn-primary btn-lg">Start Election</button>
+            </form>
+            <a href="partylist.php" class="btn btn-primary btn-lg">Set Up Partylists</a>
+        </div>
+    </div>
+</div>
 
     <!-- Link to offline Bootstrap JS -->
     <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
