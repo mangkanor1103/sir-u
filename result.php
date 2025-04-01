@@ -1,57 +1,17 @@
-
 <?php
 session_start();
-require 'conn.php';
+include 'includes/conn.php';
 
+// Check if election_id is set in the session
 if (!isset($_SESSION['election_id'])) {
-    header("Location: index.php");
+    // Redirect to the login page or an error page
+    header("Location: index.php"); // Adjust the path as necessary
     exit();
 }
-if (isset($_POST['back'])) {
-    unset($_SESSION['election_id']);
-    header("Location: ../index.php");
-    exit();
-}
+
 $election_id = $_SESSION['election_id'];
 
-// Handle ending an election
-if (isset($_POST['end_election'])) {
-    $conn->begin_transaction();
-
-    try {
-        $result = $conn->query("SELECT name FROM elections WHERE id = '$election_id'");
-        if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-            $election_title = $row['name'];
-
-            $history_sql = "INSERT INTO history (election_title, deleted_at, candidates, voters, votes, positions, partylists)
-                            VALUES ('$election_title', NOW(),
-                                (SELECT GROUP_CONCAT(CONCAT(id, '|', position_id, '|', firstname, '|', lastname, '|', photo, '|', platform, '|', partylist_id) SEPARATOR ';') FROM candidates WHERE election_id = '$election_id'),
-                                (SELECT GROUP_CONCAT(CONCAT(id, '|', voters_id) SEPARATOR ';') FROM voters WHERE election_id = '$election_id'),
-                                (SELECT GROUP_CONCAT(CONCAT(id, '|', voters_id, '|', candidate_id, '|', position_id, '|', timestamp) SEPARATOR ';') FROM votes WHERE election_id = '$election_id'),
-                                (SELECT GROUP_CONCAT(CONCAT(position_id, '|', description, '|', max_vote) SEPARATOR ';') FROM positions WHERE election_id = '$election_id'),
-                                (SELECT GROUP_CONCAT(CONCAT(partylist_id, '|', name) SEPARATOR ';') FROM partylists WHERE election_id = '$election_id'))";
-            $conn->query($history_sql) or die($conn->error);
-        }
-
-        $conn->query("DELETE FROM votes WHERE election_id = '$election_id'") or die($conn->error);
-        $conn->query("DELETE FROM candidates WHERE election_id = '$election_id'") or die($conn->error);
-        $conn->query("DELETE FROM voters WHERE election_id = '$election_id'") or die($conn->error);
-        $conn->query("DELETE FROM positions WHERE election_id = '$election_id'") or die($conn->error);
-        $conn->query("DELETE FROM partylists WHERE election_id = '$election_id'") or die($conn->error);
-        $conn->query("DELETE FROM elections WHERE id = '$election_id'") or die($conn->error);
-
-        $conn->commit();
-        $_SESSION['success'] = 'Election has ended and all related records have been archived.';
-    } catch (Exception $e) {
-        $conn->rollback();
-        $_SESSION['error'] = "Failed to end election: " . $e->getMessage();
-    }
-
-    header('location: ../index.php'); // Redirect to index.php after ending the election
-    exit();
-}
-
+// Function to get votes by position
 function getVotesByPosition($election_id) {
     global $conn;
     $sql = "
@@ -72,6 +32,7 @@ function getVotesByPosition($election_id) {
     return $stmt->get_result();
 }
 
+// Function to get total votes by position
 function getTotalVotesByPosition($position_id, $election_id) {
     global $conn;
     $sql = "SELECT COUNT(v.id) AS total FROM votes v
@@ -81,9 +42,10 @@ function getTotalVotesByPosition($position_id, $election_id) {
     $stmt->bind_param("ii", $position_id, $election_id);
     $stmt->execute();
     $result = $stmt->get_result()->fetch_assoc();
- return $result['total'] ?? 0;
+    return $result['total'] ?? 0;
 }
 
+// Fetch results
 $results = getVotesByPosition($election_id);
 $positionsData = [];
 while ($row = $results->fetch_assoc()) {
@@ -97,7 +59,6 @@ while ($row = $results->fetch_assoc()) {
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,7 +67,6 @@ while ($row = $results->fetch_assoc()) {
     <title>Election Results</title>
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
@@ -141,18 +101,6 @@ while ($row = $results->fetch_assoc()) {
         .navbar-nav .nav-link:hover {
             color: #00ffcc !important;
         }
-        .icon {
-            margin-right: 5px;
-        }
-        #countdown {
-            background-color: #28a745;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.2em;
-        }
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -170,17 +118,9 @@ while ($row = $results->fetch_assoc()) {
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <form method="POST" action="">
-                        <button type="submit" name="back" class="btn btn-danger">
-                                <i class="fas fa-sign-out-alt icon"></i>Logout
-                            </button>
-                        </form>
-                    </li>
-                    <li class="nav-item">
-                        <form method="POST" action="" onsubmit="return confirmEndElection();">
-                            <input type="hidden" name="election_id" value="<?php echo $election_id; ?>">
-                            <button type="submit" name="end_election" class="btn btn-danger">
-                                <i class="fas fa-stop-circle icon"></i>End Election
+                        <form method="POST" action="logout.php"> <!-- Link to logout.php -->
+                            <button type="submit" name="logout" class="btn btn-danger">
+                                <i class="fas fa-sign-out-alt"></i> Logout
                             </button>
                         </form>
                     </li>
@@ -191,9 +131,6 @@ while ($row = $results->fetch_assoc()) {
 
     <div class="container">
         <h1 class="text-center">Election Results</h1>
-
-        <!-- Countdown Timer -->
-        <div id="countdown">The page will refresh in <span id="time">5</span> seconds...</div>
 
         <?php foreach ($positionsData as $position => $candidates): ?>
             <h2 class="mt-4"><?php echo htmlspecialchars($position); ?></h2>
@@ -220,23 +157,7 @@ while ($row = $results->fetch_assoc()) {
         <?php endforeach; ?>
     </div>
 
-    <script>
-        let countdownTime = 5; // Set countdown time in seconds
-        const timeDisplay = document.getElementById('time');
-
-        const countdownInterval = setInterval(() => {
-            countdownTime--;
-            timeDisplay.textContent = countdownTime;
-
-            if (countdownTime <= 0) {
-                clearInterval(countdownInterval);
-                location.reload(); // Refresh the page when countdown reaches zero
-            }
-        }, 1000); // Update every second
-
-        function confirmEndElection() {
-            return confirm("Are you sure you want to end the election? This action cannot be undone.");
-        }
-    </script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
