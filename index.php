@@ -173,14 +173,8 @@ body {
 </head>
 <body>
     <div class="login-box">
-        <div class="logo-left">
-            <img src="pics/Picture5.jpg" alt="University Logo 1">
-        </div>
-        <div class="logo-right">
-            <img src="pics/logo.png" alt="University Logo 2">
-        </div>
         <div class="login-logo">
-            <b>Mindoro State University Online Voting System</b>
+        <img src="pics/logo.png" alt="University Logo 2">
         </div>
         <div class="login-box-body">
             <p class="login-box-msg">Sign in to start your session</p>
@@ -215,9 +209,6 @@ body {
                 <ul>
                     <li>Input the given Voter's ID code.</li>
                     <li>Click "Sign In" to verify your identity.</li>
-                    <li>After voting, you can see the real-time results.</li>
-                    <li>Re-enter your Voter's ID and click "Result" to view the results.</li>
-                </ul>
             </div>
 
             <p class="mt20">Manage an Election <a href="admin.php" style="color: green; text-decoration: underline;">Click here.</a>.</p>
