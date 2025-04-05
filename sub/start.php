@@ -77,177 +77,71 @@ if (isset($_POST['start_election'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        body {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            font-family: 'Poppins', sans-serif;
-            transition: background-color 0.5s ease;
-        }
-
-        .navbar-nav .nav-link {
-            color: #e0e0e0;
-            font-size: 16px;
-            transition: color 0.3s ease, transform 0.3s ease;
-            position: relative;
-            padding: 10px 15px;
-        }
-
-        .navbar-nav .nav-link:hover {
-            color: #00ffcc;
-            transform: translateY(-2px);
-        }
-
-        .navbar-nav .nav-link.active {
-            color: #00ffcc;
-            font-weight: bold;
-            text-shadow: 0px 0px 8px rgba(0, 255, 204, 0.8);
-        }
-
-        .step-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 25px;
-    flex-wrap: wrap;
-    margin: 0 auto;
-    max-width: 950px;
-}
-
-.card {
-    background-color: white;
-    border: 2px solid #2e7d32;
-    border-radius: 10px;
-    padding: 15px;
-    text-align: center;
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
-    width: 190px;
-    height: 160px; /* Setting a fixed height for all cards */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    animation: fadeIn 0.5s ease forwards;
-}
-
-.final-step {
-    background-color: #2e7d32;
-    color: white;
-    border: none;
-    font-weight: bold;
-    width: 190px; /* Same width as other cards */
-    height: 160px; /* Same height as other cards */
-}
-
-        .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .card-title {
-            font-weight: bold;
-            font-size: 1.2em;
-            margin-bottom: 10px;
-        }
-
-        .btn-primary {
-    background-color: #2e7d32;
-    border: none;
-    transition: background-color 0.3s ease;
-    padding: 10px 20px; /* Increased padding */
-    font-size: 1.1rem; /* Increased font size */
-    font-weight: 500; /* Added some font weight */
-}
-
-.btn-primary:hover {
-    background-color: #1b5e20;
-}
-
-        .final-step {
-            background-color: #2e7d32;
-            color: white;
-            border: none;
-            font-weight: bold;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-    </style>
+    <title>Start Election</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <!-- Navigation bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="home.php">Election Dashboard</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'home.php' ? 'active' : ''; ?>" href="home.php">
-                            <i class="fas fa-home"></i> Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'partylist.php' ? 'active' : ''; ?>" href="partylist.php">
-                            <i class="fas fa-users"></i> Partylist
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'positions.php' ? 'active' : ''; ?>" href="positions.php">
-                            <i class="fas fa-user-tie"></i> Positions
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'candidates.php' ? 'active' : ''; ?>" href="candidates.php">
-                            <i class="fas fa-user-tie"></i> Candidates
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'voters.php' ? 'active' : ''; ?>" href="voters.php">
-                            <i class="fas fa-id-card"></i> Voters
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'start.php' ? 'active' : ''; ?>" href="start.php">
-                            <i class="fas fa-id-card"></i> Start
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-danger text-white fw-bold" href="../index.php">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </a>
-                    </li>
-                </ul>
-            </div>
+<body class="bg-green-50 text-green-900 font-sans">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-green-700 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
+            <ul class="flex space-x-6">
+                <li><a href="home.php" class="hover:text-green-300 <?php echo $current_page == 'home.php' ? 'font-bold underline' : ''; ?>">Home</a></li>
+                <li><a href="partylist.php" class="hover:text-green-300 <?php echo $current_page == 'partylist.php' ? 'font-bold underline' : ''; ?>">Partylist</a></li>
+                <li><a href="positions.php" class="hover:text-green-300 <?php echo $current_page == 'positions.php' ? 'font-bold underline' : ''; ?>">Positions</a></li>
+                <li><a href="candidates.php" class="hover:text-green-300 <?php echo $current_page == 'candidates.php' ? 'font-bold underline' : ''; ?>">Candidates</a></li>
+                <li><a href="voters.php" class="hover:text-green-300 <?php echo $current_page == 'voters.php' ? 'font-bold underline' : ''; ?>">Voters</a></li>
+                <li><a href="start.php" class="hover:text-green-300 <?php echo $current_page == 'start.php' ? 'font-bold underline' : ''; ?>">Start</a></li>
+                <li>
+                    <a href="#" 
+                       class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" 
+                       onclick="openLogoutModal(event);">
+                       Logout
+                    </a>
+                </li>
+            </ul>
         </div>
     </nav>
 
-    <!-- Main content -->
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h1>Let's Start the Election</h1>
-                <p class="lead">Current Election: <?php echo htmlspecialchars($election_name); ?></p>
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold text-green-700 mb-4">Confirm Logout</h2>
+            <p class="text-gray-700 mb-6">Are you sure you want to logout?</p>
+            <div class="flex justify-end space-x-4">
+                <button onclick="closeLogoutModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
+                <a href="../index.php" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Logout</a>
             </div>
         </div>
-<!-- Buttons below the steps -->
-<div class="row mt-5">
-    <div class="col-12 text-center">
-        <div class="d-flex justify-content-center gap-4">
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto mt-10">
+        <h2 class="text-3xl font-bold text-center mb-6">Start the Election</h2>
+        <p class="text-center text-lg mb-8">Current Election: <span class="font-semibold"><?php echo htmlspecialchars($election_name); ?></span></p>
+
+        <!-- Start Election Button -->
+        <div class="flex justify-center">
             <form method="POST" action="">
-                <button type="submit" name="start_election" class="btn btn-primary btn-lg">Start Election</button>
+                <button type="submit" name="start_election" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg text-lg font-semibold">
+                    Start Election
+                </button>
             </form>
         </div>
     </div>
-</div>
 
-    <!-- Link to offline Bootstrap JS -->
-    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Function to open the logout confirmation modal
+        function openLogoutModal(event) {
+            event.preventDefault(); // Prevent the default link behavior
+            document.getElementById('logoutModal').classList.remove('hidden');
+        }
+
+        // Function to close the logout confirmation modal
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.add('hidden');
+        }
+    </script>
 </body>
 </html>

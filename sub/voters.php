@@ -165,225 +165,67 @@ if ($row = $result->fetch_assoc()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generate Voter Codes</title>
-    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
-
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Poppins', sans-serif;
-            color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin-top: 50px;
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 128, 0, 0.5);
-        }
-        .form-control {
-            background: #f0f0f0;
-            border: 1px solid #28a745;
-            color: #333;
-        }
-        .btn-custom {
-            background: #28a745;
-            color: white;
-            font-weight: bold;
-            border: none;
-            width: 100%;
-        }
-        .btn-custom:hover {
-            background: #218838;
-        }
-        .table thead {
-            background: #28a745;
-            color: white;
-        }
-        .table tbody tr:hover {
-            background: #f1f1f1;
-        }
-        .navbar-nav .nav-link {
-            font-family: 'Orbitron', sans-serif;
-            color: #e0e0e0;
-            font-size: 16px;
-            transition: color 0.3s ease, transform 0.3s ease;
-            position: relative;
-            padding: 10px 15px;
-        }
-
-        /* Hover Effect */
-        .navbar-nav .nav-link:hover {
-            color: #00ffcc;
-            transform: translateY(-2px); /* Slight lift effect */
-        }
-
-        /* Active Page Indicator */
-        .navbar-nav .nav-link.active {
-            color: #00ffcc;
-            font-weight: bold;
-            text-shadow: 0px 0px 8px rgba(0, 255, 204, 0.8);
-        }
-
-        /* Underline Animation */
-        .navbar-nav .nav-link::after {
-            content: "";
-            display: block;
-            width: 0;
-            height: 2px;
-            background: #00ffcc;
-            transition: width 0.3s ease;
-            margin-top: 3px;
-        }
-
-        .navbar-nav .nav-link:hover::after {
-            width: 100%;
-        }
-
-        /* Icons Styling */
-        .navbar-nav .nav-link i {
-            margin-right: 8px;
-        }
-
-        /* Pagination styling */
-        .pagination .page-item.active .page-link {
-            background-color: #28a745;
-            border-color: #28a745;
-        }
-        .pagination .page-link {
-            color: #28a745;
-        }
-        .pagination .page-link:hover {
-            color: #218838;
-        }
-
-        /* Code format styling */
-        .code-format {
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        /* Alert styling */
-        .alert-success {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-
-        /* Form card styling */
-        .form-card {
-            border: 1px solid #28a745;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            background-color: #f8f9fa;
-        }
-
-        .form-card h4 {
-            color: #28a745;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #28a745;
-            padding-bottom: 10px;
-        }
-
-        /* Preview styling */
-        .code-preview {
-            background-color: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            margin-top: 10px;
-            text-align: center;
-            font-size: 18px;
-            letter-spacing: 2px;
-        }
-    </style>
+    <title>Voters Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
-    <!-- Navigation bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="home.php">Election Dashboard</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <!-- Home -->
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'home.php' ? 'active' : ''; ?>" href="home.php">
-                            <i class="fas fa-home"></i> Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'partylist.php' ? 'active' : ''; ?>" href="partylist.php">
-                            <i class="fas fa-users"></i> Partylist
-                        </a>
-                    </li>
-                    <!-- Positions -->
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'positions.php' ? 'active' : ''; ?>" href="positions.php">
-                            <i class="fas fa-user-tie"></i> Positions
-                        </a>
-                    </li>
-                    <!-- Candidates -->
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'candidates.php' ? 'active' : ''; ?>" href="candidates.php">
-                            <i class="fas fa-users"></i> Candidates
-                        </a>
-                    </li>
-                    <!-- Voters -->
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'voters.php' ? 'active' : ''; ?>" href="voters.php">
-                            <i class="fas fa-id-card"></i> Voters
-                        </a>
-                    </li>
-                    <!-- Back to Login -->
-<li class="nav-item">
-    <a class="btn btn-danger text-white fw-bold" href="../index.php">
-        <i class="fas fa-id-card"></i> Logout
-    </a>
-</li>
+<body class="bg-green-50 text-green-900 font-sans">
 
-                </ul>
-            </div>
+    <!-- Navigation Bar -->
+    <nav class="bg-green-700 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
+            <ul class="flex space-x-6">
+                <li><a href="home.php" class="hover:text-green-300 <?php echo $current_page == 'home.php' ? 'font-bold underline' : ''; ?>">Home</a></li>
+                <li><a href="partylist.php" class="hover:text-green-300 <?php echo $current_page == 'partylist.php' ? 'font-bold underline' : ''; ?>">Partylist</a></li>
+                <li><a href="positions.php" class="hover:text-green-300 <?php echo $current_page == 'positions.php' ? 'font-bold underline' : ''; ?>">Positions</a></li>
+                <li><a href="candidates.php" class="hover:text-green-300 <?php echo $current_page == 'candidates.php' ? 'font-bold underline' : ''; ?>">Candidates</a></li>
+                <li><a href="voters.php" class="hover:text-green-300 <?php echo $current_page == 'voters.php' ? 'font-bold underline' : ''; ?>">Voters</a></li>
+                <li><a href="start.php" class="hover:text-green-300 <?php echo $current_page == 'start.php' ? 'font-bold underline' : ''; ?>">Start</a></li>
+                <li>
+                    <a href="#" 
+                       class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" 
+                       onclick="openLogoutModal(event);">
+                       Logout
+                    </a>
+                </li>
+            </ul>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="header text-center mb-4">
-            <h1>Generate Voter Codes</h1>
-            <h5 class="text-muted">Election: <?php echo htmlspecialchars($election_name); ?></h5>
-            <a href="candidates.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Candidates</a>
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold text-green-700 mb-4">Confirm Logout</h2>
+            <p class="text-gray-700 mb-6">Are you sure you want to logout?</p>
+            <div class="flex justify-end space-x-4">
+                <button onclick="closeLogoutModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
+                <a href="../index.php" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Logout</a>
+            </div>
         </div>
+    </div>
 
-        <?php if (isset($_GET['generated']) && $_GET['generated'] == 'true'): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong><i class="fas fa-check-circle"></i> Success!</strong> Voter codes have been generated successfully.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <?php endif; ?>
+    <!-- Main Content -->
+    <div class="container mx-auto mt-10">
+        <h2 class="text-3xl font-bold text-center mb-6">Manage Voters</h2>
+        <p class="text-center text-lg mb-8">Generate, view, or delete voter codes for the current election.</p>
 
-        <div class="form-card">
-            <h4><i class="fas fa-key"></i> Generate Voter Codes</h4>
-            <form method="POST" action="" id="generateForm">
+        <!-- Generate Voter Codes Form -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+            <h3 class="text-2xl font-bold mb-4">Generate Voter Codes</h3>
+            <form method="POST" action="">
                 <input type="hidden" name="action" value="generate_voter_codes">
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="prefix" class="form-label">Prefix (Optional)</label>
-                        <input type="text" class="form-control" id="prefix" name="prefix" placeholder="e.g., VOTE" maxlength="5" oninput="updatePreview()">
-                        <small class="text-muted">Leave blank to use election name abbreviation</small>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Prefix -->
+                    <div>
+                        <label for="prefix" class="block text-sm font-medium text-gray-700">Prefix (Optional)</label>
+                        <input type="text" id="prefix" name="prefix" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" maxlength="5" placeholder="e.g., VOTE">
+                        <small class="text-gray-500">Leave blank to use election name abbreviation</small>
                     </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="length" class="form-label">Random Code Length</label>
-                        <select class="form-control" id="length" name="length" onchange="updatePreview()">
+                    <!-- Random Code Length -->
+                    <div>
+                        <label for="length" class="block text-sm font-medium text-gray-700">Random Code Length</label>
+                        <select id="length" name="length" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50">
                             <option value="4">4 characters</option>
                             <option value="6" selected>6 characters</option>
                             <option value="8">8 characters</option>
@@ -391,266 +233,88 @@ if ($row = $result->fetch_assoc()) {
                         </select>
                     </div>
                 </div>
-
-                <div class="mb-3">
-                    <label for="count" class="form-label">Number of Codes to Generate</label>
-                    <input type="number" class="form-control" id="count" name="count" min="1" max="1000" value="10" required>
+                <!-- Number of Codes -->
+                <div class="mt-6">
+                    <label for="count" class="block text-sm font-medium text-gray-700">Number of Codes to Generate</label>
+                    <input type="number" id="count" name="count" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" min="1" max="1000" value="10" required>
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Code Format Preview:</label>
-                    <div class="code-preview" id="codePreview">PREFIX123456</div>
+                <div class="mt-6 text-center">
+                    <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg">Generate Codes</button>
                 </div>
-
-                <button type="submit" class="btn btn-custom"><i class="fas fa-cog"></i> Generate Codes</button>
             </form>
         </div>
 
-        <div class="d-flex gap-2 mt-3 mb-4">
-            <form method="POST" action="" onsubmit="return confirmDelete()">
-                <input type="hidden" name="action" value="clear_voter_codes">
-                <!-- Delete Button -->
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                    <i class="fas fa-trash"></i> Clear All Codes
-                </button>
-            </form>
-
-            <button onclick="printTable()" class="btn btn-primary">
-                <i class="fas fa-print"></i> Print Codes
-            </button>
-
-            <button onclick="exportToCSV()" class="btn btn-success">
-                <i class="fas fa-file-csv"></i> Export to CSV
-            </button>
-        </div>
-
-        <h2><i class="fas fa-list"></i> Generated Voter Codes</h2>
-        <div class="table-responsive">
-            <table class="table table-bordered" id="voterCodesTable">
-                <thead>
+        <!-- Voter Codes List -->
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h3 class="text-2xl font-bold mb-4">Generated Voter Codes</h3>
+            <table class="table-auto w-full border-collapse border border-gray-300">
+                <thead class="bg-green-700 text-white">
                     <tr>
-                        <th>Voter Code</th>
+                        <th class="border border-gray-300 px-4 py-2">Voter Code</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if ($voters->num_rows > 0): ?>
                         <?php while ($row = $voters->fetch_assoc()): ?>
-                        <tr>
-                            <td class="code-format"><?php echo $row['voters_id']; ?></td>
+                        <tr class="hover:bg-green-100">
+                            <td class="border border-gray-300 px-4 py-2"><?php echo $row['voters_id']; ?></td>
                         </tr>
                         <?php endwhile; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="2" class="text-center">No voter codes generated yet.</td>
+                            <td colspan="1" class="text-center text-gray-500">No voter codes generated yet.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
 
-        <!-- Pagination Links -->
-        <?php if ($totalPages > 0): ?>
-        <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
+        <!-- Pagination -->
+        <?php if ($totalPages > 1): ?>
+        <div class="mt-6 flex justify-center">
+            <nav class="inline-flex space-x-2">
                 <?php if ($page > 1): ?>
-                    <li class="page-item">
-                        <a class="page-link" href="?page=1" aria-label="First">
-                            <span aria-hidden="true">&laquo;&laquo;</span>
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page=<?php echo $page-1; ?>" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
+                    <a href="?page=1" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded">First</a>
+                    <a href="?page=<?php echo $page - 1; ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded">Previous</a>
                 <?php endif; ?>
-
-                <?php
-                // Show limited page numbers with current page in the middle
-                $startPage = max(1, $page - 2);
-                $endPage = min($totalPages, $page + 2);
-
-                // Always show first page
-                if ($startPage > 1) {
-                    echo '<li class="page-item"><a class="page-link" href="?page=1">1</a></li>';
-                    if ($startPage > 2) {
-                        echo '<li class="page-item disabled"><a class="page-link">...</a></li>';
-                    }
-                }
-
-                // Display page numbers
-                for ($i = $startPage; $i <= $endPage; $i++) {
-                    echo '<li class="page-item ' . ($i == $page ? 'active' : '') . '">
-                            <a class="page-link" href="?page=' . $i . '">' . $i . '</a>
-                          </li>';
-                }
-
-                // Always show last page
-                if ($endPage < $totalPages) {
-                    if ($endPage < $totalPages - 1) {
-                        echo '<li class="page-item disabled"><a class="page-link">...</a></li>';
-                    }
-                    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '">' . $totalPages . '</a></li>';
-                }
-                ?>
-
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <a href="?page=<?php echo $i; ?>" class="px-4 py-2 <?php echo $i == $page ? 'bg-green-700 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-800'; ?> rounded"><?php echo $i; ?></a>
+                <?php endfor; ?>
                 <?php if ($page < $totalPages): ?>
-                    <li class="page-item">
-                        <a class="page-link" href="?page=<?php echo $page+1; ?>" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page=<?php echo $totalPages; ?>" aria-label="Last">
-                            <span aria-hidden="true">&raquo;&raquo;</span>
-                        </a>
-                    </li>
+                    <a href="?page=<?php echo $page + 1; ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded">Next</a>
+                    <a href="?page=<?php echo $totalPages; ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded">Last</a>
                 <?php endif; ?>
-            </ul>
-        </nav>
+            </nav>
+        </div>
         <?php endif; ?>
-
-        <div class="text-center mt-3 mb-4">
-            <p>Showing <?php echo min(($page-1)*$limit+1, $totalVoters); ?> to <?php echo min($page*$limit, $totalVoters); ?> of <?php echo $totalVoters; ?> entries</p>
-        </div>
     </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="deleteModalLabel"><i class="fas fa-exclamation-triangle"></i> Confirm Deletion</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <p>Are you sure you want to delete all voter codes?</p>
-                    <p class="text-danger"><strong>This action cannot be undone!</strong></p>
-                    <p>All votes and feedback associated with these codes will also be deleted.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form method="POST" action="">
-                        <input type="hidden" name="action" value="clear_voter_codes">
-                        <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Yes, Delete All</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap JS (Offline) -->
-    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Function to update the code preview
-        function updatePreview() {
-            let prefix = document.getElementById('prefix').value.toUpperCase();
-            let length = document.getElementById('length').value;
-            let randomPart = generateRandomPreview(length);
-
-            document.getElementById('codePreview').innerText = prefix + randomPart;
-        }
-
-        // Function to generate a random preview string
-        function generateRandomPreview(length) {
-            const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            let result = '';
-            for (let i = 0; i < length; i++) {
-                result += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            return result;
-        }
-
-        // Function to print the table
-        function printTable() {
-            let printWindow = window.open('', '', 'width=800,height=600');
-            printWindow.document.write('<html><head><title>Print Voter Codes</title>');
-            printWindow.document.write('<style>');
-            printWindow.document.write(`
-                body { font-family: Arial, sans-serif; }
-                h2 { color: #28a745; text-align: center; margin-bottom: 20px; }
-                table { width: 100%; border-collapse: collapse; }
-                th { background-color: #28a745; color: white; padding: 10px; text-align: left; }
-                td { padding: 8px; border: 1px solid #ddd; }
-                .code-format { font-family: 'Courier New', monospace; font-weight: bold; letter-spacing: 1px; }
-                .election-info { text-align: center; margin-bottom: 10px; color: #666; }
-            `);
-            printWindow.document.write('</style></head><body>');
-            printWindow.document.write('<h2>Generated Voter Codes</h2>');
-            printWindow.document.write('<div class="election-info">Election: <?php echo htmlspecialchars($election_name); ?></div>');
-
-            // Create a new table for printing
-            printWindow.document.write('<table>');
-            printWindow.document.write('<thead><tr><th>ID</th><th>Voter Code</th></tr></thead><tbody>');
-
-            // Get all rows from the current table
-            const rows = document.querySelectorAll('#voterCodesTable tbody tr');
-            rows.forEach(row => {
-                printWindow.document.write('<tr>');
-                const cells = row.querySelectorAll('td');
-                cells.forEach(cell => {
-                    if (cell.classList.contains('code-format')) {
-                        printWindow.document.write(`<td class="code-format">${cell.innerText}</td>`);
-                    } else {
-                        printWindow.document.write(`<td>${cell.innerText}</td>`);
-                    }
-                });
-                printWindow.document.write('</tr>');
+        // SweetAlert2 for delete confirmation
+        function confirmDelete() {
+            return Swal.fire({
+                title: 'Are you sure?',
+                text: "This action cannot be undone!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete all!'
+            }).then((result) => {
+                return result.isConfirmed;
             });
-
-            printWindow.document.write('</tbody></table>');
-            printWindow.document.write('<div style="text-align: center; margin-top: 20px; font-size: 12px;">Generated on: ' + new Date().toLocaleString() + '</div>');
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.print();
         }
 
-        // Function to export table to CSV
-        function exportToCSV() {
-            const table = document.getElementById('voterCodesTable');
-            let csv = [];
-            const rows = table.querySelectorAll('tr');
-
-            for (let i = 0; i < rows.length; i++) {
-                const row = [], cols = rows[i].querySelectorAll('td, th');
-
-                for (let j = 0; j < cols.length; j++) {
-                    // Escape double quotes with double quotes
-                    let data = cols[j].innerText.replace(/"/g, '""');
-                    // Add quotes around the field
-                    row.push('"' + data + '"');
-                }
-                csv.push(row.join(','));
-            }
-
-            // Download CSV file
-            downloadCSV(csv.join('\n'), 'voter_codes_<?php echo date("Y-m-d"); ?>.csv');
+        // Function to open the logout confirmation modal
+        function openLogoutModal(event) {
+            event.preventDefault(); // Prevent the default link behavior
+            document.getElementById('logoutModal').classList.remove('hidden');
         }
 
-        function downloadCSV(csv, filename) {
-            const csvFile = new Blob([csv], {type: 'text/csv'});
-            const downloadLink = document.createElement('a');
-
-            // Create a download link
-            downloadLink.download = filename;
-            downloadLink.href = window.URL.createObjectURL(csvFile);
-            downloadLink.style.display = 'none';
-
-            // Add the link to the DOM
-            document.body.appendChild(downloadLink);
-
-            // Click the link
-            downloadLink.click();
-
-            // Remove the link
-            document.body.removeChild(downloadLink);
+        // Function to close the logout confirmation modal
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.add('hidden');
         }
-
-        // Initialize the preview when the page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            updatePreview();
-        });
     </script>
 </body>
 </html>

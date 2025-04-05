@@ -162,286 +162,192 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Candidates Management</title>
-    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        body {
-            background-color: #f8fafc;
-        }
-        .navbar-nav .nav-link {
-            font-family: 'Orbitron', sans-serif;
-            color: #e0e0e0;
-            transition: color 0.3s ease, transform 0.3s ease;
-            padding: 10px 15px;
-        }
-        .navbar-nav .nav-link:hover {
-            color: #00ffcc;
-            transform: translateY(-2px);
-        }
-        .navbar-nav .nav-link.active {
-            color: #00ffcc;
-            font-weight: bold;
-            text-shadow: 0px 0px 8px rgba(0, 255, 204, 0.8);
-        }
-        .form-control:disabled {
-            background-color: #e9ecef;
-            opacity: 0.7;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
-    <!-- Navigation Bar -->
-      <!-- Navigation bar -->
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="home.php">Election Dashboard</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'home.php' ? 'active' : ''; ?>" href="home.php">
-                            <i class="fas fa-home"></i> Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'partylist.php' ? 'active' : ''; ?>" href="partylist.php">
-                            <i class="fas fa-users"></i> Partylist
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'positions.php' ? 'active' : ''; ?>" href="positions.php">
-                            <i class="fas fa-users"></i> Positions
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'candidates.php' ? 'active' : ''; ?>" href="candidates.php">
-                            <i class="fas fa-user-tie"></i> Candidates
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'voters.php' ? 'active' : ''; ?>" href="voters.php">
-                            <i class="fas fa-id-card"></i> Voters
-                        </a>
-                    </li>
-                                        <!-- Back to Login -->
-<li class="nav-item">
-    <a class="btn btn-danger text-white fw-bold" href="../index.php">
-        <i class="fas fa-id-card"></i> Logout
-    </a>
-</li>
+<body class="bg-green-50 text-green-900 font-sans">
 
-                </ul>
-            </div>
+    <!-- Navigation Bar -->
+    <nav class="bg-green-700 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
+            <ul class="flex space-x-6">
+                <li><a href="home.php" class="hover:text-green-300 <?php echo $current_page == 'home.php' ? 'font-bold underline' : ''; ?>">Home</a></li>
+                <li><a href="partylist.php" class="hover:text-green-300 <?php echo $current_page == 'partylist.php' ? 'font-bold underline' : ''; ?>">Partylist</a></li>
+                <li><a href="positions.php" class="hover:text-green-300 <?php echo $current_page == 'positions.php' ? 'font-bold underline' : ''; ?>">Positions</a></li>
+                <li><a href="candidates.php" class="hover:text-green-300 <?php echo $current_page == 'candidates.php' ? 'font-bold underline' : ''; ?>">Candidates</a></li>
+                <li><a href="voters.php" class="hover:text-green-300 <?php echo $current_page == 'voters.php' ? 'font-bold underline' : ''; ?>">Voters</a></li>
+                <li><a href="start.php" class="hover:text-green-300 <?php echo $current_page == 'start.php' ? 'font-bold underline' : ''; ?>">Start</a></li>
+                <li>
+                    <a href="#" 
+                       class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" 
+                       onclick="openLogoutModal(event);">
+                       Logout
+                    </a>
+                </li>
+            </ul>
         </div>
     </nav>
 
-    <div class="container mt-5">
-        <div class="header text-center mb-4">
-            <h1>Candidate Management</h1>
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold text-green-700 mb-4">Confirm Logout</h2>
+            <p class="text-gray-700 mb-6">Are you sure you want to logout?</p>
+            <div class="flex justify-end space-x-4">
+                <button onclick="closeLogoutModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
+                <a href="../index.php" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Logout</a>
+            </div>
         </div>
-        <div class="d-flex justify-content-between">
-        <a href="positions.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Positions</a>
-        <a href="voters.php" class="btn btn-success">Next: Set Up Voters <i class="fas fa-arrow-right"></i></a>
     </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto mt-10">
+        <h2 class="text-3xl font-bold text-center mb-6">Manage Candidates</h2>
+        <p class="text-center text-lg mb-8">Add, edit, or delete candidates for the current election.</p>
 
         <!-- Create Candidate Form -->
-        <div class="card p-4 mb-4 bg-light border-success">
-            <h2 class="text-success">Add New Candidate</h2>
+        <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+            <h3 class="text-2xl font-bold mb-4">Add New Candidate</h3>
             <form method="POST" action="" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="create_candidate">
-
-                <div class="row">
-                    <!-- Basic Information -->
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label for="position" class="text-success">Position</label>
-                            <select class="form-control border-success" name="position_id" required>
-                                <option value="">Select Position</option>
-                                <?php while ($position = $positions->fetch_assoc()): ?>
-                                    <option value="<?php echo $position['position_id']; ?>">
-                                        <?php echo $position['description']; ?>
-                                    </option>
-                                <?php endwhile; ?>
-                            </select>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label for="firstname" class="text-success">First Name</label>
-                            <input type="text" class="form-control border-success" name="firstname" required>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label for="lastname" class="text-success">Last Name</label>
-                            <input type="text" class="form-control border-success" name="lastname" required>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label for="partylist" class="text-success">Partylist</label>
-                            <select class="form-control border-success" name="partylist_id" required>
-                                <option value="">Select Partylist</option>
-                                <?php while ($partylist = $partylists->fetch_assoc()): ?>
-                                    <option value="<?php echo $partylist['partylist_id']; ?>">
-                                        <?php echo $partylist['name']; ?>
-                                    </option>
-                                <?php endwhile; ?>
-                            </select>
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Position -->
+                    <div>
+                        <label for="position_id" class="block text-sm font-medium text-gray-700">Position</label>
+                        <select id="position_id" name="position_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" required>
+                            <option value="">Select Position</option>
+                            <?php while ($position = $positions->fetch_assoc()): ?>
+                                <option value="<?php echo $position['position_id']; ?>"><?php echo $position['description']; ?></option>
+                            <?php endwhile; ?>
+                        </select>
                     </div>
-
-                    <!-- Additional Information -->
-<div class="col-md-6">
-    <div class="form-group mb-3">
-        <label for="course" class="text-success">Course</label>
-        <select class="form-control border-success candidate-info" name="course">
-            <option value="">Select Course</option>
-            <?php
-            // Fetch courses from the courses table
-            $sql_courses = "SELECT * FROM courses";
-            $result_courses = $conn->query($sql_courses);
-
-            while($course = $result_courses->fetch_assoc()) {
-                echo "<option value='" . $course['course'] . "'>" . $course['course'] . "</option>";
-            }
-            ?>
-        </select>
-    </div>
-
-    <div class="form-group mb-3">
-        <label for="year_section" class="text-success">Year and Section</label>
-        <select class="form-control border-success candidate-info" name="year_section">
-            <option value="">Select Year and Section</option>
-            <?php
-            // Fetch year_section from the courses table
-            $sql_sections = "SELECT DISTINCT year_section FROM courses ORDER BY year_section";
-            $result_sections = $conn->query($sql_sections);
-
-            while($section = $result_sections->fetch_assoc()) {
-                echo "<option value='" . $section['year_section'] . "'>" . $section['year_section'] . "</option>";
-            }
-            ?>
-        </select>
-    </div>
-</div>
-
-
-                        <div class="form-group mb-3">
-                            <label for="age" class="text-success">Age</label>
-                            <input type="number" class="form-control border-success candidate-info" name="age" min="16" max="30">
+                    <!-- Partylist -->
+                    <div>
+                        <label for="partylist_id" class="block text-sm font-medium text-gray-700">Partylist</label>
+                        <select id="partylist_id" name="partylist_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" required>
+                            <option value="">Select Partylist</option>
+                            <?php while ($partylist = $partylists->fetch_assoc()): ?>
+                                <option value="<?php echo $partylist['partylist_id']; ?>"><?php echo $partylist['name']; ?></option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
+                    <!-- First Name -->
+                    <div>
+                        <label for="firstname" class="block text-sm font-medium text-gray-700">First Name</label>
+                        <input type="text" id="firstname" name="firstname" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" required>
+                    </div>
+                    <!-- Last Name -->
+                    <div>
+                        <label for="lastname" class="block text-sm font-medium text-gray-700">Last Name</label>
+                        <input type="text" id="lastname" name="lastname" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" required>
+                    </div>
+                </div>
+                <!-- Additional Information -->
+                <div class="mt-6">
+                    <label for="info_enabled" class="flex items-center space-x-2">
+                        <input type="checkbox" id="info_enabled" name="info_enabled" class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                        <span class="text-sm font-medium text-gray-700">Include Additional Candidate Information</span>
+                    </label>
+                </div>
+                <div id="additional-info" class="mt-6 hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="course" class="block text-sm font-medium text-gray-700">Course</label>
+                            <input type="text" id="course" name="course" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50">
                         </div>
-
-                        <div class="form-group mb-3">
-                            <label for="sex" class="text-success">Sex</label>
-                            <select class="form-control border-success candidate-info" name="sex">
-                                <option value="">Select Sex</option>
+                        <div>
+                            <label for="year_section" class="block text-sm font-medium text-gray-700">Year & Section</label>
+                            <input type="text" id="year_section" name="year_section" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50">
+                        </div>
+                        <div>
+                            <label for="age" class="block text-sm font-medium text-gray-700">Age</label>
+                            <input type="number" id="age" name="age" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50">
+                        </div>
+                        <div>
+                            <label for="sex" class="block text-sm font-medium text-gray-700">Sex</label>
+                            <select id="sex" name="sex" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50">
+                                <option value="">Select</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
                             </select>
                         </div>
-
-                        <div class="form-group mb-3">
-                            <label for="address" class="text-success">Address</label>
-                            <textarea class="form-control border-success candidate-info" name="address" rows="2"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Photo and Platform -->
-                    <div class="col-12">
-                        <div class="form-group mb-3">
-                            <label for="photo" class="text-success">Photo</label>
-                            <input type="file" class="form-control border-success" name="photo" accept="image/*" required>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label for="platform" class="text-success">Platform</label>
-                            <textarea class="form-control border-success" name="platform" rows="3" required></textarea>
-                        </div>
-
-                        <div class="form-check mb-3">
-                            <input type="checkbox" class="form-check-input" id="enableInfo" name="info_enabled" checked>
-                            <label class="form-check-label text-success" for="enableInfo">
-                                Enable Additional Candidate Information
-                            </label>
+                        <div class="md:col-span-2">
+                            <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+                            <textarea id="address" name="address" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50"></textarea>
                         </div>
                     </div>
                 </div>
-
-                <div class="text-center">
-                    <button type="submit" class="btn btn-success">Create Candidate</button>
+                <!-- Photo -->
+                <div class="mt-6">
+                    <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
+                    <input type="file" id="photo" name="photo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" accept="image/*" required>
+                </div>
+                <!-- Platform -->
+                <div class="mt-6">
+                    <label for="platform" class="block text-sm font-medium text-gray-700">Platform</label>
+                    <textarea id="platform" name="platform" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" required></textarea>
+                </div>
+                <div class="mt-6 text-center">
+                    <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg">Create Candidate</button>
                 </div>
             </form>
         </div>
 
         <!-- Candidates List -->
-        <div class="card p-4 bg-light border-success">
-            <h2 class="text-success">Existing Candidates</h2>
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead class="table-success">
-                        <tr>
-                            <th>Position</th>
-                            <th>Name</th>
-                            <th>Partylist</th>
-                            <th>Course</th>
-                            <th>Year-Section</th>
-                            <th>Age</th>
-                            <th>Sex</th>
-                            <th>Photo</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while ($candidate = $candidates->fetch_assoc()): ?>
-                            <tr>
-                                <td><?php echo $candidate['position_description']; ?></td>
-                                <td><?php echo $candidate['firstname'] . ' ' . $candidate['lastname']; ?></td>
-                                <td><?php echo $candidate['partylist_name'] ?? 'None'; ?></td>
-                                <td><?php echo $candidate['course'] ?? 'N/A'; ?></td>
-                                <td><?php echo $candidate['year_section'] ?? 'N/A'; ?></td>
-                                <td><?php echo $candidate['age'] ?? 'N/A'; ?></td>
-                                <td><?php echo $candidate['sex'] ?? 'N/A'; ?></td>
-                                <td>
-                                    <img src="<?php echo $candidate['photo']; ?>" alt="Candidate Photo"
-                                         class="rounded-circle border border-success"
-                                         style="width: 50px; height: 50px; object-fit: cover;">
-                                </td>
-                                <td>
-                                    <div class="btn-group">
-                                        <a href="edit_candidate.php?id=<?php echo $candidate['id']; ?>"
-                                           class="btn btn-warning btn-sm">Edit</a>
-                                        <form method="POST" action="" class="d-inline">
-                                            <input type="hidden" name="id" value="<?php echo $candidate['id']; ?>">
-                                            <input type="hidden" name="action" value="delete_candidate">
-                                            <button type="submit" class="btn btn-danger btn-sm"
-                                                    onclick="return confirm('Are you sure you want to delete this candidate?')">
-                                                Delete
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
-            </div>
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h3 class="text-2xl font-bold mb-4">Candidates List</h3>
+            <table class="table-auto w-full border-collapse border border-gray-300">
+                <thead class="bg-green-700 text-white">
+                    <tr>
+                        <th class="border border-gray-300 px-4 py-2">Position</th>
+                        <th class="border border-gray-300 px-4 py-2">Name</th>
+                        <th class="border border-gray-300 px-4 py-2">Partylist</th>
+                        <th class="border border-gray-300 px-4 py-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php while ($candidate = $candidates->fetch_assoc()): ?>
+                    <tr class="hover:bg-green-100">
+                        <td class="border border-gray-300 px-4 py-2"><?php echo $candidate['position_description']; ?></td>
+                        <td class="border border-gray-300 px-4 py-2"><?php echo $candidate['firstname'] . ' ' . $candidate['lastname']; ?></td>
+                        <td class="border border-gray-300 px-4 py-2"><?php echo $candidate['partylist_name'] ?? 'None'; ?></td>
+                        <td class="border border-gray-300 px-4 py-2">
+                            <a href="edit_candidate.php?id=<?php echo $candidate['id']; ?>" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Edit</a>
+                            <form method="POST" action="" class="inline">
+                                <input type="hidden" name="id" value="<?php echo $candidate['id']; ?>">
+                                <input type="hidden" name="action" value="delete_candidate">
+                                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" onclick="return confirm('Are you sure you want to delete this candidate?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.getElementById('enableInfo').addEventListener('change', function() {
-            const infoFields = document.querySelectorAll('.candidate-info');
-            infoFields.forEach(field => {
-                field.disabled = !this.checked;
-                if (this.checked) {
-                    field.required = true;
-                } else {
-                    field.required = false;
-                    field.value = '';
-                }
-            });
+        // Show or hide additional candidate information based on the checkbox
+        document.getElementById('info_enabled').addEventListener('change', function () {
+            const additionalInfo = document.getElementById('additional-info');
+            if (this.checked) {
+                additionalInfo.classList.remove('hidden');
+            } else {
+                additionalInfo.classList.add('hidden');
+            }
         });
+
+        // Function to open the logout confirmation modal
+        function openLogoutModal(event) {
+            event.preventDefault(); // Prevent the default link behavior
+            document.getElementById('logoutModal').classList.remove('hidden');
+        }
+
+        // Function to close the logout confirmation modal
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.add('hidden');
+        }
     </script>
 </body>
 </html>

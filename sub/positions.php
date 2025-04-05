@@ -73,198 +73,110 @@ $positions = getPositions($election_id);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Positions</title>
-    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <!-- SweetAlert2 CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
-
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Poppins', sans-serif;
-            color: #333;
-        }
-        .navbar {
-            background-color: black;
-        }
-        .navbar-nav .nav-link {
-            color: #e0e0e0;
-            font-size: 16px;
-            transition: color 0.3s ease, transform 0.3s ease;
-            padding: 10px 15px;
-        }
-        .navbar-nav .nav-link:hover {
-            color: #00ffcc;
-            transform: translateY(-2px);
-        }
-        .header {
-            background-color: #28a745;
-            color: white;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        .container {
-            max-width: 900px;
-            margin-top: 50px;
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 128, 0, 0.5);
-        }
-        .form-control {
-            background: #f0f0f0;
-            border: 1px solid #28a745;
-            color: #333;
-        }
-        .btn-custom {
-            background: #28a745;
-            color: white;
-            font-weight: bold;
-            border: none;
-            transition: background 0.3s;
-        }
-        .btn-custom:hover {
-            background: #218838;
-        }
-        .table thead {
-            background: #28a745;
-            color: white;
-        }
-        .table tbody tr:hover {
-            background: #f1f1f1;
-        }
-        .actions button {
-            transition: transform 0.2s;
-        }
-        .actions button:hover {
-            transform: scale(1.1);
-        }
-        .navbar-nav .nav-link.active {
-            color: #00ffcc;
-            font-weight: bold;
-            text-shadow: 0px 0px 8px rgba(0, 255, 204, 0.8);
-        }
-        .btn-group-custom {
-            display: flex;
-            justify-content: flex-end; /* Align buttons to the right */
-            gap: 10px; /* Add spacing between buttons */
-        }
-        .btn-group-custom .btn {
-            width: auto; /* Allow buttons to take only necessary width */
-            white-space: nowrap; /* Prevent text from wrapping */
-        }
-    </style>
+    <title>Manage Positions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
+<body class="bg-green-50 text-green-900 font-sans">
+
     <!-- Navigation bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="home.php">Election Dashboard</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'home.php' ? 'active' : ''; ?>" href="home.php">
-                            <i class="fas fa-home"></i> Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'partylist.php' ? 'active' : ''; ?>" href="partylist.php">
-                            <i class="fas fa-users"></i> Partylist
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'positions.php' ? 'active' : ''; ?>" href="positions.php">
-                            <i class="fas fa-user-tie"></i> Positions
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'candidates.php' ? 'active' : ''; ?>" href="candidates.php">
-                            <i class="fas fa-user-tie"></i> Candidates
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo $current_page == 'voters.php' ? 'active' : ''; ?>" href="voters.php">
-                            <i class="fas fa-id-card"></i> Voters
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-danger text-white fw-bold" href="../index.php">
-                            <i class="fas fa-id-card"></i> Logout
-                        </a>
-                    </li>
-                </ul>
-            </div>
+    <nav class="bg-green-700 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
+            <ul class="flex space-x-6">
+                <li><a href="home.php" class="hover:text-green-300 <?php echo $current_page == 'home.php' ? 'font-bold underline' : ''; ?>">Home</a></li>
+                <li><a href="partylist.php" class="hover:text-green-300 <?php echo $current_page == 'partylist.php' ? 'font-bold underline' : ''; ?>">Partylist</a></li>
+                <li><a href="positions.php" class="hover:text-green-300 <?php echo $current_page == 'positions.php' ? 'font-bold underline' : ''; ?>">Positions</a></li>
+                <li><a href="candidates.php" class="hover:text-green-300 <?php echo $current_page == 'candidates.php' ? 'font-bold underline' : ''; ?>">Candidates</a></li>
+                <li><a href="voters.php" class="hover:text-green-300 <?php echo $current_page == 'voters.php' ? 'font-bold underline' : ''; ?>">Voters</a></li>
+                <li><a href="start.php" class="hover:text-green-300 <?php echo $current_page == 'start.php' ? 'font-bold underline' : ''; ?>">Start</a></li>
+                <li>
+                    <a href="#" 
+                       class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" 
+                       onclick="openLogoutModal(event);">
+                       Logout
+                    </a>
+                </li>
+            </ul>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="header text-center mb-4">
-            <h1>Positions</h1>
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold text-green-700 mb-4">Confirm Logout</h2>
+            <p class="text-gray-700 mb-6">Are you sure you want to logout?</p>
+            <div class="flex justify-end space-x-4">
+                <button onclick="closeLogoutModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
+                <a href="../index.php" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Logout</a>
+            </div>
         </div>
+    </div>
 
-        <div class="create-form mb-4">
-            <h2>Create Position</h2>
+    <!-- Main content -->
+    <div class="container mx-auto mt-10">
+        <h2 class="text-3xl font-bold text-center mb-6">Manage Positions</h2>
+        <p class="text-center text-lg mb-8">Here you can manage the positions for the current election. Add, update, or delete positions as needed.</p>
+
+        <!-- Create Position Form -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+            <h3 class="text-2xl font-bold mb-4">Create Position</h3>
             <form method="POST" action="">
                 <input type="hidden" name="action" value="create_position">
-                <div class="form-group mb-3">
-                    <input type="text" class="form-control" name="description" placeholder="Description" required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Position Name -->
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700">Position Name</label>
+                        <input type="text" id="description" name="description" 
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" 
+                               placeholder="Enter position name" required>
+                    </div>
+                    <!-- Max Vote -->
+                    <div>
+                        <label for="max_vote" class="block text-sm font-medium text-gray-700">Max Vote</label>
+                        <input type="number" id="max_vote" name="max_vote" 
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" 
+                               placeholder="Enter max vote" required>
+                    </div>
                 </div>
-                <div class="form-group mb-3">
-                    <input type="number" class="form-control" name="max_vote" placeholder="Max Vote" required>
+                <div class="mt-6">
+                    <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg">Create Position</button>
                 </div>
-                <button type="submit" class="btn btn-custom w-100">Create Position</button>
             </form>
         </div>
 
-        <h2>Positions List</h2>
-        <div class="table-responsive">
-            <table class="table table-bordered">
+        <!-- Positions List -->
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h3 class="text-2xl font-bold mb-4">Positions List</h3>
+            <table class="table-auto w-full border-collapse border border-gray-300">
                 <thead>
-                    <tr>
-                        <th>Description</th>
-                        <th>Max Vote</th>
-                        <th>Actions</th>
+                    <tr class="bg-green-100">
+                        <th class="border border-gray-300 px-4 py-2">Description</th>
+                        <th class="border border-gray-300 px-4 py-2">Max Vote</th>
+                        <th class="border border-gray-300 px-4 py-2">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php while ($row = $positions->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($row['description']); ?></td>
-                        <td><?php echo htmlspecialchars($row['max_vote']); ?></td>
-                        <td class="actions">
-                            <button class="btn btn-info btn-sm" onclick="editPosition(<?php echo $row['position_id']; ?>)"><i class="fas fa-edit"></i> Edit</button>
-                            <button class="btn btn-danger btn-sm delete-btn" data-id="<?php echo $row['position_id']; ?>"><i class="fas fa-trash-alt"></i> Delete</button>
+                    <tr class="hover:bg-green-100">
+                        <td class="border border-gray-300 px-4 py-2"><?php echo htmlspecialchars($row['description']); ?></td>
+                        <td class="border border-gray-300 px-4 py-2"><?php echo htmlspecialchars($row['max_vote']); ?></td>
+                        <td class="border border-gray-300 px-4 py-2">
+                            <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" onclick="editPosition(<?php echo $row['position_id']; ?>)">Edit</button>
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded delete-btn" data-id="<?php echo $row['position_id']; ?>">Delete</button>
                         </td>
                     </tr>
                     <?php endwhile; ?>
                 </tbody>
             </table>
         </div>
-
-        <!-- Buttons Section -->
-        <div class="btn-group-custom mt-4">
-            <a href="partylist.php" class="btn btn-success"><i class="fas fa-home"></i> Back to Partylists</a>
-            <a href="candidates.php" class="btn btn-success">Next: Set Up Candidates <i class="fas fa-arrow-right"></i></a>
-        </div>
     </div>
-
-    <!-- SweetAlert2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Bootstrap JS (Offline) -->
-    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 
     <script>
         // Function to handle position deletion with SweetAlert2
         document.querySelectorAll('.delete-btn').forEach(button => {
             button.addEventListener('click', function() {
                 const positionId = this.getAttribute('data-id');
-
                 Swal.fire({
                     title: 'Are you sure?',
                     text: "You won't be able to revert this!",
@@ -279,19 +191,16 @@ $positions = getPositions($election_id);
                         const form = document.createElement('form');
                         form.method = 'POST';
                         form.action = '';
-
                         const actionInput = document.createElement('input');
                         actionInput.type = 'hidden';
                         actionInput.name = 'action';
                         actionInput.value = 'delete_position';
                         form.appendChild(actionInput);
-
                         const idInput = document.createElement('input');
                         idInput.type = 'hidden';
                         idInput.name = 'id';
                         idInput.value = positionId;
                         form.appendChild(idInput);
-
                         document.body.appendChild(form);
                         form.submit();
                     }
@@ -302,6 +211,17 @@ $positions = getPositions($election_id);
         // Function to handle position editing
         function editPosition(id) {
             window.location.href = "edit_position.php?id=" + id; // Redirect to edit page
+        }
+
+        // Function to open logout modal
+        function openLogoutModal(event) {
+            event.preventDefault();
+            document.getElementById('logoutModal').classList.remove('hidden');
+        }
+
+        // Function to close logout modal
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.add('hidden');
         }
     </script>
 </body>
