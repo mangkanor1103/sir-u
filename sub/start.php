@@ -16,9 +16,9 @@ if (isset($_POST['back'])) {
 $servername = "localhost";
 $username = "root";
 $password = "";
-$database = "votingsystem5";
+$dbname = "votingsystem5";
 
-$connection = mysqli_connect($servername, $username, $password, $database);
+$connection = mysqli_connect($servername, $username, $password, $dbname);
 
 if (!$connection) {
     die("Connection failed: " . mysqli_connect_error());
