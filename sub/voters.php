@@ -174,7 +174,10 @@ if ($row = $result->fetch_assoc()) {
     <!-- Navigation Bar -->
     <nav class="bg-green-700 text-white shadow-lg">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
+            <div class="flex items-center space-x-3">
+                <img src="../pics/logo.png" alt="Logo" class="h-10 w-10">
+                <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
+            </div>
             <ul class="flex space-x-6">
                 <li><a href="home.php" class="hover:text-green-300 <?php echo $current_page == 'home.php' ? 'font-bold underline' : ''; ?>">Home</a></li>
                 <li><a href="partylist.php" class="hover:text-green-300 <?php echo $current_page == 'partylist.php' ? 'font-bold underline' : ''; ?>">Partylist</a></li>
@@ -210,38 +213,14 @@ if ($row = $result->fetch_assoc()) {
         <h2 class="text-3xl font-bold text-center mb-6">Manage Voters</h2>
         <p class="text-center text-lg mb-8">Generate, view, or delete voter codes for the current election.</p>
 
-        <!-- Generate Voter Codes Form -->
-        <div class="bg-white shadow-md rounded-lg p-6 mb-8">
-            <h3 class="text-2xl font-bold mb-4">Generate Voter Codes</h3>
-            <form method="POST" action="">
-                <input type="hidden" name="action" value="generate_voter_codes">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Prefix -->
-                    <div>
-                        <label for="prefix" class="block text-sm font-medium text-gray-700">Prefix (Optional)</label>
-                        <input type="text" id="prefix" name="prefix" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" maxlength="5" placeholder="e.g., VOTE">
-                        <small class="text-gray-500">Leave blank to use election name abbreviation</small>
-                    </div>
-                    <!-- Random Code Length -->
-                    <div>
-                        <label for="length" class="block text-sm font-medium text-gray-700">Random Code Length</label>
-                        <select id="length" name="length" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50">
-                            <option value="4">4 characters</option>
-                            <option value="6" selected>6 characters</option>
-                            <option value="8">8 characters</option>
-                            <option value="10">10 characters</option>
-                        </select>
-                    </div>
-                </div>
-                <!-- Number of Codes -->
-                <div class="mt-6">
-                    <label for="count" class="block text-sm font-medium text-gray-700">Number of Codes to Generate</label>
-                    <input type="number" id="count" name="count" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" min="1" max="1000" value="10" required>
-                </div>
-                <div class="mt-6 text-center">
-                    <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg">Generate Codes</button>
-                </div>
-            </form>
+        <!-- Generate Voter Codes Button -->
+        <div class="flex justify-end mb-4">
+            <button onclick="openGenerateModal()" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg flex items-center space-x-2">
+                <span>Generate Codes</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+            </button>
         </div>
 
         <!-- Voter Codes List -->
@@ -267,51 +246,89 @@ if ($row = $result->fetch_assoc()) {
                     <?php endif; ?>
                 </tbody>
             </table>
-        </div>
 
-        <!-- Pagination -->
-        <?php if ($totalPages > 1): ?>
-        <div class="mt-6 flex justify-center">
-            <nav class="inline-flex space-x-2">
-                <?php if ($page > 1): ?>
-                    <a href="?page=1" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded">First</a>
-                    <a href="?page=<?php echo $page - 1; ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded">Previous</a>
+            <!-- Pagination Links -->
+            <div class="flex justify-center mt-4">
+                <?php if ($totalPages > 1): ?>
+                    <nav class="inline-flex space-x-2">
+                        <!-- Previous Page Link -->
+                        <?php if ($page > 1): ?>
+                            <a href="?page=<?php echo $page - 1; ?>" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Previous</a>
+                        <?php else: ?>
+                            <span class="bg-gray-200 text-gray-500 px-4 py-2 rounded cursor-not-allowed">Previous</span>
+                        <?php endif; ?>
+
+                        <!-- Page Numbers -->
+                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                            <?php if ($i == $page): ?>
+                                <span class="bg-green-700 text-white px-4 py-2 rounded"><?php echo $i; ?></span>
+                            <?php else: ?>
+                                <a href="?page=<?php echo $i; ?>" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"><?php echo $i; ?></a>
+                            <?php endif; ?>
+                        <?php endfor; ?>
+
+                        <!-- Next Page Link -->
+                        <?php if ($page < $totalPages): ?>
+                            <a href="?page=<?php echo $page + 1; ?>" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Next</a>
+                        <?php else: ?>
+                            <span class="bg-gray-200 text-gray-500 px-4 py-2 rounded cursor-not-allowed">Next</span>
+                        <?php endif; ?>
+                    </nav>
                 <?php endif; ?>
-                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <a href="?page=<?php echo $i; ?>" class="px-4 py-2 <?php echo $i == $page ? 'bg-green-700 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-800'; ?> rounded"><?php echo $i; ?></a>
-                <?php endfor; ?>
-                <?php if ($page < $totalPages): ?>
-                    <a href="?page=<?php echo $page + 1; ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded">Next</a>
-                    <a href="?page=<?php echo $totalPages; ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded">Last</a>
-                <?php endif; ?>
-            </nav>
+            </div>
         </div>
-        <?php endif; ?>
+    </div>
+
+    <!-- Generate Voter Codes Modal -->
+    <div id="generateModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold text-green-700 mb-4">Generate Voter Codes</h2>
+            <form method="POST" action="">
+                <input type="hidden" name="action" value="generate_voter_codes">
+                <div class="mb-4">
+                    <label for="prefix" class="block text-sm font-medium text-gray-700">Prefix (Optional)</label>
+                    <input type="text" id="prefix" name="prefix" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" maxlength="5" placeholder="e.g., VOTE">
+                    <small class="text-gray-500">Leave blank to use election name abbreviation</small>
+                </div>
+                <div class="mb-4">
+                    <label for="length" class="block text-sm font-medium text-gray-700">Random Code Length</label>
+                    <select id="length" name="length" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50">
+                        <option value="4">4 characters</option>
+                        <option value="6" selected>6 characters</option>
+                        <option value="8">8 characters</option>
+                        <option value="10">10 characters</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="count" class="block text-sm font-medium text-gray-700">Number of Codes to Generate</label>
+                    <input type="number" id="count" name="count" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" min="1" max="1000" value="10" required>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeGenerateModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
+                    <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Generate</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
-        // SweetAlert2 for delete confirmation
-        function confirmDelete() {
-            return Swal.fire({
-                title: 'Are you sure?',
-                text: "This action cannot be undone!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, delete all!'
-            }).then((result) => {
-                return result.isConfirmed;
-            });
+        // Open Generate Modal
+        function openGenerateModal() {
+            document.getElementById('generateModal').classList.remove('hidden');
         }
 
-        // Function to open the logout confirmation modal
+        // Close Generate Modal
+        function closeGenerateModal() {
+            document.getElementById('generateModal').classList.add('hidden');
+        }
+
+        // Open Logout Modal
         function openLogoutModal(event) {
-            event.preventDefault(); // Prevent the default link behavior
+            event.preventDefault();
             document.getElementById('logoutModal').classList.remove('hidden');
         }
 
-        // Function to close the logout confirmation modal
+        // Close Logout Modal
         function closeLogoutModal() {
             document.getElementById('logoutModal').classList.add('hidden');
         }

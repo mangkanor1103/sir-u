@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 require 'conn.php';
@@ -14,8 +13,18 @@ if (isset($_POST['back'])) {
 }
 $election_id = $_SESSION['election_id'];
 
+// Fetch election details
+$election_query = "SELECT name, status, end_time FROM elections WHERE id = ?";
+$stmt = $conn->prepare($election_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$election = $stmt->get_result()->fetch_assoc();
+$election_name = $election['name'] ?? 'Election not found';
+$election_status = $election['status'] ?? 0;
+$election_end_time = $election['end_time'] ?? null;
+
 // Handle ending an election
-if (isset($_POST['end_election'])) {
+if (isset($_POST['end_election']) || ($election_status == 1 && $election_end_time && strtotime($election_end_time) <= time())) {
     $conn->begin_transaction();
 
     try {
@@ -43,13 +52,56 @@ if (isset($_POST['end_election'])) {
 
         $conn->commit();
         $_SESSION['success'] = 'Election has ended and all related records have been archived.';
+
+        // Display SweetAlert thank you message
+        echo "<script>
+            Swal.fire({
+                title: 'Thank You!',
+                text: 'Thank you for using the election system. You will now be redirected.',
+                icon: 'success',
+                confirmButtonText: 'OK',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            }).then(() => {
+                window.location.href = '../index.php';
+            });
+        </script>";
+        exit();
     } catch (Exception $e) {
         $conn->rollback();
         $_SESSION['error'] = "Failed to end election: " . $e->getMessage();
     }
+}
 
-    header('location: ../index.php'); // Redirect to index.php after ending the election
-    exit();
+// Handle extending election time
+if (isset($_POST['extend_time'])) {
+    $additional_hours = intval($_POST['hours']);
+    $additional_minutes = intval($_POST['minutes']);
+
+    if ($additional_hours > 0 || $additional_minutes > 0) {
+        $new_end_time = date("Y-m-d H:i:s", strtotime("+$additional_hours hours +$additional_minutes minutes", strtotime($election_end_time)));
+
+        $update_query = "UPDATE elections SET end_time = ? WHERE id = ?";
+        $update_stmt = $conn->prepare($update_query);
+        $update_stmt->bind_param("si", $new_end_time, $election_id);
+        $update_stmt->execute();
+
+        $_SESSION['success'] = "Election time has been successfully extended.";
+        header("Location: votes.php");
+        exit();
+    } else {
+        $_SESSION['error'] = "Please specify a valid time to extend.";
+    }
+}
+
+// Calculate remaining time
+$remaining_time = null;
+if ($election_status == 1 && $election_end_time) {
+    $remaining_time = strtotime($election_end_time) - time();
+    if ($remaining_time <= 0) {
+        $remaining_time = 0;
+        $election_status = 0; // Automatically end the election
+    }
 }
 
 function getVotesByPosition($election_id) {
@@ -72,31 +124,15 @@ function getVotesByPosition($election_id) {
     return $stmt->get_result();
 }
 
-function getTotalVotesByPosition($position_id, $election_id) {
-    global $conn;
-    $sql = "SELECT COUNT(v.id) AS total FROM votes v
-            JOIN candidates c ON v.candidate_id = c.id
-            WHERE c.position_id = ? AND v.election_id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ii", $position_id, $election_id);
-    $stmt->execute();
-    $result = $stmt->get_result()->fetch_assoc();
- return $result['total'] ?? 0;
-}
-
 $results = getVotesByPosition($election_id);
 $positionsData = [];
 while ($row = $results->fetch_assoc()) {
-    $totalVotes = getTotalVotesByPosition($row['position_id'], $election_id);
-    $votesNeeded = ceil(($totalVotes / 2) + 1);
     $positionsData[$row['position']][] = [
         'candidate' => $row['candidate'],
-        'total_votes' => $row['total_votes'],
-        'votes_needed' => $votesNeeded
+        'total_votes' => $row['total_votes']
     ];
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -104,114 +140,70 @@ while ($row = $results->fetch_assoc()) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Election Results</title>
-    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
-
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Poppins', sans-serif;
-            color: #333;
-            transition: background-color 0.5s ease;
-        }
-        .container {
-            max-width: 800px;
-            margin-top: 50px;
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 128, 0, 0.5);
-            animation: fadeIn 0.5s ease;
-        }
-        .table thead {
-            background: #28a745;
-            color: white;
-        }
-        .table tbody tr:hover {
-            background: #f1f1f1;
-        }
-        .navbar {
-            background-color: #28a745;
-        }
-        .navbar-brand, .nav-link {
-            color: white !important;
-        }
-        .navbar-nav .nav-link:hover {
-            color: #00ffcc !important;
-        }
-        .icon {
-            margin-right: 5px;
-        }
-        #countdown {
-            background-color: #28a745;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.2em;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
-    <!-- Navigation bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="home.php">Election Dashboard</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <form method="POST" action="">
-                        <button type="submit" name="back" class="btn btn-danger">
-                                <i class="fas fa-sign-out-alt icon"></i>Logout
-                            </button>
-                        </form>
-                    </li>
-                    <li class="nav-item">
-                        <form method="POST" action="" onsubmit="return confirmEndElection();">
-                            <input type="hidden" name="election_id" value="<?php echo $election_id; ?>">
-                            <button type="submit" name="end_election" class="btn btn-danger">
-                                <i class="fas fa-stop-circle icon"></i>End Election
-                            </button>
-                        </form>
-                    </li>
-                </ul>
+<body class="bg-gray-50 text-gray-900 font-sans">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-blue-700 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <img src="../pics/logo.png" alt="Logo" class="h-10 w-10">
+                <a href="home.php" class="text-2xl font-bold flex items-center space-x-2">
+                    <i class="fas fa-poll"></i>
+                    <span>Election Dashboard</span>
+                </a>
             </div>
+            <ul class="flex space-x-6">
+                <li>
+                    <form id="logoutForm" method="POST" action="">
+                        <button type="submit" name="logout" onclick="confirmLogout(event)" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center space-x-2">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Log Out</span>
+                        </button>
+                    </form>
+                </li>
+                <li>
+                    <button onclick="openExtendTimeModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center space-x-2">
+                        <i class="fas fa-clock"></i>
+                        <span>Extend Time</span>
+                    </button>
+                </li>
+            </ul>
         </div>
     </nav>
 
-    <div class="container">
-        <h1 class="text-center">Election Results</h1>
+    <!-- Main Content -->
+    <div class="container mx-auto mt-10">
+        <h1 class="text-4xl font-bold text-center mb-6 text-blue-700">Election Results</h1>
 
-        <!-- Countdown Timer -->
-        <div id="countdown">The page will refresh in <span id="time">5</span> seconds...</div>
+        <!-- Remaining Time -->
+        <?php if ($remaining_time !== null): ?>
+            <div class="bg-blue-700 text-white text-center py-3 rounded mb-6 flex items-center justify-center space-x-2">
+                <i class="fas fa-clock"></i>
+                <span>Remaining Time:</span>
+                <span id="remaining-time" class="font-bold"><?php echo gmdate("H:i:s", $remaining_time); ?></span>
+            </div>
+        <?php endif; ?>
 
+        <!-- Results Table -->
         <?php foreach ($positionsData as $position => $candidates): ?>
-            <h2 class="mt-4"><?php echo htmlspecialchars($position); ?></h2>
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead>
+            <h2 class="text-2xl font-bold mt-6 text-gray-700"><?php echo htmlspecialchars($position); ?></h2>
+            <div class="bg-white shadow-md rounded-lg p-6 mt-4">
+                <table class="table-auto w-full border-collapse border border-gray-300">
+                    <thead class="bg-blue-700 text-white">
                         <tr>
-                            <th>Candidate</th>
-                            <th>Total Votes</th>
-                            <th>Votes Needed to Win</th>
+                            <th class="border border-gray-300 px-4 py-2">Candidate</th>
+                            <th class="border border-gray-300 px-4 py-2">Total Votes</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($candidates as $candidate): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($candidate['candidate']); ?></td>
-                                <td><?php echo htmlspecialchars($candidate['total_votes']); ?></td>
-                                <td><?php echo htmlspecialchars($candidate['votes_needed']); ?></td>
+                            <tr class="hover:bg-blue-100">
+                                <td class="border border-gray-300 px-4 py-2"><?php echo htmlspecialchars($candidate['candidate']); ?></td>
+                                <td class="border border-gray-300 px-4 py-2"><?php echo htmlspecialchars($candidate['total_votes']); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -220,22 +212,94 @@ while ($row = $results->fetch_assoc()) {
         <?php endforeach; ?>
     </div>
 
+    <!-- Extend Time Modal -->
+    <div id="extendTimeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold text-blue-700 mb-4 flex items-center space-x-2">
+                <i class="fas fa-clock"></i>
+                <span>Extend Election Time</span>
+            </h2>
+            <form method="POST" action="">
+                <div class="mb-4">
+                    <label for="hours" class="block text-sm font-medium text-gray-700">Hours</label>
+                    <input type="number" id="hours" name="hours" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" min="0" value="0">
+                </div>
+                <div class="mb-4">
+                    <label for="minutes" class="block text-sm font-medium text-gray-700">Minutes</label>
+                    <input type="number" id="minutes" name="minutes" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" min="0" value="0">
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeExtendTimeModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
+                    <button type="submit" name="extend_time" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded">Extend</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        let countdownTime = 5; // Set countdown time in seconds
-        const timeDisplay = document.getElementById('time');
+        // Real-time countdown for remaining time
+        let remainingTime = <?php echo $remaining_time; ?>;
 
-        const countdownInterval = setInterval(() => {
-            countdownTime--;
-            timeDisplay.textContent = countdownTime;
+        function updateRemainingTime() {
+            if (remainingTime > 0) {
+                remainingTime--;
+                const hours = Math.floor(remainingTime / 3600);
+                const minutes = Math.floor((remainingTime % 3600) / 60);
+                const seconds = remainingTime % 60;
 
-            if (countdownTime <= 0) {
-                clearInterval(countdownInterval);
-                location.reload(); // Refresh the page when countdown reaches zero
+                document.getElementById('remaining-time').textContent =
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            } else {
+                document.getElementById('remaining-time').textContent = "00:00:00";
             }
-        }, 1000); // Update every second
+        }
 
-        function confirmEndElection() {
-            return confirm("Are you sure you want to end the election? This action cannot be undone.");
+        setInterval(updateRemainingTime, 1000); // Update every second
+
+        // Auto-refresh the page every 10 seconds
+        setTimeout(() => {
+            location.reload();
+        }, 10000);
+
+        // Open the extend time modal
+        function openExtendTimeModal() {
+            document.getElementById('extendTimeModal').classList.remove('hidden');
+        }
+
+        // Close the extend time modal
+        function closeExtendTimeModal() {
+            document.getElementById('extendTimeModal').classList.add('hidden');
+        }
+
+        // SweetAlert confirmation for logging out
+        function confirmLogout(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You will be logged out and redirected to the login page.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, log out!',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Logging Out...',
+                        text: 'Please wait while you are being logged out.',
+                        icon: 'info',
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        timer: 2000
+                    }).then(() => {
+                        // Redirect to ../index.php after logging out
+                        window.location.href = '../index.php';
+                    });
+                }
+            });
         }
     </script>
 </body>

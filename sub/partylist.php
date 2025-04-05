@@ -15,16 +15,6 @@ $result        = $stmt->get_result();
 $election      = $result->fetch_assoc();
 $election_name = $election ? $election['name'] : 'Election not found';
 
-// Handle Deletion
-if (isset($_GET['delete'])) {
-    $id   = $_GET['delete'];
-    $stmt = $conn->prepare("DELETE FROM partylists WHERE partylist_id = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    header("Location: partylist.php");
-    exit;
-}
-
 // Fetch Partylists for this election
 $stmt = $conn->prepare("SELECT * FROM partylists WHERE election_id = ?");
 $stmt->bind_param("i", $election_id);
@@ -46,7 +36,12 @@ $result = $stmt->get_result();
     <!-- Navigation bar -->
     <nav class="bg-green-700 text-white shadow-lg">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
+            <!-- Logo and Title -->
+            <div class="flex items-center space-x-3">
+                <img src="../pics/logo.png" alt="Logo" class="h-10 w-10">
+                <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
+            </div>
+            <!-- Navigation Links -->
             <ul class="flex space-x-6">
                 <li><a href="home.php" class="hover:text-green-300 <?php echo $current_page == 'home.php' ? 'font-bold underline' : ''; ?>">Home</a></li>
                 <li><a href="partylist.php" class="hover:text-green-300 <?php echo $current_page == 'partylist.php' ? 'font-bold underline' : ''; ?>">Partylist</a></li>
@@ -65,22 +60,17 @@ $result = $stmt->get_result();
         </div>
     </nav>
 
-    <!-- Logout Confirmation Modal -->
-    <div id="logoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
-            <h2 class="text-2xl font-bold text-green-700 mb-4">Confirm Logout</h2>
-            <p class="text-gray-700 mb-6">Are you sure you want to logout?</p>
-            <div class="flex justify-end space-x-4">
-                <button onclick="closeLogoutModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
-                <a href="../index.php" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Logout</a>
-            </div>
-        </div>
-    </div>
-
     <!-- Main content -->
     <div class="container mx-auto mt-10">
         <h2 class="text-3xl font-bold text-center mb-6">Manage Partylists for <?php echo $election_name; ?></h2>
         <p class="text-center text-lg mb-8">Here you can manage the partylists for the current election. You can add new partylists, edit existing ones, or delete them as needed.</p>
+
+        <!-- Add Partylist Button -->
+        <div class="flex justify-end mb-4">
+            <button onclick="openAddModal()" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg">
+                + Add Partylist
+            </button>
+        </div>
 
         <!-- Table -->
         <div class="overflow-x-auto">
@@ -96,63 +86,100 @@ $result = $stmt->get_result();
                     <tr class="hover:bg-green-100">
                         <td class="border px-4 py-2"><?php echo $row['name']; ?></td>
                         <td class="border px-4 py-2">
-                            <a href="edit_partylist.php?id=<?php echo $row['partylist_id']; ?>" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                            <button onclick="openEditModal(<?php echo $row['partylist_id']; ?>, '<?php echo $row['name']; ?>')" class="bg-green-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
                                 Edit
-                            </a>
-                            <a href="partylist.php?delete=<?php echo $row['partylist_id']; ?>" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded delete-btn">
+                            </button>
+                            <button onclick="openDeleteModal(<?php echo $row['partylist_id']; ?>)" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
                                 Delete
-                            </a>
+                            </button>
                         </td>
                     </tr>
                     <?php endwhile; ?>
                 </tbody>
             </table>
         </div>
+    </div>
 
-        <!-- Buttons -->
-        <div class="flex justify-between mt-8">
-            <a href="add_partylist.php" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg">Add Partylist</a>
-            <div class="flex space-x-4">
-                <a href="home.php" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg">Back to Dashboard</a>
-                <a href="positions.php" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg">Next: Set Up Positions</a>
+    <!-- Add Modal -->
+    <div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold text-green-700 mb-4">Add Partylist</h2>
+            <form method="POST" action="add_partylist.php">
+                <div class="mb-4">
+                    <label for="partylistName" class="block text-sm font-medium text-gray-700">Partylist Name</label>
+                    <input type="text" id="partylistName" name="partylistName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeAddModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
+                    <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold text-green-700 mb-4">Edit Partylist</h2>
+            <form method="POST" action="edit_partylist.php">
+                <input type="hidden" id="editPartylistId" name="id">
+                <div class="mb-4">
+                    <label for="editPartylistName" class="block text-sm font-medium text-gray-700">Partylist Name</label>
+                    <input type="text" id="editPartylistName" name="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeEditModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
+                    <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold text-red-700 mb-4">Confirm Deletion</h2>
+            <p class="text-gray-700 mb-6">Are you sure you want to delete this partylist?</p>
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="closeDeleteModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
+                <a id="deleteConfirmLink" href="#" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Delete</a>
             </div>
         </div>
     </div>
 
     <script>
-        // Function to open the logout confirmation modal
-        function openLogoutModal(event) {
-            event.preventDefault(); // Prevent the default link behavior
-            document.getElementById('logoutModal').classList.remove('hidden');
+        // Open Add Modal
+        function openAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
         }
 
-        // Function to close the logout confirmation modal
-        function closeLogoutModal() {
-            document.getElementById('logoutModal').classList.add('hidden');
+        // Close Add Modal
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
         }
 
-        // Add event listener to all delete buttons
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function(event) {
-                event.preventDefault(); // Prevent the default link behavior
+        // Open Edit Modal
+        function openEditModal(id, name) {
+            document.getElementById('editPartylistId').value = id;
+            document.getElementById('editPartylistName').value = name;
+            document.getElementById('editModal').classList.remove('hidden');
+        }
 
-                // SweetAlert2 confirmation dialog
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#dc3545',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Redirect to the delete URL if confirmed
-                        window.location.href = button.getAttribute('href');
-                    }
-                });
-            });
-        });
+        // Close Edit Modal
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        // Open Delete Modal
+        function openDeleteModal(id) {
+            document.getElementById('deleteConfirmLink').href = `delete_partylist.php?id=${id}`;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        // Close Delete Modal
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
     </script>
 </body>
 </html>

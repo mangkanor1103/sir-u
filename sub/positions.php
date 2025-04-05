@@ -82,7 +82,11 @@ $positions = getPositions($election_id);
     <!-- Navigation bar -->
     <nav class="bg-green-700 text-white shadow-lg">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
+            <!-- Logo and Title -->
+            <div class="flex items-center space-x-3">
+                <img src="../pics/logo.png" alt="Logo" class="h-10 w-10">
+                <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
+            </div>
             <ul class="flex space-x-6">
                 <li><a href="home.php" class="hover:text-green-300 <?php echo $current_page == 'home.php' ? 'font-bold underline' : ''; ?>">Home</a></li>
                 <li><a href="partylist.php" class="hover:text-green-300 <?php echo $current_page == 'partylist.php' ? 'font-bold underline' : ''; ?>">Partylist</a></li>
@@ -118,31 +122,11 @@ $positions = getPositions($election_id);
         <h2 class="text-3xl font-bold text-center mb-6">Manage Positions</h2>
         <p class="text-center text-lg mb-8">Here you can manage the positions for the current election. Add, update, or delete positions as needed.</p>
 
-        <!-- Create Position Form -->
-        <div class="bg-white shadow-md rounded-lg p-6 mb-8">
-            <h3 class="text-2xl font-bold mb-4">Create Position</h3>
-            <form method="POST" action="">
-                <input type="hidden" name="action" value="create_position">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Position Name -->
-                    <div>
-                        <label for="description" class="block text-sm font-medium text-gray-700">Position Name</label>
-                        <input type="text" id="description" name="description" 
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" 
-                               placeholder="Enter position name" required>
-                    </div>
-                    <!-- Max Vote -->
-                    <div>
-                        <label for="max_vote" class="block text-sm font-medium text-gray-700">Max Vote</label>
-                        <input type="number" id="max_vote" name="max_vote" 
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" 
-                               placeholder="Enter max vote" required>
-                    </div>
-                </div>
-                <div class="mt-6">
-                    <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg">Create Position</button>
-                </div>
-            </form>
+        <!-- Add Position Button -->
+        <div class="flex justify-end mb-4">
+            <button onclick="openAddModal()" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg">
+                + Add Position
+            </button>
         </div>
 
         <!-- Positions List -->
@@ -162,8 +146,8 @@ $positions = getPositions($election_id);
                         <td class="border border-gray-300 px-4 py-2"><?php echo htmlspecialchars($row['description']); ?></td>
                         <td class="border border-gray-300 px-4 py-2"><?php echo htmlspecialchars($row['max_vote']); ?></td>
                         <td class="border border-gray-300 px-4 py-2">
-                            <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" onclick="editPosition(<?php echo $row['position_id']; ?>)">Edit</button>
-                            <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded delete-btn" data-id="<?php echo $row['position_id']; ?>">Delete</button>
+                            <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" onclick="openEditModal(<?php echo $row['position_id']; ?>, '<?php echo htmlspecialchars($row['description']); ?>', <?php echo $row['max_vote']; ?>)">Edit</button>
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" onclick="openDeleteModal(<?php echo $row['position_id']; ?>)">Delete</button>
                         </td>
                     </tr>
                     <?php endwhile; ?>
@@ -172,45 +156,97 @@ $positions = getPositions($election_id);
         </div>
     </div>
 
-    <script>
-        // Function to handle position deletion with SweetAlert2
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const positionId = this.getAttribute('data-id');
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#dc3545',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Submit the form to delete the position
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = '';
-                        const actionInput = document.createElement('input');
-                        actionInput.type = 'hidden';
-                        actionInput.name = 'action';
-                        actionInput.value = 'delete_position';
-                        form.appendChild(actionInput);
-                        const idInput = document.createElement('input');
-                        idInput.type = 'hidden';
-                        idInput.name = 'id';
-                        idInput.value = positionId;
-                        form.appendChild(idInput);
-                        document.body.appendChild(form);
-                        form.submit();
-                    }
-                });
-            });
-        });
+    <!-- Add Modal -->
+    <div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold text-green-700 mb-4">Add Position</h2>
+            <form method="POST" action="">
+                <input type="hidden" name="action" value="create_position">
+                <div class="mb-4">
+                    <label for="description" class="block text-sm font-medium text-gray-700">Position Name</label>
+                    <input type="text" id="description" name="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="max_vote" class="block text-sm font-medium text-gray-700">Max Vote</label>
+                    <input type="number" id="max_vote" name="max_vote" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeAddModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
+                    <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        // Function to handle position editing
-        function editPosition(id) {
-            window.location.href = "edit_position.php?id=" + id; // Redirect to edit page
+    <!-- Edit Modal -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold text-green-700 mb-4">Edit Position</h2>
+            <form method="POST" action="">
+                <input type="hidden" name="action" value="update_position">
+                <input type="hidden" id="editPositionId" name="id">
+                <div class="mb-4">
+                    <label for="editDescription" class="block text-sm font-medium text-gray-700">Position Name</label>
+                    <input type="text" id="editDescription" name="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="editMaxVote" class="block text-sm font-medium text-gray-700">Max Vote</label>
+                    <input type="number" id="editMaxVote" name="max_vote" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeEditModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
+                    <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold text-red-700 mb-4">Confirm Deletion</h2>
+            <p class="text-gray-700 mb-6">Are you sure you want to delete this position?</p>
+            <form method="POST" action="">
+                <input type="hidden" name="action" value="delete_position">
+                <input type="hidden" id="deletePositionId" name="id">
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeDeleteModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
+                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Open Add Modal
+        function openAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+        }
+
+        // Open Edit Modal
+        function openEditModal(id, description, maxVote) {
+            document.getElementById('editPositionId').value = id;
+            document.getElementById('editDescription').value = description;
+            document.getElementById('editMaxVote').value = maxVote;
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        // Open Delete Modal
+        function openDeleteModal(id) {
+            document.getElementById('deletePositionId').value = id;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
         }
 
         // Function to open logout modal

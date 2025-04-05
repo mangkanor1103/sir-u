@@ -20,12 +20,6 @@ function deleteCandidate($id) {
 
 // Handle form submissions for candidates
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (isset($_POST['back'])) {
-        unset($_SESSION['election_id']);
-        header("Location: index.php");
-        exit();
-    }
-
     $action = $_POST['action'];
 
     if ($action == "create_candidate") {
@@ -35,19 +29,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $platform = $_POST['platform'];
         $partylist_id = $_POST['partylist_id'];
 
-        // New candidate info fields
-        $info_enabled = isset($_POST['info_enabled']) ? 1 : 0;
-        $course = $info_enabled ? $_POST['course'] : '';
-        $year_section = $info_enabled ? $_POST['year_section'] : '';
-        $age = $info_enabled ? $_POST['age'] : null;
-        $sex = $info_enabled ? $_POST['sex'] : '';
-        $address = $info_enabled ? $_POST['address'] : '';
-
         // Handle photo upload
         $photo = uploadPhoto($_FILES['photo']);
         if ($photo) {
-            if (createCandidate($election_id, $position_id, $firstname, $lastname, $photo, $platform, $partylist_id,
-                              $course, $year_section, $age, $sex, $address, $info_enabled)) {
+            if (createCandidate($election_id, $position_id, $firstname, $lastname, $photo, $platform, $partylist_id)) {
                 $_SESSION['message'] = "Candidate created successfully!";
                 header("Location: candidates.php");
                 exit();
@@ -60,9 +45,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif ($action == "delete_candidate") {
         $id = $_POST['id'];
         if (deleteCandidate($id)) {
-            echo "<div class='alert alert-success'>Candidate deleted successfully!</div>";
+            $_SESSION['message'] = "Candidate deleted successfully!";
+            header("Location: candidates.php");
+            exit();
         } else {
             echo "<div class='alert alert-danger'>Error deleting candidate!</div>";
+        }
+    } elseif ($action == "update_candidate") {
+        $id = $_POST['id'];
+        $firstname = $_POST['firstname'];
+        $lastname = $_POST['lastname'];
+        $position_id = $_POST['position_id'];
+        $partylist_id = $_POST['partylist_id'];
+        $platform = $_POST['platform'];
+
+        if (updateCandidate($id, $firstname, $lastname, $position_id, $partylist_id, $platform)) {
+            $_SESSION['message'] = "Candidate updated successfully!";
+            header("Location: candidates.php");
+            exit();
+        } else {
+            echo "<div class='alert alert-danger'>Error updating candidate!</div>";
         }
     }
 }
@@ -103,15 +105,23 @@ function getCandidates($election_id) {
 }
 
 // Function to create a new candidate
-function createCandidate($election_id, $position_id, $firstname, $lastname, $photo, $platform, $partylist_id,
-                        $course, $year_section, $age, $sex, $address, $info_enabled) {
+function createCandidate($election_id, $position_id, $firstname, $lastname, $photo, $platform, $partylist_id) {
     global $conn;
-    $sql = "INSERT INTO candidates (election_id, position_id, firstname, lastname, photo, platform, partylist_id,
-                                  course, year_section, age, sex, address, info_enabled)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO candidates (election_id, position_id, firstname, lastname, photo, platform, partylist_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("iissssississi", $election_id, $position_id, $firstname, $lastname, $photo, $platform,
-                      $partylist_id, $course, $year_section, $age, $sex, $address, $info_enabled);
+    $stmt->bind_param("iissssi", $election_id, $position_id, $firstname, $lastname, $photo, $platform, $partylist_id);
+    return $stmt->execute();
+}
+
+// Function to update a candidate
+function updateCandidate($id, $firstname, $lastname, $position_id, $partylist_id, $platform) {
+    global $conn;
+    $sql = "UPDATE candidates 
+            SET firstname = ?, lastname = ?, position_id = ?, partylist_id = ?, platform = ? 
+            WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ssisii", $firstname, $lastname, $position_id, $partylist_id, $platform, $id);
     return $stmt->execute();
 }
 
@@ -170,7 +180,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <!-- Navigation Bar -->
     <nav class="bg-green-700 text-white shadow-lg">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
+            <div class="flex items-center space-x-3">
+                <img src="../pics/logo.png" alt="Logo" class="h-10 w-10">
+                <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
+            </div>
             <ul class="flex space-x-6">
                 <li><a href="home.php" class="hover:text-green-300 <?php echo $current_page == 'home.php' ? 'font-bold underline' : ''; ?>">Home</a></li>
                 <li><a href="partylist.php" class="hover:text-green-300 <?php echo $current_page == 'partylist.php' ? 'font-bold underline' : ''; ?>">Partylist</a></li>
@@ -189,109 +202,16 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </div>
     </nav>
 
-    <!-- Logout Confirmation Modal -->
-    <div id="logoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
-            <h2 class="text-2xl font-bold text-green-700 mb-4">Confirm Logout</h2>
-            <p class="text-gray-700 mb-6">Are you sure you want to logout?</p>
-            <div class="flex justify-end space-x-4">
-                <button onclick="closeLogoutModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
-                <a href="../index.php" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Logout</a>
-            </div>
-        </div>
-    </div>
-
     <!-- Main Content -->
     <div class="container mx-auto mt-10">
         <h2 class="text-3xl font-bold text-center mb-6">Manage Candidates</h2>
         <p class="text-center text-lg mb-8">Add, edit, or delete candidates for the current election.</p>
 
-        <!-- Create Candidate Form -->
-        <div class="bg-white shadow-md rounded-lg p-6 mb-8">
-            <h3 class="text-2xl font-bold mb-4">Add New Candidate</h3>
-            <form method="POST" action="" enctype="multipart/form-data">
-                <input type="hidden" name="action" value="create_candidate">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Position -->
-                    <div>
-                        <label for="position_id" class="block text-sm font-medium text-gray-700">Position</label>
-                        <select id="position_id" name="position_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" required>
-                            <option value="">Select Position</option>
-                            <?php while ($position = $positions->fetch_assoc()): ?>
-                                <option value="<?php echo $position['position_id']; ?>"><?php echo $position['description']; ?></option>
-                            <?php endwhile; ?>
-                        </select>
-                    </div>
-                    <!-- Partylist -->
-                    <div>
-                        <label for="partylist_id" class="block text-sm font-medium text-gray-700">Partylist</label>
-                        <select id="partylist_id" name="partylist_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" required>
-                            <option value="">Select Partylist</option>
-                            <?php while ($partylist = $partylists->fetch_assoc()): ?>
-                                <option value="<?php echo $partylist['partylist_id']; ?>"><?php echo $partylist['name']; ?></option>
-                            <?php endwhile; ?>
-                        </select>
-                    </div>
-                    <!-- First Name -->
-                    <div>
-                        <label for="firstname" class="block text-sm font-medium text-gray-700">First Name</label>
-                        <input type="text" id="firstname" name="firstname" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" required>
-                    </div>
-                    <!-- Last Name -->
-                    <div>
-                        <label for="lastname" class="block text-sm font-medium text-gray-700">Last Name</label>
-                        <input type="text" id="lastname" name="lastname" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" required>
-                    </div>
-                </div>
-                <!-- Additional Information -->
-                <div class="mt-6">
-                    <label for="info_enabled" class="flex items-center space-x-2">
-                        <input type="checkbox" id="info_enabled" name="info_enabled" class="rounded border-gray-300 text-green-600 focus:ring-green-500">
-                        <span class="text-sm font-medium text-gray-700">Include Additional Candidate Information</span>
-                    </label>
-                </div>
-                <div id="additional-info" class="mt-6 hidden">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="course" class="block text-sm font-medium text-gray-700">Course</label>
-                            <input type="text" id="course" name="course" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50">
-                        </div>
-                        <div>
-                            <label for="year_section" class="block text-sm font-medium text-gray-700">Year & Section</label>
-                            <input type="text" id="year_section" name="year_section" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50">
-                        </div>
-                        <div>
-                            <label for="age" class="block text-sm font-medium text-gray-700">Age</label>
-                            <input type="number" id="age" name="age" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50">
-                        </div>
-                        <div>
-                            <label for="sex" class="block text-sm font-medium text-gray-700">Sex</label>
-                            <select id="sex" name="sex" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50">
-                                <option value="">Select</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                            </select>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
-                            <textarea id="address" name="address" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <!-- Photo -->
-                <div class="mt-6">
-                    <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
-                    <input type="file" id="photo" name="photo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" accept="image/*" required>
-                </div>
-                <!-- Platform -->
-                <div class="mt-6">
-                    <label for="platform" class="block text-sm font-medium text-gray-700">Platform</label>
-                    <textarea id="platform" name="platform" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-green-50" required></textarea>
-                </div>
-                <div class="mt-6 text-center">
-                    <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg">Create Candidate</button>
-                </div>
-            </form>
+        <!-- Add Candidate Button -->
+        <div class="flex justify-end mb-4">
+            <button onclick="openAddModal()" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg">
+                + Add Candidate
+            </button>
         </div>
 
         <!-- Candidates List -->
@@ -303,6 +223,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <th class="border border-gray-300 px-4 py-2">Position</th>
                         <th class="border border-gray-300 px-4 py-2">Name</th>
                         <th class="border border-gray-300 px-4 py-2">Partylist</th>
+                        <th class="border border-gray-300 px-4 py-2">Platform</th>
+                        <th class="border border-gray-300 px-4 py-2">Photo</th>
                         <th class="border border-gray-300 px-4 py-2">Actions</th>
                     </tr>
                 </thead>
@@ -312,13 +234,30 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <td class="border border-gray-300 px-4 py-2"><?php echo $candidate['position_description']; ?></td>
                         <td class="border border-gray-300 px-4 py-2"><?php echo $candidate['firstname'] . ' ' . $candidate['lastname']; ?></td>
                         <td class="border border-gray-300 px-4 py-2"><?php echo $candidate['partylist_name'] ?? 'None'; ?></td>
+                        <td class="border border-gray-300 px-4 py-2"><?php echo htmlspecialchars($candidate['platform']); ?></td>
                         <td class="border border-gray-300 px-4 py-2">
-                            <a href="edit_candidate.php?id=<?php echo $candidate['id']; ?>" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Edit</a>
-                            <form method="POST" action="" class="inline">
-                                <input type="hidden" name="id" value="<?php echo $candidate['id']; ?>">
-                                <input type="hidden" name="action" value="delete_candidate">
-                                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" onclick="return confirm('Are you sure you want to delete this candidate?')">Delete</button>
-                            </form>
+                            <?php if (!empty($candidate['photo'])): ?>
+                                <img src="<?php echo htmlspecialchars($candidate['photo']); ?>" alt="Candidate Photo" class="h-16 w-16 object-cover rounded">
+                            <?php else: ?>
+                                <span>No Photo</span>
+                            <?php endif; ?>
+                        </td>
+                        <td class="border border-gray-300 px-4 py-2">
+                            <button class="bg-green-500 hover:bg-blue-600 text-white px-4 py-2 rounded" 
+                                onclick="openEditModal(
+                                    <?php echo $candidate['id']; ?>, 
+                                    '<?php echo htmlspecialchars($candidate['firstname'], ENT_QUOTES); ?>', 
+                                    '<?php echo htmlspecialchars($candidate['lastname'], ENT_QUOTES); ?>', 
+                                    <?php echo $candidate['position_id']; ?>, 
+                                    <?php echo $candidate['partylist_id'] ?? 'null'; ?>, 
+                                    '<?php echo htmlspecialchars($candidate['platform'], ENT_QUOTES); ?>'
+                                )">
+                                Edit
+                            </button>
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" 
+                                onclick="openDeleteModal(<?php echo $candidate['id']; ?>)">
+                                Delete
+                            </button>
                         </td>
                     </tr>
                     <?php endwhile; ?>
@@ -327,17 +266,116 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </div>
     </div>
 
-    <script>
-        // Show or hide additional candidate information based on the checkbox
-        document.getElementById('info_enabled').addEventListener('change', function () {
-            const additionalInfo = document.getElementById('additional-info');
-            if (this.checked) {
-                additionalInfo.classList.remove('hidden');
-            } else {
-                additionalInfo.classList.add('hidden');
-            }
-        });
+    <!-- Add Modal -->
+    <div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold text-green-700 mb-4">Add Candidate</h2>
+            <form method="POST" action="" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="create_candidate">
+                <div class="mb-4">
+                    <label for="firstname" class="block text-sm font-medium text-gray-700">First Name</label>
+                    <input type="text" id="firstname" name="firstname" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="lastname" class="block text-sm font-medium text-gray-700">Last Name</label>
+                    <input type="text" id="lastname" name="lastname" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="position_id" class="block text-sm font-medium text-gray-700">Position</label>
+                    <select id="position_id" name="position_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>
+                        <option value="">Select Position</option>
+                        <?php while ($position = $positions->fetch_assoc()): ?>
+                            <option value="<?php echo $position['position_id']; ?>"><?php echo $position['description']; ?></option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="partylist_id" class="block text-sm font-medium text-gray-700">Partylist</label>
+                    <select id="partylist_id" name="partylist_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        <option value="">Select Partylist</option>
+                        <?php while ($partylist = $partylists->fetch_assoc()): ?>
+                            <option value="<?php echo $partylist['partylist_id']; ?>"><?php echo $partylist['name']; ?></option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="platform" class="block text-sm font-medium text-gray-700">Platform</label>
+                    <textarea id="platform" name="platform" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
+                    <input type="file" id="photo" name="photo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" accept="image/*" required>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeAddModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
+                    <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
+    <!-- Edit Modal -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold text-green-700 mb-4">Edit Candidate Platform</h2>
+            <form method="POST" action="">
+                <input type="hidden" name="action" value="update_candidate">
+                <input type="hidden" id="editCandidateId" name="id">
+                <div class="mb-4">
+                    <label for="editFirstname" class="block text-sm font-medium text-gray-700">First Name</label>
+                    <input type="text" id="editFirstname" name="firstname" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-300" disabled>
+                </div>
+                <div class="mb-4">
+                    <label for="editLastname" class="block text-sm font-medium text-gray-700">Last Name</label>
+                    <input type="text" id="editLastname" name="lastname" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-300" disabled>
+                </div>
+                <div class="mb-4">
+                    <label for="editPositionId" class="block text-sm font-medium text-gray-700">Position</label>
+                    <select id="editPositionId" name="position_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-300" disabled>
+                        <option value="">Select Position</option>
+                        <?php foreach ($positions as $position): ?>
+                            <option value="<?php echo $position['position_id']; ?>"><?php echo $position['description']; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="editPartylistId" class="block text-sm font-medium text-gray-700">Partylist</label>
+                    <select id="editPartylistId" name="partylist_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-300" disabled>
+                        <option value="">Select Partylist</option>
+                        <?php foreach ($partylists as $partylist): ?>
+                            <option value="<?php echo $partylist['partylist_id']; ?>"><?php echo $partylist['name']; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="editPlatform" class="block text-sm font-medium text-gray-700">Platform</label>
+                    <textarea id="editPlatform" name="platform" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required></textarea>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeEditModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
+                    <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold text-red-700 mb-4">Confirm Deletion</h2>
+            <p class="text-gray-700 mb-6">Are you sure you want to delete this candidate?</p>
+            <form method="POST" action="">
+                <input type="hidden" name="action" value="delete_candidate">
+                <input type="hidden" id="deleteCandidateId" name="id">
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeDeleteModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
+                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
         // Function to open the logout confirmation modal
         function openLogoutModal(event) {
             event.preventDefault(); // Prevent the default link behavior
@@ -347,6 +385,43 @@ $current_page = basename($_SERVER['PHP_SELF']);
         // Function to close the logout confirmation modal
         function closeLogoutModal() {
             document.getElementById('logoutModal').classList.add('hidden');
+        }
+
+        // Function to open the add candidate modal
+        function openAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+        }
+
+        // Function to close the add candidate modal
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+        }
+
+        // Function to open the edit candidate modal
+        function openEditModal(id, firstname, lastname, positionId, partylistId, platform) {
+            document.getElementById('editCandidateId').value = id;
+            document.getElementById('editFirstname').value = firstname;
+            document.getElementById('editLastname').value = lastname;
+            document.getElementById('editPositionId').value = positionId;
+            document.getElementById('editPartylistId').value = partylistId;
+            document.getElementById('editPlatform').value = platform;
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        // Function to close the edit candidate modal
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        // Function to open the delete confirmation modal
+        function openDeleteModal(id) {
+            document.getElementById('deleteCandidateId').value = id;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        // Function to close the delete confirmation modal
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
         }
     </script>
 </body>

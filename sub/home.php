@@ -36,26 +36,6 @@ $result = $stmt->get_result();
 $election = $result->fetch_assoc();
 $election_name = $election ? $election['name'] : 'Election not found';
 
-// Define an array to store the winners for each position
-$winners = array();
-
-// Query to select the candidate with the maximum number of votes for each position
-$query = "SELECT position_id, candidate_id, COUNT(*) AS total_votes
-          FROM votes
-          GROUP BY position_id, candidate_id
-          ORDER BY position_id, total_votes DESC";
-
-$result = mysqli_query($conn, $query);
-
-while ($row = mysqli_fetch_assoc($result)) {
-    $position_id = $row['position_id'];
-    $candidate_id = $row['candidate_id'];
-
-    if (!isset($winners[$position_id])) {
-        $winners[$position_id] = $candidate_id;
-    }
-}
-
 // Get the current file name to determine active page
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
@@ -67,13 +47,19 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-green-50 text-green-900 font-sans">
 
     <!-- Navigation bar -->
     <nav class="bg-green-700 text-white shadow-lg">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
+            <!-- Logo and Title -->
+            <div class="flex items-center space-x-3">
+                <img src="../pics/logo.png" alt="Logo" class="h-10 w-10">
+                <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
+            </div>
+            <!-- Navigation Links -->
             <ul class="flex space-x-6">
                 <li><a href="home.php" class="hover:text-green-300 <?php echo $current_page == 'home.php' ? 'font-bold underline' : ''; ?>">Home</a></li>
                 <li><a href="partylist.php" class="hover:text-green-300 <?php echo $current_page == 'partylist.php' ? 'font-bold underline' : ''; ?>">Partylist</a></li>
@@ -84,7 +70,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <li>
                     <a href="#" 
                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" 
-                       onclick="openLogoutModal(event);">
+                       onclick="confirmLogout(event);">
                        Logout
                     </a>
                 </li>
@@ -92,62 +78,79 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </div>
     </nav>
 
-    <!-- Logout Confirmation Modal -->
-    <div id="logoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
-            <h2 class="text-2xl font-bold text-green-700 mb-4">Confirm Logout</h2>
-            <p class="text-gray-700 mb-6">Are you sure you want to logout?</p>
-            <div class="flex justify-end space-x-4">
-                <button onclick="closeLogoutModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
-                <a href="../index.php" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Logout</a>
-            </div>
-        </div>
-    </div>
-
     <!-- Main content -->
     <div class="container mx-auto mt-10">
         <div class="text-center">
-            <h1 class="text-4xl font-bold">Welcome to the Election Dashboard</h1>
-            <p class="text-lg mt-2">Current Election: <span class="font-semibold"><?php echo htmlspecialchars($election_name); ?></span></p>
+            <h1 class="text-4xl font-bold">Current Election: <span class="font-semibold"><?php echo htmlspecialchars($election_name); ?></span></h1>
+            <p class="text-lg mt-2">Welcome to the Election Dashboard.</p>
+            <p class="text-gray-600 mt-4">Manage your election process step-by-step. Follow the instructions below to set up and start your election.</p>
         </div>
 
         <!-- Step-by-step horizontal layout -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-10">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mt-10">
             <div class="bg-white shadow-md rounded-lg p-6 text-center hover:shadow-lg transition">
+                <div class="text-green-700 text-4xl mb-4">📋</div>
                 <h5 class="text-xl font-bold mb-2">Step 1: Partylists</h5>
-                <p class="text-gray-600">Set up partylists.</p>
+                <p class="text-gray-600">Create and manage the partylists for your election. Ensure all partylists are added before proceeding.</p>
+                <a href="partylist.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mt-4 inline-block">Set Up Partylists</a>
             </div>
             <div class="bg-white shadow-md rounded-lg p-6 text-center hover:shadow-lg transition">
+                <div class="text-green-700 text-4xl mb-4">🏛️</div>
                 <h5 class="text-xl font-bold mb-2">Step 2: Positions</h5>
-                <p class="text-gray-600">Set up positions.</p>
+                <p class="text-gray-600">Define the positions available in the election. Specify the maximum votes allowed per position.</p>
+                <a href="positions.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mt-4 inline-block">Set Up Positions</a>
             </div>
             <div class="bg-white shadow-md rounded-lg p-6 text-center hover:shadow-lg transition">
+                <div class="text-green-700 text-4xl mb-4">👤</div>
                 <h5 class="text-xl font-bold mb-2">Step 3: Candidates</h5>
-                <p class="text-gray-600">Set up candidates.</p>
+                <p class="text-gray-600">Add candidates for each position. Ensure all candidate details are accurate and complete.</p>
+                <a href="candidates.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mt-4 inline-block">Add Candidates</a>
+            </div>
+            <div class="bg-white shadow-md rounded-lg p-6 text-center hover:shadow-lg transition">
+                <div class="text-green-700 text-4xl mb-4">🗳️</div>
+                <h5 class="text-xl font-bold mb-2">Step 4: Voters</h5>
+                <p class="text-gray-600">Register voters for the election. Ensure all eligible voters are added to the system.</p>
+                <a href="voters.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mt-4 inline-block">Register Voters</a>
             </div>
             <div class="bg-green-700 text-white shadow-md rounded-lg p-6 text-center hover:shadow-lg transition">
-                <h5 class="text-xl font-bold mb-2">Final Step: Voters</h5>
-                <p>Set up voters.</p>
+                <div class="text-white text-4xl mb-4">🚀</div>
+                <h5 class="text-xl font-bold mb-2">Final Step: Start</h5>
+                <p>Start the election process and monitor the results in real-time.</p>
+                <a href="start.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mt-4 inline-block">Start Election</a>
             </div>
-        </div>
-
-        <!-- Buttons below the steps -->
-        <div class="flex justify-center space-x-6 mt-10">
-            <a href="start.php" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg text-lg font-semibold">Start Election</a>
-            <a href="partylist.php" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg text-lg font-semibold">Set Up Partylists</a>
         </div>
     </div>
 
     <script>
-        // Function to open the logout confirmation modal
-        function openLogoutModal(event) {
-            event.preventDefault(); // Prevent the default link behavior
-            document.getElementById('logoutModal').classList.remove('hidden');
-        }
+        // SweetAlert confirmation for logging out
+        function confirmLogout(event) {
+            event.preventDefault(); // Prevent the default form submission
 
-        // Function to close the logout confirmation modal
-        function closeLogoutModal() {
-            document.getElementById('logoutModal').classList.add('hidden');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You will be logged out and redirected to the login page.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, log out!',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Logging Out...',
+                        text: 'Please wait while you are being logged out.',
+                        icon: 'info',
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        timer: 2000
+                    }).then(() => {
+                        // Redirect to ../index.php after logging out
+                        window.location.href = '../index.php';
+                    });
+                }
+            });
         }
     </script>
 
