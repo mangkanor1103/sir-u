@@ -14,14 +14,37 @@
     <!-- sidebar menu: : style can be found in sidebar.less -->
     <ul class="sidebar-menu" data-widget="tree">
       <li class="header">MANAGE</li>
-      <li class=""><a href="home.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>Home</span></a></li> <!-- New menu item -->
-      <li class=""><a href="sub_admins.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>Elections</span></a></li> <!-- New menu item -->
-      <li class=""><a href="feedback.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>Feedbacks</span></a></li> <!-- New menu item -->
-      <li class=""><a href="history.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>History</span></a></li> <!-- New menu item -->
-      <li class=""><a href="students.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>Students</span></a></li> <!-- New menu item -->
-      <li class=""><a href="info.php" style="color: #fff;"><i class="fa fa-user-secret"></i> <span>Programs</span></a></li> <!-- New menu item -->
-
-  </ul>
+      <li class="">
+        <a href="home.php" style="color: #fff;">
+          <i class="fa fa-home" style="width: 20px;"></i> <span>Home</span>
+        </a>
+      </li>
+      <li class="">
+        <a href="sub_admins.php" style="color: #fff;">
+          <i class="fa fa-calendar-check-o" style="width: 20px;"></i> <span>Elections</span>
+        </a>
+      </li>
+      <li class="">
+        <a href="feedback.php" style="color: #fff;">
+          <i class="fa fa-comments" style="width: 20px;"></i> <span>Feedbacks</span>
+        </a>
+      </li>
+      <li class="">
+        <a href="history.php" style="color: #fff;">
+          <i class="fa fa-history" style="width: 20px;"></i> <span>History</span>
+        </a>
+      </li>
+      <li class="">
+        <a href="students.php" style="color: #fff;">
+          <i class="fa fa-users" style="width: 20px;"></i> <span>Students</span>
+        </a>
+      </li>
+      <li class="">
+        <a href="info.php" style="color: #fff;">
+          <i class="fa fa-book" style="width: 20px;"></i> <span>Programs</span>
+        </a>
+      </li>
+    </ul>
   </section>
   <!-- /.sidebar -->
 </aside>
