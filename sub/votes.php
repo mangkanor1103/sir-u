@@ -155,7 +155,6 @@ while ($row = $results->fetch_assoc()) {
     <title>Election Results</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
 
@@ -171,12 +170,10 @@ while ($row = $results->fetch_assoc()) {
             </div>
             <ul class="flex space-x-6">
                 <li>
-                    <form id="logoutForm" method="POST" action="">
-                        <button type="submit" name="logout" onclick="confirmLogout(event)" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center space-x-2">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Log Out</span>
-                        </button>
-                    </form>
+                    <button onclick="openLogoutModal()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center space-x-2">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Log Out</span>
+                    </button>
                 </li>
                 <li>
                     <button onclick="openExtendTimeModal()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center space-x-2">
@@ -233,6 +230,21 @@ while ($row = $results->fetch_assoc()) {
         <?php endforeach; ?>
     </div>
 
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 class="text-2xl font-bold text-green-700 mb-4 flex items-center space-x-2">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Confirm Logout</span>
+            </h2>
+            <p class="text-gray-700 mb-6">Are you sure you want to logout?</p>
+            <div class="flex justify-end space-x-4">
+                <button onclick="closeLogoutModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
+                <a href="../logout.php" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Logout</a>
+            </div>
+        </div>
+    </div>
+
     <!-- Extend Time Modal -->
     <div id="extendTimeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-lg p-6 w-96">
@@ -282,6 +294,16 @@ while ($row = $results->fetch_assoc()) {
             location.reload();
         }, 10000);
 
+        // Open the logout confirmation modal
+        function openLogoutModal() {
+            document.getElementById('logoutModal').classList.remove('hidden');
+        }
+
+        // Close the logout confirmation modal
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.add('hidden');
+        }
+
         // Open the extend time modal
         function openExtendTimeModal() {
             document.getElementById('extendTimeModal').classList.remove('hidden');
@@ -290,37 +312,6 @@ while ($row = $results->fetch_assoc()) {
         // Close the extend time modal
         function closeExtendTimeModal() {
             document.getElementById('extendTimeModal').classList.add('hidden');
-        }
-
-        // SweetAlert confirmation for logging out
-        function confirmLogout(event) {
-            event.preventDefault(); // Prevent the default form submission
-
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You will be logged out and redirected to the login page.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, log out!',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Logging Out...',
-                        text: 'Please wait while you are being logged out.',
-                        icon: 'info',
-                        showConfirmButton: false,
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        timer: 2000
-                    }).then(() => {
-                        // Redirect to ../index.php after logging out
-                        window.location.href = '../index.php';
-                    });
-                }
-            });
         }
     </script>
 </body>

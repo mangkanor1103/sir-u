@@ -2,8 +2,12 @@
 // Include session management and database connection
 include 'includes/session.php';
 
-// Fetch feedback data
-$sql = "SELECT election_id, feedback, created_at FROM feedback ORDER BY created_at DESC"; // Removed ID from the query
+// Fetch feedback data with election name
+$sql = "
+    SELECT elections.name AS election_name, feedback.feedback, feedback.created_at 
+    FROM feedback 
+    JOIN elections ON feedback.election_id = elections.id 
+    ORDER BY feedback.created_at DESC";
 $result = $conn->query($sql);
 ?>
 <?php include 'includes/header.php'; ?>
@@ -23,22 +27,22 @@ $result = $conn->query($sql);
 
     <section class="content">
       <?php
-        if(isset($_SESSION['error'])){
+        if (isset($_SESSION['error'])) {
           echo "
             <div class='alert alert-danger alert-dismissible'>
               <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>
               <h4><i class='icon fa fa-warning'></i> Error!</h4>
-              ".$_SESSION['error']."
+              " . $_SESSION['error'] . "
             </div>
           ";
           unset($_SESSION['error']);
         }
-        if(isset($_SESSION['success'])){
+        if (isset($_SESSION['success'])) {
           echo "
             <div class='alert alert-success alert-dismissible'>
               <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>
               <h4><i class='icon fa fa-check'></i> Success!</h4>
-              ".$_SESSION['success']."
+              " . $_SESSION['success'] . "
             </div>
           ";
           unset($_SESSION['success']);
@@ -55,19 +59,19 @@ $result = $conn->query($sql);
             <div class="box-body">
               <table id="example1" class="table table-bordered">
                 <thead>
-                  <th>Election ID</th> <!-- Only Election ID -->
+                  <th>Election Name</th> <!-- Changed to Election Name -->
                   <th>Feedback</th>
                   <th>Submitted At</th>
                 </thead>
                 <tbody>
                   <?php
                     if ($result->num_rows > 0) {
-                      while($row = $result->fetch_assoc()) {
+                      while ($row = $result->fetch_assoc()) {
                         echo "
                           <tr>
-                            <td>".htmlspecialchars($row['election_id'])."</td> <!-- Display Election ID -->
-                            <td>".htmlspecialchars($row['feedback'])."</td>
-                            <td>".date('Y-m-d H:i:s', strtotime($row['created_at']))."</td>
+                            <td>" . htmlspecialchars($row['election_name']) . "</td> <!-- Display Election Name -->
+                            <td>" . htmlspecialchars($row['feedback']) . "</td>
+                            <td>" . date('Y-m-d H:i:s', strtotime($row['created_at'])) . "</td>
                           </tr>
                         ";
                       }

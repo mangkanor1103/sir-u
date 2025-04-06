@@ -20,8 +20,19 @@
                     $_SESSION['election_id'] = $election['id'];
 
                     echo "<h1 class='page-header text-center title' style='color: #70C237;'><b>" . strtoupper($election['name']) . "</b></h1>";
-
-                    // Check if the voter has already voted for this election
+                    echo "
+                    <div class='alert alert-success'>
+                        <h4><i class='fa fa-info-circle'></i> Voting Steps:</h4>
+                        <ol>
+                            <li>Review the list of candidates for each position.</li>
+                            <li>Click on a candidate to select them. You can also view their details by clicking the 'Details' button.</li>
+                            <li>If you do not wish to vote for a position, select the 'Abstain' option.</li>
+                            <li>Once you have made your selections, click 'Review & Submit Votes' to confirm your choices.</li>
+                            <li>Submit your votes. You cannot change your votes after submission.</li>
+                        </ol>
+                    </div>
+                ";
+                                  // Check if the voter has already voted for this election
                     $stmt = $conn->prepare("SELECT * FROM votes WHERE election_id = ? AND voters_id = ?");
                     $stmt->bind_param("ii", $election['id'], $voter['id']);
                     $stmt->execute();

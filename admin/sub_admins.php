@@ -1,24 +1,22 @@
 <?php
 include 'includes/session.php';
 
-// Handle form submission to generate codes
+// Handle form submission to generate a single code
 if (isset($_POST['generate'])) {
     $election_name = $_POST['election_name'];
-    $quantity = intval($_POST['quantity']); // Assuming you have a field in your form to input the quantity of codes
 
-    for ($i = 0; $i < $quantity; $i++) {
-        // Generate election code
-        $set = '123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $election_code = substr(str_shuffle($set), 0, 10);
+    // Generate a single election code
+    $set = '123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $election_code = substr(str_shuffle($set), 0, 10);
 
-        // Set status to 0 (not started) by default
-        $sql = "INSERT INTO elections (name, election_code, status) VALUES ('$election_name', '$election_code', 0)";
-        if ($conn->query($sql)) {
-            $_SESSION['success'] = 'Election code generated successfully for ' . $election_name . '. Code: ' . $election_code;
-        } else {
-            $_SESSION['error'] = $conn->error;
-        }
+    // Set status to 0 (not started) by default
+    $sql = "INSERT INTO elections (name, election_code, status) VALUES ('$election_name', '$election_code', 0)";
+    if ($conn->query($sql)) {
+        $_SESSION['success'] = 'Election code generated successfully for ' . $election_name . '. Code: ' . $election_code;
+    } else {
+        $_SESSION['error'] = $conn->error;
     }
+
     header('location: sub_admins.php');
     exit();
 }
@@ -44,44 +42,13 @@ if (isset($_POST['start_election'])) {
 if (isset($_POST['end_election'])) {
     $election_id = $_POST['election_id'];
 
-    // Start a transaction to ensure data integrity
-    $conn->begin_transaction();
+    // Update the election status to 0 (ended)
+    $sql = "UPDATE elections SET status = 0, end_time = NOW() WHERE id = '$election_id'";
 
-    try {
-        // Fetch election title
-        $result = $conn->query("SELECT name FROM elections WHERE id = '$election_id'");
-        if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-            $election_title = $row['name'];
-
-            // Store related data as a string in the history table
-            $history_sql = "INSERT INTO history (election_title, deleted_at, candidates, voters, votes, positions, partylists)
-                            VALUES ('$election_title', NOW(),
-                                (SELECT GROUP_CONCAT(CONCAT(id, '|', position_id, '|', firstname, '|', lastname, '|', photo, '|', platform, '|', partylist_id) SEPARATOR ';') FROM candidates WHERE election_id = '$election_id'),
-                                (SELECT GROUP_CONCAT(CONCAT(id, '|', voters_id) SEPARATOR ';') FROM voters WHERE election_id = '$election_id'),
-                                (SELECT GROUP_CONCAT(CONCAT(id, '|', voters_id, '|', candidate_id, '|', position_id, '|', timestamp) SEPARATOR ';') FROM votes WHERE election_id = '$election_id'),
-                                (SELECT GROUP_CONCAT(CONCAT(position_id, '|', description, '|', max_vote) SEPARATOR ';') FROM positions WHERE election_id = '$election_id'),
-                                (SELECT GROUP_CONCAT(CONCAT(partylist_id, '|', name) SEPARATOR ';') FROM partylists WHERE election_id = '$election_id'))";
-            $conn->query($history_sql) or die($conn->error);
-        }
-
-        // Delete related data in the correct order
-        $conn->query("DELETE FROM votes WHERE election_id = '$election_id'") or die($conn->error);
-        $conn->query("DELETE FROM candidates WHERE election_id = '$election_id'") or die($conn->error);
-        $conn->query("DELETE FROM voters WHERE election_id = '$election_id'") or die($conn->error);
-        $conn->query("DELETE FROM positions WHERE election_id = '$election_id'") or die($conn->error);
-        $conn->query("DELETE FROM partylists WHERE election_id = '$election_id'") or die($conn->error);
-
-        // Finally, delete the election itself
-        $conn->query("DELETE FROM elections WHERE id = '$election_id'") or die($conn->error);
-
-        // Commit transaction
-        $conn->commit();
-
-        $_SESSION['success'] = 'Election has ended and all related records have been archived.';
-    } catch (Exception $e) {
-        $conn->rollback();
-        $_SESSION['error'] = "Failed to end election: " . $e->getMessage();
+    if ($conn->query($sql)) {
+        $_SESSION['success'] = 'Election has been ended successfully.';
+    } else {
+        $_SESSION['error'] = $conn->error;
     }
 
     header('location: sub_admins.php');
@@ -130,7 +97,7 @@ if (isset($_POST['end_election'])) {
             <div class="box-header with-border">
               <form action="" method="post">
                 <div class="row">
-                  <div class="col-md-3">
+                  <div class="col-md-6">
                     <div class="form-group">
                       <label>Election Name:</label>
                       <input type="text" name="election_name" class="form-control" placeholder="Enter election name" required>
@@ -138,13 +105,7 @@ if (isset($_POST['end_election'])) {
                   </div>
                   <div class="col-md-3">
                     <div class="form-group">
-                      <label>Generate Codes:</label>
-                      <input type="number" name="quantity" class="form-control" placeholder="Enter quantity" required>
-                    </div>
-                  </div>
-                  <div class="col-md-2">
-                    <div class="form-group">
-                      <button type="submit" name="generate" class="btn btn-primary" style="margin-top: 25px;">Generate</button>
+                      <button type="submit" name="generate" class="btn btn-success" style="margin-top: 25px;">Generate Code</button>
                     </div>
                   </div>
                 </div>
@@ -158,25 +119,27 @@ if (isset($_POST['end_election'])) {
                     <th>Election Name</th>
                     <th>Election Code</th>
                     <th>Status</th>
+                    <th>End Time</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   <?php
                     // Retrieve elections from the database
-                    $sql = "SELECT * FROM elections";
+                    $sql = "SELECT id, name, election_code, status, end_time FROM elections";
                     $result = $conn->query($sql);
 
                     if ($result->num_rows > 0) {
                       while ($row = $result->fetch_assoc()) {
                         $status = ($row['status'] == 1) ? '<span class="label label-success">Active</span>' : '<span class="label label-default">Not Started</span>';
-                        $election_code = $row['election_code'];
+                        $end_time = $row['end_time'] ? date('Y-m-d H:i:s', strtotime($row['end_time'])) : 'N/A';
 
                         echo "
                           <tr>
-                            <td>" . $row['name'] . "</td>
-                            <td>" . $election_code . "</td>
+                            <td>" . htmlspecialchars($row['name']) . "</td>
+                            <td>" . htmlspecialchars($row['election_code']) . "</td>
                             <td>" . $status . "</td>
+                            <td>" . $end_time . "</td>
                             <td>";
 
                         // Show Start button only if election is not started
@@ -189,19 +152,19 @@ if (isset($_POST['end_election'])) {
                         }
 
                         echo "
-                            <form method='POST' action='' style='display:inline;' onsubmit='return confirm(\"Are you sure you want to end this election? All data will be archived.\");'>
+                            <form method='POST' action='' style='display:inline;' onsubmit='return confirm(\"Are you sure you want to end this election?\");'>
                               <input type='hidden' name='election_id' value='" . $row['id'] . "'>
                               <button type='submit' name='end_election' class='btn btn-danger btn-sm'>End Election</button>
                             </form>
                             <form method='GET' action='result.php' style='display:inline;'>
                               <input type='hidden' name='election_id' value='" . $row['id'] . "'>
-                              <button type='submit' class='btn btn-info btn-sm'>View Results</button>
+                              <button type='submit' class='btn btn-success btn-sm'>View Results</button>
                             </form>
                             </td>
                           </tr>";
                       }
                     } else {
-                      echo "<tr><td colspan='4'>No elections found</td></tr>";
+                      echo "<tr><td colspan='5'>No elections found</td></tr>";
                     }
                   ?>
                 </tbody>
@@ -218,5 +181,16 @@ if (isset($_POST['end_election'])) {
   <?php include 'includes/footer.php'; ?>
 </div>
 <?php include 'includes/scripts.php'; ?>
+
+<script>
+  // Update pagination buttons to green
+  document.addEventListener('DOMContentLoaded', function () {
+    const paginationButtons = document.querySelectorAll('.pagination li a');
+    paginationButtons.forEach(button => {
+      button.classList.add('btn', 'btn-success', 'btn-sm');
+    });
+  });
+</script>
+
 </body>
 </html>

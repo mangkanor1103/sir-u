@@ -116,7 +116,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <li>
                     <a href="#" 
                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" 
-                       onclick="confirmLogout(event);">
+                       onclick="openLogoutModal(event);">
                        Logout
                     </a>
                 </li>
@@ -145,14 +145,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <!-- Logout Confirmation Modal -->
     <div id="logoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-lg p-6 w-96">
-            <h2 class="text-2xl font-bold text-green-700 mb-4 flex items-center space-x-2">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Confirm Logout</span>
-            </h2>
+            <h2 class="text-2xl font-bold text-green-700 mb-4">Confirm Logout</h2>
             <p class="text-gray-700 mb-6">Are you sure you want to logout?</p>
             <div class="flex justify-end space-x-4">
                 <button onclick="closeLogoutModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
-                <a href="../index.php" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Logout</a>
+                <a href="../logout.php" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Logout</a>
             </div>
         </div>
     </div>
@@ -240,13 +237,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
             menu.classList.toggle('hidden');
         });
 
-        // Function to open the logout confirmation modal
+        // Open Logout Modal
         function openLogoutModal(event) {
-            event.preventDefault(); // Prevent the default link behavior
+            event.preventDefault(); // Prevent default link behavior
             document.getElementById('logoutModal').classList.remove('hidden');
         }
 
-        // Function to close the logout confirmation modal
+        // Close Logout Modal
         function closeLogoutModal() {
             document.getElementById('logoutModal').classList.add('hidden');
         }
