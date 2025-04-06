@@ -154,6 +154,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['election_code_submit']
         <div class="home-button">
             <a href="../index.php">Back</a>
         </div>
+        <!-- Link to History Login -->
+        <div class="home-button" style="margin-top: 10px;">
+            <a href="historylogin.php">View Login History</a>
+        </div>
     </div>
 </body>
 </html>

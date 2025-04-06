@@ -23,6 +23,17 @@ $election_name = $election['name'] ?? 'Election not found';
 $election_status = $election['status'] ?? 0;
 $election_end_time = $election['end_time'] ?? null;
 
+// Fetch total voters
+$total_voters_query = "SELECT COUNT(*) AS total_voters FROM voters WHERE election_id = ?";
+$stmt = $conn->prepare($total_voters_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$total_voters_result = $stmt->get_result()->fetch_assoc();
+$total_voters = $total_voters_result['total_voters'] ?? 0;
+
+// Calculate the threshold for winning (50% + 1)
+$winning_threshold = ceil(($total_voters / 2) + 1);
+
 // Handle ending an election
 if (isset($_POST['end_election']) || ($election_status == 1 && $election_end_time && strtotime($election_end_time) <= time())) {
     $conn->begin_transaction();
@@ -104,6 +115,7 @@ if ($election_status == 1 && $election_end_time) {
     }
 }
 
+// Fetch votes by position
 function getVotesByPosition($election_id) {
     global $conn;
     $sql = "
@@ -129,7 +141,8 @@ $positionsData = [];
 while ($row = $results->fetch_assoc()) {
     $positionsData[$row['position']][] = [
         'candidate' => $row['candidate'],
-        'total_votes' => $row['total_votes']
+        'total_votes' => $row['total_votes'],
+        'is_winner' => $row['total_votes'] >= $winning_threshold // Check if the candidate meets the winning threshold
     ];
 }
 ?>
@@ -147,7 +160,7 @@ while ($row = $results->fetch_assoc()) {
 <body class="bg-gray-50 text-gray-900 font-sans">
 
     <!-- Navigation Bar -->
-    <nav class="bg-blue-700 text-white shadow-lg">
+    <nav class="bg-green-700 text-white shadow-lg">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-3">
                 <img src="../pics/logo.png" alt="Logo" class="h-10 w-10">
@@ -166,7 +179,7 @@ while ($row = $results->fetch_assoc()) {
                     </form>
                 </li>
                 <li>
-                    <button onclick="openExtendTimeModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center space-x-2">
+                    <button onclick="openExtendTimeModal()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center space-x-2">
                         <i class="fas fa-clock"></i>
                         <span>Extend Time</span>
                     </button>
@@ -177,11 +190,11 @@ while ($row = $results->fetch_assoc()) {
 
     <!-- Main Content -->
     <div class="container mx-auto mt-10">
-        <h1 class="text-4xl font-bold text-center mb-6 text-blue-700">Election Results</h1>
+        <h1 class="text-4xl font-bold text-center mb-6 text-green-700">Election Results</h1>
 
         <!-- Remaining Time -->
         <?php if ($remaining_time !== null): ?>
-            <div class="bg-blue-700 text-white text-center py-3 rounded mb-6 flex items-center justify-center space-x-2">
+            <div class="bg-green-700 text-white text-center py-3 rounded mb-6 flex items-center justify-center space-x-2">
                 <i class="fas fa-clock"></i>
                 <span>Remaining Time:</span>
                 <span id="remaining-time" class="font-bold"><?php echo gmdate("H:i:s", $remaining_time); ?></span>
@@ -193,17 +206,25 @@ while ($row = $results->fetch_assoc()) {
             <h2 class="text-2xl font-bold mt-6 text-gray-700"><?php echo htmlspecialchars($position); ?></h2>
             <div class="bg-white shadow-md rounded-lg p-6 mt-4">
                 <table class="table-auto w-full border-collapse border border-gray-300">
-                    <thead class="bg-blue-700 text-white">
+                    <thead class="bg-green-700 text-white">
                         <tr>
                             <th class="border border-gray-300 px-4 py-2">Candidate</th>
                             <th class="border border-gray-300 px-4 py-2">Total Votes</th>
+                            <th class="border border-gray-300 px-4 py-2">Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($candidates as $candidate): ?>
-                            <tr class="hover:bg-blue-100">
+                            <tr class="hover:bg-green-100">
                                 <td class="border border-gray-300 px-4 py-2"><?php echo htmlspecialchars($candidate['candidate']); ?></td>
                                 <td class="border border-gray-300 px-4 py-2"><?php echo htmlspecialchars($candidate['total_votes']); ?></td>
+                                <td class="border border-gray-300 px-4 py-2">
+                                    <?php if ($candidate['is_winner']): ?>
+                                        <span class="text-green-700 font-bold">Winner</span>
+                                    <?php else: ?>
+                                        <span class="text-gray-500">Not Qualified</span>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -215,22 +236,22 @@ while ($row = $results->fetch_assoc()) {
     <!-- Extend Time Modal -->
     <div id="extendTimeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-lg p-6 w-96">
-            <h2 class="text-2xl font-bold text-blue-700 mb-4 flex items-center space-x-2">
+            <h2 class="text-2xl font-bold text-green-700 mb-4 flex items-center space-x-2">
                 <i class="fas fa-clock"></i>
                 <span>Extend Election Time</span>
             </h2>
             <form method="POST" action="">
                 <div class="mb-4">
                     <label for="hours" class="block text-sm font-medium text-gray-700">Hours</label>
-                    <input type="number" id="hours" name="hours" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" min="0" value="0">
+                    <input type="number" id="hours" name="hours" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" min="0" value="0">
                 </div>
                 <div class="mb-4">
                     <label for="minutes" class="block text-sm font-medium text-gray-700">Minutes</label>
-                    <input type="number" id="minutes" name="minutes" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" min="0" value="0">
+                    <input type="number" id="minutes" name="minutes" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" min="0" value="0">
                 </div>
                 <div class="flex justify-end space-x-4">
                     <button type="button" onclick="closeExtendTimeModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
-                    <button type="submit" name="extend_time" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded">Extend</button>
+                    <button type="submit" name="extend_time" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Extend</button>
                 </div>
             </form>
         </div>

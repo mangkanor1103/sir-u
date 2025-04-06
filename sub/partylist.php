@@ -41,8 +41,16 @@ $result = $stmt->get_result();
                 <img src="../pics/logo.png" alt="Logo" class="h-10 w-10">
                 <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
             </div>
+
+            <!-- Hamburger Menu for Mobile -->
+            <button id="menu-toggle" class="block md:hidden focus:outline-none">
+                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+
             <!-- Navigation Links -->
-            <ul class="flex space-x-6">
+            <ul id="menu" class="hidden md:flex space-x-6">
                 <li><a href="home.php" class="hover:text-green-300 <?php echo $current_page == 'home.php' ? 'font-bold underline' : ''; ?>">Home</a></li>
                 <li><a href="partylist.php" class="hover:text-green-300 <?php echo $current_page == 'partylist.php' ? 'font-bold underline' : ''; ?>">Partylist</a></li>
                 <li><a href="positions.php" class="hover:text-green-300 <?php echo $current_page == 'positions.php' ? 'font-bold underline' : ''; ?>">Positions</a></li>
@@ -65,11 +73,17 @@ $result = $stmt->get_result();
         <h2 class="text-3xl font-bold text-center mb-6">Manage Partylists for <?php echo $election_name; ?></h2>
         <p class="text-center text-lg mb-8">Here you can manage the partylists for the current election. You can add new partylists, edit existing ones, or delete them as needed.</p>
 
-        <!-- Add Partylist Button -->
-        <div class="flex justify-end mb-4">
-            <button onclick="openAddModal()" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg">
+                <!-- Navigation Buttons -->
+                <div class="flex justify-between items-center mb-6">
+            <a href="home.php" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg">
+                &larr; Back to Home
+            </a>
+            <button onclick="openAddModal()" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg mx-auto">
                 + Add Partylist
             </button>
+            <a href="positions.php" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg">
+                Next Step &rarr;
+            </a>
         </div>
 
         <!-- Table -->
@@ -148,6 +162,14 @@ $result = $stmt->get_result();
     </div>
 
     <script>
+        // Toggle the mobile menu
+        const menuToggle = document.getElementById('menu-toggle');
+        const menu = document.getElementById('menu');
+
+        menuToggle.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
         // Open Add Modal
         function openAddModal() {
             document.getElementById('addModal').classList.remove('hidden');

@@ -59,8 +59,16 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <img src="../pics/logo.png" alt="Logo" class="h-10 w-10">
                 <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
             </div>
+
+            <!-- Hamburger Menu for Mobile -->
+            <button id="menu-toggle" class="block md:hidden focus:outline-none">
+                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+
             <!-- Navigation Links -->
-            <ul class="flex space-x-6">
+            <ul id="menu" class="hidden md:flex space-x-6">
                 <li><a href="home.php" class="hover:text-green-300 <?php echo $current_page == 'home.php' ? 'font-bold underline' : ''; ?>">Home</a></li>
                 <li><a href="partylist.php" class="hover:text-green-300 <?php echo $current_page == 'partylist.php' ? 'font-bold underline' : ''; ?>">Partylist</a></li>
                 <li><a href="positions.php" class="hover:text-green-300 <?php echo $current_page == 'positions.php' ? 'font-bold underline' : ''; ?>">Positions</a></li>
@@ -122,6 +130,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
     </div>
 
     <script>
+        // Toggle the mobile menu
+        const menuToggle = document.getElementById('menu-toggle');
+        const menu = document.getElementById('menu');
+
+        menuToggle.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
         // SweetAlert confirmation for logging out
         function confirmLogout(event) {
             event.preventDefault(); // Prevent the default form submission
