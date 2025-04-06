@@ -122,7 +122,9 @@ function getVotesByPosition($election_id) {
         SELECT p.description AS position,
                CONCAT(c.firstname, ' ', c.lastname) AS candidate,
                COALESCE(COUNT(v.candidate_id), 0) AS total_votes,
-               p.position_id
+               p.position_id,
+               p.max_vote,
+               (SELECT COUNT(*) FROM candidates WHERE position_id = p.position_id AND election_id = ?) AS candidate_count
         FROM candidates c
         JOIN positions p ON c.position_id = p.position_id
         LEFT JOIN votes v ON c.id = v.candidate_id AND v.election_id = ?
@@ -131,7 +133,7 @@ function getVotesByPosition($election_id) {
         ORDER BY p.position_id, total_votes DESC;
     ";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ii", $election_id, $election_id);
+    $stmt->bind_param("iii", $election_id, $election_id, $election_id);
     $stmt->execute();
     return $stmt->get_result();
 }
@@ -139,10 +141,27 @@ function getVotesByPosition($election_id) {
 $results = getVotesByPosition($election_id);
 $positionsData = [];
 while ($row = $results->fetch_assoc()) {
+    $candidate_count = $row['candidate_count'];
+    $max_vote = $row['max_vote'];
+
+    // Determine if the candidate is a winner
+    $is_winner = false;
+
+    // For positions with max_vote = 1, only the top candidate is the winner
+    if ($max_vote == 1) {
+        $is_winner = count($positionsData[$row['position']] ?? []) < $max_vote;
+    } else {
+        // For positions with max_vote > 1, select up to max_vote candidates
+        $current_winners = $positionsData[$row['position']] ?? [];
+        if (count($current_winners) < $max_vote) {
+            $is_winner = true;
+        }
+    }
+
     $positionsData[$row['position']][] = [
         'candidate' => $row['candidate'],
         'total_votes' => $row['total_votes'],
-        'is_winner' => $row['total_votes'] >= $winning_threshold // Check if the candidate meets the winning threshold
+        'is_winner' => $is_winner
     ];
 }
 ?>

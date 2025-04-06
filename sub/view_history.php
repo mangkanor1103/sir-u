@@ -80,6 +80,9 @@ if (isset($_POST['id'])) {
                 // Calculate total votes for this position
                 $totalVotes = array_sum($voteCounts[$position_id]);
 
+                // Get the number of candidates for this position
+                $candidateCount = count($voteCounts[$position_id]);
+
                 // Calculate minimum votes needed to win (50% + 1)
                 $minimumVotesToWin = floor($totalVotes / 2) + 1;
 
@@ -100,14 +103,22 @@ if (isset($_POST['id'])) {
                         $percentage = ($totalVotes > 0) ? round(($votes / $totalVotes) * 100, 2) : 0;
 
                         // Determine status based on 50%+1 rule
-                        if ($rank === 1) {
-                            if ($votes >= $minimumVotesToWin) {
+                        if ($candidateCount <= 2) {
+                            // Apply 50% + 1 rule for 1 or 2 candidates
+                            if ($rank === 1 && $votes >= $minimumVotesToWin) {
                                 $status = "<span class='badge bg-success'>WINNER</span>";
-                            } else {
+                            } elseif ($rank === 1) {
                                 $status = "<span class='badge bg-warning'>RE-ELECTION NEEDED</span>";
+                            } else {
+                                $status = "<span class='badge bg-secondary'>RUNNER-UP</span>";
                             }
                         } else {
-                            $status = "<span class='badge bg-secondary'>RUNNER-UP</span>";
+                            // For 3 or more candidates, the highest vote-getters are winners
+                            if ($rank === 1) {
+                                $status = "<span class='badge bg-success'>WINNER</span>";
+                            } else {
+                                $status = "<span class='badge bg-secondary'>RUNNER-UP</span>";
+                            }
                         }
 
                         echo "<tr>";
@@ -127,12 +138,14 @@ if (isset($_POST['id'])) {
                             <td><strong>" . $totalVotes . "</strong></td>
                             <td><strong>100%</strong></td>
                             <td></td>
-                        </tr>
-                        <tr>
+                        </tr>";
+                if ($candidateCount <= 2) {
+                    echo "<tr>
                             <td colspan='2'><strong>Votes Needed to Win (50%+1):</strong></td>
                             <td colspan='3'><strong>" . $minimumVotesToWin . " votes</strong></td>
-                        </tr>
-                    </tfoot>";
+                        </tr>";
+                }
+                echo "</tfoot>";
                 echo "</table>";
             } else {
                 echo "<p>No votes recorded for this position.</p>";

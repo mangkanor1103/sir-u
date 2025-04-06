@@ -100,31 +100,31 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <div class="text-green-700 text-4xl mb-4">📋</div>
                 <h5 class="text-xl font-bold mb-2">Step 1: Partylists</h5>
                 <p class="text-gray-600">Create and manage the partylists for your election. Ensure all partylists are added before proceeding.</p>
-                <a href="partylist.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mt-4 inline-block">Set Up Partylists</a>
+                <a href="partylist.php" class="bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded mt-4 inline-block">Set Up Partylists</a>
             </div>
             <div class="bg-white shadow-md rounded-lg p-6 text-center hover:shadow-lg transition">
                 <div class="text-green-700 text-4xl mb-4">🏛️</div>
                 <h5 class="text-xl font-bold mb-2">Step 2: Positions</h5>
                 <p class="text-gray-600">Define the positions available in the election. Specify the maximum votes allowed per position.</p>
-                <a href="positions.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mt-4 inline-block">Set Up Positions</a>
+                <a href="positions.php" class="bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded mt-4 inline-block">Set Up Positions</a>
             </div>
             <div class="bg-white shadow-md rounded-lg p-6 text-center hover:shadow-lg transition">
                 <div class="text-green-700 text-4xl mb-4">👤</div>
                 <h5 class="text-xl font-bold mb-2">Step 3: Candidates</h5>
                 <p class="text-gray-600">Add candidates for each position. Ensure all candidate details are accurate and complete.</p>
-                <a href="candidates.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mt-4 inline-block">Add Candidates</a>
+                <a href="candidates.php" class="bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded mt-4 inline-block">Add Candidates</a>
             </div>
             <div class="bg-white shadow-md rounded-lg p-6 text-center hover:shadow-lg transition">
                 <div class="text-green-700 text-4xl mb-4">🗳️</div>
                 <h5 class="text-xl font-bold mb-2">Step 4: Voters</h5>
                 <p class="text-gray-600">Register voters for the election. Ensure all eligible voters are added to the system.</p>
-                <a href="voters.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mt-4 inline-block">Register Voters</a>
+                <a href="voters.php" class="bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded mt-4 inline-block">Register Voters</a>
             </div>
             <div class="bg-green-700 text-white shadow-md rounded-lg p-6 text-center hover:shadow-lg transition">
                 <div class="text-white text-4xl mb-4">🚀</div>
                 <h5 class="text-xl font-bold mb-2">Final Step: Start</h5>
                 <p>Start the election process and monitor the results in real-time.</p>
-                <a href="start.php" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mt-4 inline-block">Start Election</a>
+                <a href="start.php" class="bg-white hover:bg-white text-green-700 px-4 py-2 rounded mt-4 inline-block">Start Election</a>
             </div>
         </div>
     </div>
