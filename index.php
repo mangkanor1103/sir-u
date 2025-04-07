@@ -209,7 +209,7 @@ body {
             </div>
 
             <p class="mt20">Manage an Election <a href="admin.php" style="color: green; text-decoration: underline;">Click here.</a>.</p>
-
+            
         </div>
     </div>
 
