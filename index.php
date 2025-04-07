@@ -197,8 +197,7 @@ body {
                     unset($_SESSION['error']);
                 }
             ?>
-
-            <p class="mt20">If you want to create your own election, please <a href="https://www.facebook.com/kianr873" style="color: green; text-decoration: underline;">contact us</a>.</p>
+            <p class="mt20">Manage an Election <a href="admin.php" style="color: green; text-decoration: underline;">Click here.</a>.</p>
 
             <!-- Steps for Voters -->
             <div class="steps">
@@ -208,7 +207,7 @@ body {
                     <li>Click "Sign In" to verify your identity.</li>
             </div>
 
-            <p class="mt20">Manage an Election <a href="admin.php" style="color: green; text-decoration: underline;">Click here.</a>.</p>
+            <p class="mt20">If you want to create your own election, please <a href="https://www.facebook.com/kianr873" style="color: green; text-decoration: underline;">contact us</a>.</p>
             
         </div>
     </div>
