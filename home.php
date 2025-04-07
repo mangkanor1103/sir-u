@@ -19,8 +19,11 @@
                     // Set the election ID in the session
                     $_SESSION['election_id'] = $election['id'];
 
-                    echo "<h1 class='page-header text-center title' style='color: #70C237;'><b>" . strtoupper($election['name']) . "</b></h1>";
-                    echo "
+                    echo "<h1 class='page-header text-center title' style='color: #70C237;'>
+                    <b>Welcome to the Election: " . strtoupper($election['name']) . "</b><br>
+                    <small style='color: #555;'>Your voice matters — cast your vote and be heard!</small>
+                  </h1>";
+                                echo "
                     <div class='alert alert-success'>
                         <h4><i class='fa fa-info-circle'></i> Voting Steps:</h4>
                         <ol>
