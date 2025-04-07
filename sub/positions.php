@@ -131,18 +131,25 @@ $positions = getPositions($election_id);
         <h2 class="text-3xl font-bold text-center mb-6">Manage Positions</h2>
         <p class="text-center text-lg mb-8">Here you can manage the positions for the current election. Add, update, or delete positions as needed.</p>
 
-        <!-- Navigation Buttons -->
-        <div class="flex justify-between items-center mb-6">
-            <a href="partylist.php" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg">
-                &larr; Back to Partylist
-            </a>
-            <button onclick="openAddModal()" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg mx-auto">
-                + Add Position
-            </button>
-            <a href="candidates.php" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg">
-                Next Step &rarr;
-            </a>
-        </div>
+       <!-- Navigation Buttons -->
+<div class="flex justify-between items-center mb-6">
+    <a href="partylist.php" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg">
+        &larr; Back to Partylist
+    </a>
+    <button onclick="openAddModal()" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg mx-auto">
+        + Add Position
+    </button>
+    <a href="candidates.php" 
+       class="px-6 py-3 rounded-lg text-white <?php echo ($positions->num_rows > 0) ? 'bg-green-700 hover:bg-green-800' : 'bg-red-500 cursor-not-allowed'; ?>" 
+       <?php echo ($positions->num_rows > 0) ? '' : 'onclick="return false;"'; ?>>
+        Next Step &rarr;
+    </a>
+</div>
+
+<!-- Red Message -->
+<?php if ($positions->num_rows == 0): ?>
+    <p class="text-red-500 mt-4 text-center">You must add at least one position to proceed to the next step.</p>
+<?php endif; ?>
 
         <!-- Positions List -->
         <div class="bg-white shadow-md rounded-lg p-6">

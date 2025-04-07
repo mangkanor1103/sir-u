@@ -133,8 +133,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
     </div>
                     <!-- Navigation Buttons -->
                     <div class="flex justify-between items-center mb-6">
-            <a href="candidates.php" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg">
-                &larr; Back to Candidates
+            <a href="voters.php" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg">
+                &larr; Back to Voters
             </a>
             <a href="home.php" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg">
                 &larr; Back to Home

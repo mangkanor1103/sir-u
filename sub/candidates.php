@@ -261,17 +261,24 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <p class="text-center text-lg mb-8">Add, edit, or delete candidates for the current election.</p>
 
                 <!-- Navigation Buttons -->
-                <div class="flex justify-between items-center mb-6">
-            <a href="positions.php" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg">
-                &larr; Back to Positions
-            </a>
-            <button onclick="openAddModal()" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg mx-auto">
-                + Add Candidates
-            </button>
-            <a href="voters.php" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg">
-                Next Step &rarr;
-            </a>
-        </div>
+<div class="flex justify-between items-center mb-6">
+    <a href="positions.php" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg">
+        &larr; Back to Positions
+    </a>
+    <button onclick="openAddModal()" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg mx-auto">
+        + Add Candidates
+    </button>
+    <a href="voters.php" 
+       class="px-6 py-3 rounded-lg text-white <?php echo ($candidates->num_rows > 0) ? 'bg-green-700 hover:bg-green-800' : 'bg-red-500 cursor-not-allowed'; ?>" 
+       <?php echo ($candidates->num_rows > 0) ? '' : 'onclick="return false;"'; ?>>
+        Next Step &rarr;
+    </a>
+</div>
+
+<!-- Red Message -->
+<?php if ($candidates->num_rows == 0): ?>
+    <p class="text-red-500 mt-4 text-center">You must add at least one candidate to proceed to the next step.</p>
+<?php endif; ?>
 <!-- Candidates List -->
 <div class="bg-white shadow-md rounded-lg p-6">
     <h3 class="text-2xl font-bold mb-4">Candidates List</h3>

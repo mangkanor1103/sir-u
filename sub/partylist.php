@@ -73,17 +73,26 @@ $result = $stmt->get_result();
         <h2 class="text-3xl font-bold text-center mb-6">Manage Partylists for <?php echo $election_name; ?></h2>
         <p class="text-center text-lg mb-8">Here you can manage the partylists for the current election. You can add new partylists, edit existing ones, or delete them as needed.</p>
 
-                <!-- Navigation Buttons -->
-                <div class="flex justify-between items-center mb-6">
-            <a href="home.php" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg">
-                &larr; Back to Home
-            </a>
-            <button onclick="openAddModal()" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg mx-auto">
-                + Add Partylist
-            </button>
-            <a href="positions.php" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg">
-                Next Step &rarr;
-            </a>
+        <!-- Navigation Buttons -->
+        <div class="flex flex-col items-center mb-6">
+            <div class="flex justify-between w-full">
+                <a href="home.php" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg">
+                    &larr; Back to Home
+                </a>
+                <button onclick="openAddModal()" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg">
+                    + Add Partylist
+                </button>
+                <a href="positions.php" 
+                   class="px-6 py-3 rounded-lg text-white <?php echo ($result->num_rows > 0) ? 'bg-green-700 hover:bg-green-800' : 'bg-red-500 cursor-not-allowed'; ?>" 
+                   <?php echo ($result->num_rows > 0) ? '' : 'onclick="return false;"'; ?>>
+                    Next Step &rarr;
+                </a>
+            </div>
+
+            <!-- Red Message -->
+            <?php if ($result->num_rows == 0): ?>
+                <p class="text-red-500 mt-4">You must add at least one partylist to proceed to the next step.</p>
+            <?php endif; ?>
         </div>
 
         <!-- Table -->
