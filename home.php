@@ -170,8 +170,7 @@
                             }
                         } else {
                             // Fetch and display candidates for each position in the current election
-                            $stmt = $conn->prepare("SELECT * FROM positions WHERE election_id = ? ORDER BY description ASC");
-                            $stmt->bind_param("i", $election['id']);
+                            $stmt = $conn->prepare("SELECT * FROM positions WHERE election_id = ? ORDER BY position_id ASC");                            $stmt->bind_param("i", $election['id']);
                             $stmt->execute();
                             $positions_query = $stmt->get_result();
                             echo "<form method='post' id='voteForm'>"; // Form tag added here
