@@ -26,7 +26,7 @@ $result = $conn->query($sql);
 
   <div class="content-wrapper">
     <section class="content-header">
-      <h1>Deleted Elections History</h1>
+      <h1>Elections History</h1>
     </section>
 
     <section class="content">

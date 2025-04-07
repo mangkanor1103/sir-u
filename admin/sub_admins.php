@@ -12,41 +12,7 @@ if (isset($_POST['generate'])) {
     // Set status to 0 (not started) by default
     $sql = "INSERT INTO elections (name, election_code, status) VALUES ('$election_name', '$election_code', 0)";
     if ($conn->query($sql)) {
-        $_SESSION['success'] = 'Election code generated successfully for ' . $election_name . '. Code: ' . $election_code;
-    } else {
-        $_SESSION['error'] = $conn->error;
-    }
-
-    header('location: sub_admins.php');
-    exit();
-}
-
-// Handle starting an election
-if (isset($_POST['start_election'])) {
-    $election_id = $_POST['election_id'];
-
-    // Update the election status to 1 (started)
-    $sql = "UPDATE elections SET status = 1 WHERE id = '$election_id'";
-
-    if ($conn->query($sql)) {
-        $_SESSION['success'] = 'Election has been started successfully.';
-    } else {
-        $_SESSION['error'] = $conn->error;
-    }
-
-    header('location: sub_admins.php');
-    exit();
-}
-
-// Handle ending an election
-if (isset($_POST['end_election'])) {
-    $election_id = $_POST['election_id'];
-
-    // Update the election status to 0 (ended)
-    $sql = "UPDATE elections SET status = 0, end_time = NOW() WHERE id = '$election_id'";
-
-    if ($conn->query($sql)) {
-        $_SESSION['success'] = 'Election has been ended successfully.';
+        $_SESSION['success'] = 'Election code generated successfully for ' . $election_name . '.';
     } else {
         $_SESSION['error'] = $conn->error;
     }
@@ -62,9 +28,9 @@ if (isset($_POST['end_election'])) {
   <?php include 'includes/navbar.php'; ?>
   <?php include 'includes/menubar1.php'; ?>
 
-  <div class="content-wrapper">
+  <div class="content-wrapper" style="background-color: #f0fdf4;">
     <section class="content-header">
-      <h1>Elections List</h1>
+      <h1 style="color: #2e7d32;">Elections List</h1>
       <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
         <li class="active">Elections</li>
@@ -99,7 +65,7 @@ if (isset($_POST['end_election'])) {
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label>Election Name:</label>
+                      <label style="color: #2e7d32;">Election Name:</label>
                       <input type="text" name="election_name" class="form-control" placeholder="Enter election name" required>
                     </div>
                   </div>
@@ -114,10 +80,9 @@ if (isset($_POST['end_election'])) {
 
             <div class="box-body" style="overflow-x: auto;"> <!-- Make the box body scrollable horizontally -->
               <table id="example1" class="table table-bordered">
-                <thead>
+                <thead style="background-color: #e8f5e9; color: #2e7d32;">
                   <tr>
                     <th>Election Name</th>
-                    <th>Election Code</th>
                     <th>Status</th>
                     <th>End Time</th>
                     <th>Actions</th>
@@ -137,34 +102,19 @@ if (isset($_POST['end_election'])) {
                         echo "
                           <tr>
                             <td>" . htmlspecialchars($row['name']) . "</td>
-                            <td>" . htmlspecialchars($row['election_code']) . "</td>
                             <td>" . $status . "</td>
                             <td>" . $end_time . "</td>
-                            <td>";
-
-                        // Show Start button only if election is not started
-                        if ($row['status'] == 0) {
-                          echo "
-                            <form method='POST' action='' style='display:inline;'>
-                              <input type='hidden' name='election_id' value='" . $row['id'] . "'>
-                              <button type='submit' name='start_election' class='btn btn-success btn-sm'>Start Election</button>
-                            </form> ";
-                        }
-
-                        echo "
-                            <form method='POST' action='' style='display:inline;' onsubmit='return confirm(\"Are you sure you want to end this election?\");'>
-                              <input type='hidden' name='election_id' value='" . $row['id'] . "'>
-                              <button type='submit' name='end_election' class='btn btn-danger btn-sm'>End Election</button>
-                            </form>
-                            <form method='GET' action='result.php' style='display:inline;'>
-                              <input type='hidden' name='election_id' value='" . $row['id'] . "'>
-                              <button type='submit' class='btn btn-success btn-sm'>View Results</button>
-                            </form>
+                            <td>
+                              <button type='button' class='btn btn-success btn-sm' onclick='viewElectionCode(\"" . htmlspecialchars($row['election_code']) . "\")'>View Code</button>
+                              <form method='GET' action='result.php' style='display:inline;'>
+                                <input type='hidden' name='election_id' value='" . $row['id'] . "'>
+                                <button type='submit' class='btn btn-success btn-sm'>View Results</button>
+                              </form>
                             </td>
                           </tr>";
                       }
                     } else {
-                      echo "<tr><td colspan='5'>No elections found</td></tr>";
+                      echo "<tr><td colspan='4'>No elections found</td></tr>";
                     }
                   ?>
                 </tbody>
@@ -182,14 +132,29 @@ if (isset($_POST['end_election'])) {
 </div>
 <?php include 'includes/scripts.php'; ?>
 
+<!-- Modal for Viewing Election Code -->
+<div id="electionCodeModal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color: #e8f5e9; color: #2e7d32;">
+        <h4 class="modal-title">Election Code</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body" style="background-color: #f0fdf4;">
+        <p id="electionCodeText" style="font-size: 18px; font-weight: bold; text-align: center; color: #2e7d32;"></p>
+      </div>
+      <div class="modal-footer" style="background-color: #e8f5e9;">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-  // Update pagination buttons to green
-  document.addEventListener('DOMContentLoaded', function () {
-    const paginationButtons = document.querySelectorAll('.pagination li a');
-    paginationButtons.forEach(button => {
-      button.classList.add('btn', 'btn-success', 'btn-sm');
-    });
-  });
+  function viewElectionCode(code) {
+    document.getElementById('electionCodeText').textContent = code;
+    $('#electionCodeModal').modal('show');
+  }
 </script>
 
 </body>
