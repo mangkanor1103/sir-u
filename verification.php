@@ -2,6 +2,11 @@
 session_start();
 include 'includes/conn.php';
 
+// Clear success message at the start of the script
+if (!isset($_POST['register'])) {
+    unset($_SESSION['success']);
+}
+
 // Check if voter session is set
 if (!isset($_SESSION['voter']) || !isset($_SESSION['election_id'])) {
     $_SESSION['error'] = 'Unauthorized access!';
