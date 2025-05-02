@@ -19,23 +19,37 @@
                     // Set the election ID in the session
                     $_SESSION['election_id'] = $election['id'];
 
-                    echo "<h1 class='page-header text-center title' style='color: #70C237;'>
-                    <b>Welcome to the Election: " . strtoupper($election['name']) . "</b><br>
-                    <small style='color: #555;'>Your voice matters — cast your vote and be heard!</small>
-                  </h1>";
-                                echo "
-                    <div class='alert alert-success'>
-                        <h4><i class='fa fa-info-circle'></i> Voting Steps:</h4>
-                        <ol>
-                            <li>Review the list of candidates for each position.</li>
-                            <li>Click on a candidate to select them. You can also view their details by clicking the 'Details' button.</li>
-                            <li>If you do not wish to vote for a position, select the 'Abstain' option.</li>
-                            <li>Once you have made your selections, click 'Review & Submit Votes' to confirm your choices.</li>
-                            <li>Submit your votes. You cannot change your votes after submission.</li>
-                        </ol>
-                    </div>
-                ";
-                                  // Check if the voter has already voted for this election
+                    echo "<div class='text-center mb-8 px-4 animate__animated animate__fadeIn'>
+                        <div class='border-4 border-green-500 bg-white rounded-xl shadow-lg py-6 px-3 max-w-4xl mx-auto'>
+                            <h1 class='text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-green-600 to-green-400 bg-clip-text text-transparent mb-3'>
+                                " . strtoupper($election['name']) . "
+                            </h1>
+                            <div class='max-w-lg mx-auto'>
+                                <p class='text-gray-700 text-xl md:text-2xl font-medium'>Welcome! Your voice shapes our future</p>
+                                <div class='h-2 w-32 bg-green-500 mx-auto mt-3 rounded-full'></div>
+                            </div>
+                        </div>
+                    </div>";
+                    
+                    echo "<div class='bg-green-50 border-l-4 border-green-500 p-5 mb-8 rounded-lg shadow-sm max-w-3xl mx-auto'>
+                        <div class='flex'>
+                            <div class='flex-shrink-0'>
+                                <i class='fa fa-info-circle text-green-500 text-xl'></i>
+                            </div>
+                            <div class='ml-3'>
+                                <h4 class='text-lg font-medium text-green-800'>Voting Steps:</h4>
+                                <ol class='list-decimal ml-5 mt-2 text-gray-700'>
+                                    <li class='mb-1'>Review the candidates for each position</li>
+                                    <li class='mb-1'>Tap on a candidate's card to select them</li>
+                                    <li class='mb-1'>Choose 'Abstain' if you don't want to vote for a position</li>
+                                    <li class='mb-1'>Review your choices and submit your votes</li>
+                                    <li class='mb-1'>You cannot change your votes after submission</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>";
+
+                    // Check if the voter has already voted for this election
                     $stmt = $conn->prepare("SELECT * FROM votes WHERE election_id = ? AND voters_id = ?");
                     $stmt->bind_param("ii", $election['id'], $voter['id']);
                     $stmt->execute();
@@ -43,7 +57,10 @@
 
                     // If the voter has already voted, fetch their votes
                     if ($voteCheckResult && $voteCheckResult->num_rows > 0) {
-                        echo "<h3 class='text-center'>You have already voted. Here are your selections:</h3>";
+                        echo "<div class='bg-white rounded-xl shadow-md p-4 mb-6'>
+                                <h3 class='text-xl font-bold text-center text-gray-800 mb-4'>You have already voted</h3>
+                                <p class='text-center text-gray-600 mb-4'>Here are your selections:</p>";
+                        
                         $stmt = $conn->prepare("
                             SELECT v.*, c.firstname, c.lastname, p.description AS position_description,
                                    pl.name AS partylist_name
@@ -58,25 +75,43 @@
                         $votesResult = $stmt->get_result();
 
                         if ($votesResult && $votesResult->num_rows > 0) {
+                            echo "<div class='space-y-3'>";
                             while ($vote = $votesResult->fetch_assoc()) {
                                 if ($vote['candidate_id'] === NULL) {
-                                    echo "<div class='alert alert-info'>
-                                            <strong>Position:</strong> " . htmlspecialchars($vote['position_description']) . " - <em>ABSTAINED</em>
-                                          </div>";
+                                    echo "<div class='bg-gray-100 rounded-lg p-3 flex items-center'>
+                                            <div class='rounded-full bg-gray-300 w-10 h-10 flex items-center justify-center mr-3'>
+                                                <i class='fa fa-ban text-gray-500'></i>
+                                            </div>
+                                            <div>
+                                                <p class='font-medium text-gray-800'>" . htmlspecialchars($vote['position_description']) . "</p>
+                                                <p class='text-gray-500 text-sm'>ABSTAINED</p>
+                                            </div>
+                                        </div>";
                                 } else {
                                     $partylist_info = !empty($vote['partylist_name']) ? " (" . $vote['partylist_name'] . ")" : "";
-                                    echo "<div class='alert alert-info'>
-                                            <strong>Voted for:</strong> " . htmlspecialchars($vote['firstname'] . " " . $vote['lastname'] . $partylist_info . " for " . $vote['position_description']) . "
-                                          </div>";
+                                    echo "<div class='bg-green-50 rounded-lg p-3 flex items-center'>
+                                            <div class='rounded-full bg-green-500 w-10 h-10 flex items-center justify-center mr-3'>
+                                                <i class='fa fa-check text-white'></i>
+                                            </div>
+                                            <div>
+                                                <p class='font-medium text-gray-800'>" . htmlspecialchars($vote['position_description']) . "</p>
+                                                <p class='text-gray-700'>" . htmlspecialchars($vote['firstname'] . " " . $vote['lastname'] . $partylist_info) . "</p>
+                                            </div>
+                                        </div>";
                                 }
                             }
+                            echo "</div>";
+                            
                             // Feedback button
-                            echo "<div class='text-center'>
-                                    <a href='feedback.php' class='btn btn-primary btn-flat'><i class='fa fa-comments'></i> Give Feedback</a>
+                            echo "<div class='text-center mt-6'>
+                                    <a href='feedback.php' class='inline-block bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-full shadow-md transition duration-200'>
+                                        <i class='fa fa-comments mr-2'></i> Give Feedback
+                                    </a>
                                   </div>";
                         } else {
                             echo "<div class='alert alert-warning'>No votes found for this election.</div>";
                         }
+                        echo "</div>"; // Close the container div
                     } else {
                         // Voting logic for those who haven't voted
                         if (isset($_POST['submit_votes'])) {
@@ -121,17 +156,25 @@
 
                             // Display submission result
                             if (!$hasError) {
-                                echo "<div class='alert alert-success alert-dismissible fade show text-center' role='alert' style='font-size: 18px; font-weight: bold;'>
-                                        <i class='fa fa-check-circle'></i> Your votes have been submitted successfully! Redirecting to feedback...
-                                        <button type='button' class='close' data-dismiss='alert' aria-label='Close'>
-                                            <span aria-hidden='true'>&times;</span>
-                                        </button>
+                                echo "<div class='fixed top-0 left-0 w-full flex items-center justify-center z-50 bg-green-100 bg-opacity-90 py-4 shadow-lg' id='successAlert'>
+                                        <div class='bg-white rounded-lg shadow-xl p-6 mx-4 max-w-md w-full border-l-4 border-green-500'>
+                                            <div class='flex items-center mb-4'>
+                                                <div class='flex-shrink-0'>
+                                                    <i class='fa fa-check-circle text-green-500 text-3xl'></i>
+                                                </div>
+                                                <div class='ml-3'>
+                                                    <h3 class='text-lg font-semibold text-gray-800'>Success!</h3>
+                                                    <p class='text-gray-600'>Your votes have been submitted successfully!</p>
+                                                </div>
+                                            </div>
+                                            <p class='text-sm text-gray-500 mt-2'>Redirecting to feedback form...</p>
+                                        </div>
                                       </div>";
 
                                 echo "<script>
                                         setTimeout(function() {
                                             window.location.href = 'feedback.php';
-                                        }, 500); // 0.5-second delay to show the alert
+                                        }, 1500);
                                       </script>";
 
                                 // Fetch and display the submitted votes
@@ -149,40 +192,61 @@
                                 $votesResult = $stmt->get_result();
 
                                 if ($votesResult && $votesResult->num_rows > 0) {
-                                    echo "<h3 class='text-center'>Here are your selections:</h3>";
+                                    echo "<div class='mt-8 mb-6'>
+                                            <h3 class='text-xl font-bold text-center mb-4'>Your Votes:</h3>
+                                            <div class='space-y-3'>";
                                     while ($vote = $votesResult->fetch_assoc()) {
                                         if ($vote['candidate_id'] === NULL) {
-                                            echo "<div class='alert alert-info'>
-                                                    <strong>Position:</strong> " . htmlspecialchars($vote['position_description']) . " - <em>ABSTAINED</em>
-                                                  </div>";
+                                            echo "<div class='bg-gray-100 rounded-lg p-3 flex items-center'>
+                                                    <div class='rounded-full bg-gray-300 w-10 h-10 flex items-center justify-center mr-3'>
+                                                        <i class='fa fa-ban text-gray-500'></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class='font-medium text-gray-800'>" . htmlspecialchars($vote['position_description']) . "</p>
+                                                        <p class='text-gray-500 text-sm'>ABSTAINED</p>
+                                                    </div>
+                                                </div>";
                                         } else {
                                             $partylist_info = !empty($vote['partylist_name']) ? " (" . $vote['partylist_name'] . ")" : "";
-                                            echo "<div class='alert alert-info'>
-                                                    <strong>Voted for:</strong> " . htmlspecialchars($vote['firstname'] . " " . $vote['lastname'] . $partylist_info . " for " . $vote['position_description']) . "
-                                                  </div>";
+                                            echo "<div class='bg-green-50 rounded-lg p-3 flex items-center'>
+                                                    <div class='rounded-full bg-green-500 w-10 h-10 flex items-center justify-center mr-3'>
+                                                        <i class='fa fa-check text-white'></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class='font-medium text-gray-800'>" . htmlspecialchars($vote['position_description']) . "</p>
+                                                        <p class='text-gray-700'>" . htmlspecialchars($vote['firstname'] . " " . $vote['lastname'] . $partylist_info) . "</p>
+                                                    </div>
+                                                </div>";
                                         }
                                     }
-                                } else {
-                                    echo "<div class='alert alert-warning'>No votes found for this election.</div>";
+                                    echo "</div></div>";
                                 }
                             } else {
-                                echo "<div class='alert alert-danger'>An error occurred while submitting your vote. Please try again.</div>";
+                                echo "<div class='bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md'>
+                                        <div class='flex'>
+                                            <div class='flex-shrink-0'>
+                                                <i class='fa fa-times-circle text-red-500'></i>
+                                            </div>
+                                            <div class='ml-3'>
+                                                <p class='font-medium'>Error submitting your votes. Please try again.</p>
+                                            </div>
+                                        </div>
+                                    </div>";
                             }
                         } else {
                             // Fetch and display candidates for each position in the current election
-                            $stmt = $conn->prepare("SELECT * FROM positions WHERE election_id = ? ORDER BY position_id ASC");                            $stmt->bind_param("i", $election['id']);
+                            $stmt = $conn->prepare("SELECT * FROM positions WHERE election_id = ? ORDER BY position_id ASC");
+                            $stmt->bind_param("i", $election['id']);
                             $stmt->execute();
                             $positions_query = $stmt->get_result();
                             echo "<form method='post' id='voteForm'>"; // Form tag added here
 
                             while ($position = $positions_query->fetch_assoc()) {
-                                echo "<div class='row'>
-                                        <div class='col-xs-12'>
-                                            <div class='box box-solid' id='" . htmlspecialchars($position['position_id']) . "'>
-                                                <div class='box-header with-border'>
-                                                    <h3 class='box-title'><b>" . htmlspecialchars($position['description']) . "</b></h3>
-                                                </div>
-                                                <div class='box-body'>";
+                                echo "<div class='mb-10 max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl border-2 border-green-300' id='" . htmlspecialchars($position['position_id']) . "'>
+                                        <div class='bg-gradient-to-r from-green-600 to-green-400 px-5 py-6 text-center'>
+                                            <h3 class='text-white font-bold text-2xl md:text-3xl'>" . htmlspecialchars($position['description']) . "</h3>
+                                        </div>
+                                        <div class='p-5'>";
 
                                 // Fetch candidates for the current position
                                 $stmt = $conn->prepare("
@@ -197,51 +261,70 @@
 
                                 // Check if there are candidates
                                 if ($candidates_query && $candidates_query->num_rows > 0) {
-                                    echo "<div style='display: flex; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;'>"; // Parent container for candidates
+                                    echo "<div class='candidate-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5'>"; // Mobile-responsive grid
 
                                     while ($candidate = $candidates_query->fetch_assoc()) {
                                         $partylist_display = !empty($candidate['partylist_name']) ?
-                                            "<div style='text-align: center; font-style: italic; color: #666;'>(" . htmlspecialchars($candidate['partylist_name']) . ")</div>" : "";
+                                            "<div class='bg-gray-100 text-gray-800 px-3 py-2 rounded-lg font-medium mt-2 text-base'>" . htmlspecialchars($candidate['partylist_name']) . "</div>" : "";
 
-                                        echo "<div class='candidate' style='display: flex; flex-direction: column; align-items: center; margin: 10px; cursor: pointer;'
+                                        echo "<div class='candidate-card bg-white border-2 rounded-lg overflow-hidden transition-all duration-200 hover:shadow-lg' 
                                             onclick='selectCandidate(this, " . htmlspecialchars($candidate['id']) . ", " . htmlspecialchars($position['position_id']) . ", " . htmlspecialchars($position['max_vote']) . ")'>
-                                            <img src='sub/" . htmlspecialchars($candidate['photo']) . "' style='width: 300px; height: 300px; object-fit: cover; margin-bottom: 5px; border: 3px solid transparent;'>
-                                            <span style='text-align: center;'>" . htmlspecialchars($candidate['firstname'] . " " . $candidate['lastname']) . "</span>
-                                            " . $partylist_display . "
+                                            <div class='relative pt-[100%]'>
+                                                <img src='sub/" . htmlspecialchars($candidate['photo']) . "' 
+                                                    class='absolute inset-0 w-full h-full object-cover candidate-img'>
+                                                <div class='hidden absolute top-3 right-3 bg-green-500 rounded-full w-10 h-10 flex items-center justify-center check-icon shadow-lg'>
+                                                    <i class='fa fa-check text-white text-lg'></i>
+                                                </div>
+                                            </div>
+                                            <div class='p-4 text-center'>
+                                                <h4 class='font-bold text-gray-800 text-xl md:text-2xl'>" . htmlspecialchars($candidate['firstname'] . " " . $candidate['lastname']) . "</h4>
+                                                <div class='mt-2'>" . $partylist_display . "</div>
+                                                <button type='button' 
+                                                        class='mt-3 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition duration-200 platform-btn'
+                                                        onclick='event.stopPropagation(); viewPlatform(" . htmlspecialchars($candidate['id']) . ", \"" . htmlspecialchars(addslashes($candidate['firstname'] . " " . $candidate['lastname'])) . "\")'>
+                                                    <i class='fa fa-list-alt mr-1'></i> View Platform
+                                                </button>
+                                            </div>
                                             <input type='hidden' name='candidates[" . htmlspecialchars($position['position_id']) . "][]' value=''>
                                         </div>";
                                     }
 
                                     echo "</div>"; // Close the parent container
 
-                                    // Add abstain option
-                                    echo "<div class='text-center' style='margin-top: 10px;'>
-                                            <label class='abstain-option' style='cursor: pointer;'>
+                                    // Add abstain option with cleaner styling
+                                    echo "<div class='mt-5 p-6 bg-gray-50 rounded-lg border-2 border-gray-200 text-center'>
+                                            <label class='abstain-option inline-flex items-center cursor-pointer'>
                                                 <input type='checkbox' name='abstain[]' value='" . htmlspecialchars($position['position_id']) . "'
+                                                       class='form-checkbox h-6 w-6 text-red-500 rounded focus:ring-0'
                                                        onchange='handleAbstain(this, " . htmlspecialchars($position['position_id']) . ")'>
-                                                <span style='margin-left: 5px; font-weight: bold;'>ABSTAIN from voting for this position</span>
+                                                <span class='ml-3 text-gray-700 font-bold text-lg'>ABSTAIN from voting for this position</span>
                                             </label>
+                                            <div class='text-sm text-gray-600 mt-3 bg-green-50 p-2 rounded-md inline-block font-medium'>Max selections allowed: <span class='font-bold'>" . htmlspecialchars($position['max_vote']) . "</span></div>
                                           </div>";
                                 } else {
-                                    echo "<div class='alert alert-warning'>No candidates found for this position.</div>";
+                                    echo "<div class='text-center p-6 text-gray-500'>No candidates found for this position.</div>";
                                 }
 
                                 echo "          </div>
-                                            </div>
-                                        </div>
-                                      </div>";
+                                            </div>";
                             }
 
-                            // Display voting buttons
-                            echo "<button type='button' class='btn btn-success btn-flat' onclick='return showConfirmation()'>
-                                <i class='fa fa-check-square-o'></i> Review & Submit Votes
-                            </button>";
+                            // Display voting button - floating button for mobile
+                            echo "<div class='fixed bottom-6 right-6 z-20'>
+                                    <button type='button' class='bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-full shadow-lg flex items-center justify-center transition duration-200 transform hover:scale-105' onclick='return showConfirmation()'>
+                                        <i class='fa fa-check-square-o mr-2'></i> Review & Submit
+                                    </button>
+                                  </div>";
 
                             echo "</form>"; // Form tag closing added here
                         }
                     }
                 } else {
-                    echo "<h1 class='page-header text-center title' style='color: #70C237;'><b>No Election Found</b></h1>";
+                    echo "<div class='text-center py-12'>
+                            <div class='text-5xl text-gray-300 mb-4'><i class='fa fa-info-circle'></i></div>
+                            <h1 class='text-2xl font-bold text-gray-700 mb-2'>No Election Found</h1>
+                            <p class='text-gray-500'>There are no active elections for you at this time.</p>
+                          </div>";
                 }
                 ?>
             </section>
@@ -261,30 +344,69 @@ function showConfirmation() {
 
     // Check if at least one candidate is selected or abstain is chosen
     if (selectedCandidates.length === 0 && abstainOptions.length === 0) {
-        alert("Please select at least one candidate or choose to abstain before submitting.");
+        // Modern toast alert
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-0 left-0 w-full flex items-center justify-center z-50 bg-opacity-80 p-4';
+        toast.innerHTML = `
+            <div class="bg-white rounded-lg shadow-xl p-4 mx-4 max-w-md w-full border-l-4 border-yellow-500 flex items-center">
+                <div class="flex-shrink-0 text-yellow-500">
+                    <i class="fa fa-exclamation-triangle text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-gray-700">Please select at least one candidate or choose to abstain.</p>
+                </div>
+                <button class="ml-auto text-gray-400 hover:text-gray-600" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+        
         return;
     }
 
     // Add selected candidates to the review list
     selectedCandidates.forEach(candidate => {
-        let candidateName = candidate.querySelector("span").textContent;
-        let partylistElement = candidate.querySelector("div");
-        let partylistInfo = partylistElement ? " " + partylistElement.textContent : "";
+        let candidateName = candidate.querySelector("h4").textContent;
+        let partylistElement = candidate.querySelector(".text-xs");
+        let partylistInfo = partylistElement ? " • " + partylistElement.textContent : "";
+        let candidateImg = candidate.querySelector("img").src;
 
-        let listItem = document.createElement("li");
-        listItem.classList.add("list-group-item");
-        listItem.textContent = candidateName + partylistInfo;
+        let listItem = document.createElement("div");
+        listItem.className = 'flex items-center p-3 border-b border-gray-100';
+        listItem.innerHTML = `
+            <div class="w-12 h-12 rounded-full overflow-hidden mr-3 bg-gray-100 flex-shrink-0">
+                <img src="${candidateImg}" class="w-full h-full object-cover">
+            </div>
+            <div>
+                <p class="font-medium text-gray-800">${candidateName}</p>
+                <p class="text-gray-500 text-sm">${partylistInfo}</p>
+            </div>
+        `;
         voteReviewList.appendChild(listItem);
     });
 
     // Add abstained positions to the review list
     abstainOptions.forEach(option => {
         let positionId = option.value;
-        let positionName = document.querySelector(`.box[id='${positionId}'] .box-title b`).textContent;
+        let positionName = document.querySelector(`.box[id='${positionId}'] .box-title b, div[id='${positionId}'] h3`).textContent;
 
-        let listItem = document.createElement("li");
-        listItem.classList.add("list-group-item", "text-muted");
-        listItem.textContent = positionName + " - ABSTAINED";
+        let listItem = document.createElement("div");
+        listItem.className = 'flex items-center p-3 border-b border-gray-100 bg-gray-50';
+        listItem.innerHTML = `
+            <div class="w-12 h-12 rounded-full bg-gray-200 mr-3 flex items-center justify-center flex-shrink-0">
+                <i class="fa fa-ban text-gray-400"></i>
+            </div>
+            <div>
+                <p class="font-medium text-gray-800">${positionName}</p>
+                <p class="text-gray-500 text-sm">ABSTAINED</p>
+            </div>
+        `;
         voteReviewList.appendChild(listItem);
     });
 
@@ -300,6 +422,12 @@ function confirmVote() {
 
 <script>
 function selectCandidate(element, candidateId, positionId, maxVote) {
+    // Ignore clicks on the platform button or its children
+    if (event && (event.target.classList.contains('platform-btn') || 
+        event.target.closest('.platform-btn'))) {
+        return;
+    }
+    
     // Uncheck abstain option if a candidate is selected
     let abstainCheckbox = document.querySelector(`input[name='abstain[]'][value='${positionId}']`);
     if (abstainCheckbox && abstainCheckbox.checked) {
@@ -314,58 +442,332 @@ function selectCandidate(element, candidateId, positionId, maxVote) {
         selectedCandidates.forEach(c => {
             c.classList.remove("selected");
             c.querySelector("input").value = "";
-            c.querySelector("img").style.border = "3px solid transparent";
+            c.querySelector(".check-icon").classList.add("hidden");
+            
+            // Reset visual appearance
+            c.classList.remove("border-green-500");
+            c.classList.add("border");
         });
-    } else if (selectedCandidates.length >= maxVote) {
-        alert("You can only select up to " + maxVote + " candidates for this position.");
+    } else if (selectedCandidates.length >= maxVote && !element.classList.contains("selected")) {
+        // Show warning but don't prevent deselection
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-0 left-0 w-full flex items-center justify-center z-50 bg-opacity-80 p-4';
+        toast.innerHTML = `
+            <div class="bg-white rounded-lg shadow-xl p-4 mx-4 max-w-md w-full border-l-4 border-yellow-500 flex items-center">
+                <div class="flex-shrink-0 text-yellow-500">
+                    <i class="fa fa-exclamation-triangle text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-gray-700">You can only select up to ${maxVote} candidate(s) for this position.</p>
+                </div>
+                <button class="ml-auto text-gray-400 hover:text-gray-600" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+        
         return;
     }
 
+    // Toggle selection state
     if (element.classList.contains("selected")) {
         // Deselect if already selected
         element.classList.remove("selected");
+        element.classList.remove("border-green-500");
+        element.classList.add("border");
         element.querySelector("input").value = "";
-        element.querySelector("img").style.border = "3px solid transparent";
+        element.querySelector(".check-icon").classList.add("hidden");
     } else {
         // Select the candidate
         element.classList.add("selected");
+        element.classList.remove("border");
+        element.classList.add("border-green-500");
         element.querySelector("input").value = candidateId;
-        element.querySelector("img").style.border = "3px solid #70C237";
+        element.querySelector(".check-icon").classList.remove("hidden");
     }
 }
+</script>
 
+<script>
 function handleAbstain(checkbox, positionId) {
     let positionContainer = document.getElementById(positionId);
-    let candidates = positionContainer.querySelectorAll(".candidate");
+    let candidates = positionContainer.querySelectorAll(".candidate-card");
 
     if (checkbox.checked) {
         // If abstain is checked, deselect all candidates for this position
         candidates.forEach(candidate => {
             candidate.classList.remove("selected");
+            candidate.classList.remove("border-green-500");
+            candidate.classList.add("border");
             candidate.querySelector("input").value = "";
-            candidate.querySelector("img").style.border = "3px solid transparent";
+            
+            // Hide check icon
+            let checkIcon = candidate.querySelector(".check-icon");
+            if (checkIcon) {
+                checkIcon.classList.add("hidden");
+            }
         });
     }
 }
 </script>
+
+<script>
+// Function to view a candidate's platform
+function viewPlatform(candidateId, candidateName) {
+    // Set the modal title
+    document.getElementById('platformModalTitle').textContent = candidateName + "'s Platform";
+    
+    // Clear previous content
+    document.getElementById('platformContent').innerHTML = `
+        <div class="p-12 flex items-center justify-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+        </div>
+    `;
+    
+    // Find the candidate card to extract image and partylist
+    const candidateCards = document.querySelectorAll('.candidate-card');
+    let candidateCard = null;
+    
+    candidateCards.forEach(card => {
+        const inputElement = card.querySelector('input');
+        if (inputElement && inputElement.name.includes(`candidates[`) && card.querySelector('h4').textContent.trim() === candidateName) {
+            candidateCard = card;
+        }
+    });
+    
+    if (candidateCard) {
+        // Set candidate image
+        const imageUrl = candidateCard.querySelector('img').src;
+        document.getElementById('platformCandidateImage').innerHTML = `
+            <img src="${imageUrl}" class="w-full h-full object-cover">
+        `;
+        
+        // Set candidate name
+        document.getElementById('platformCandidateName').textContent = candidateName;
+        
+        // Set partylist if available
+        const partylistElement = candidateCard.querySelector('.bg-gray-100');
+        if (partylistElement) {
+            document.getElementById('platformCandidatePartylist').textContent = partylistElement.textContent;
+        } else {
+            document.getElementById('platformCandidatePartylist').textContent = "Independent";
+        }
+    }
+    
+    // Show the modal
+    $('#platformModal').modal('show');
+    
+    // Fetch the platform data from the server
+    fetch(`get_platform.php?candidate_id=${candidateId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Successful response
+            if (data.success) {
+                document.getElementById('platformContent').innerHTML = `
+                    <div class="bg-green-50 p-6 rounded-lg shadow-sm border-l-4 border-green-500">
+                        <h4 class="font-bold text-green-800 mb-3 flex items-center text-lg">
+                            <i class="fa fa-bullhorn mr-2"></i>Platform Statement
+                        </h4>
+                        <div class="text-gray-700 leading-relaxed">
+                            ${data.platform.vision || 'No platform statement provided.'}
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                            <span class="text-green-600 text-sm italic">
+                                <i class="fa fa-quote-right mr-1"></i> Candidate's vision
+                            </span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Error from the server
+                document.getElementById('platformContent').innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="text-5xl text-green-200 mb-4"><i class="fa fa-lightbulb-o"></i></div>
+                        <h3 class="text-xl font-bold text-gray-700 mb-3">No Platform Details</h3>
+                        <p class="text-gray-500 bg-green-50 inline-block px-4 py-2 rounded-full">
+                            <i class="fa fa-info-circle mr-2"></i>This candidate has not provided any platform details yet.
+                        </p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            // Network or other error
+            document.getElementById('platformContent').innerHTML = `
+                <div class="bg-green-50 p-6 rounded-lg text-center shadow-sm">
+                    <div class="text-3xl text-green-400 mb-4"><i class="fa fa-exclamation-circle"></i></div>
+                    <h3 class="font-bold text-green-700 text-lg mb-2">Error Loading Platform</h3>
+                    <p class="text-gray-600 bg-white inline-block px-4 py-2 rounded-lg shadow-inner">
+                        <i class="fa fa-refresh mr-2"></i>There was a problem loading this candidate's platform. Please try again later.
+                    </p>
+                </div>
+            `;
+            console.error('Error fetching platform:', error);
+        });
+}
+</script>
+
 <div id="confirmationModal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Confirm Your Votes</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-lg overflow-hidden shadow-lg">
+            <div class="modal-header bg-gradient-to-r from-green-600 to-green-400 text-white border-0">
+                <h4 class="modal-title font-bold text-xl md:text-2xl">Review Your Votes</h4>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
             </div>
-            <div class="modal-body">
-                <h5 class="text-center">Please review your votes before submitting:</h5>
-                <ul id="voteReviewList" class="list-group"></ul>
+            <div class="modal-body p-0">
+                <div class="p-5 bg-gray-50">
+                    <h5 class="text-center text-gray-800 text-lg md:text-xl font-bold mb-3">Please confirm your selections:</h5>
+                </div>
+                <div id="voteReviewList" class="max-h-96 overflow-y-auto">
+                    <!-- Vote list will be inserted here via JavaScript -->
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Edit Choices</button>
-                <button type="submit" name="submit_votes" class="btn btn-success" form="voteForm">Submit Votes</button>
+            <div class="modal-footer bg-gray-50 border-0 flex justify-between p-4">
+                <button type="button" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg flex items-center transition duration-200" data-dismiss="modal">
+                    <i class="fa fa-edit mr-2"></i> Edit Choices
+                </button>
+                <button type="submit" name="submit_votes" class="bg-gradient-to-r from-green-600 to-green-400 hover:from-green-700 hover:to-green-500 text-white font-bold py-3 px-6 rounded-lg flex items-center transition duration-200" form="voteForm">
+                    <i class="fa fa-check-circle mr-2"></i> Submit Votes
+                </button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Platform Modal -->
+<div id="platformModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-lg overflow-hidden shadow-lg">
+            <div class="modal-header bg-gradient-to-r from-green-600 to-green-400 text-white border-0">
+                <h4 class="modal-title font-bold text-xl md:text-2xl" id="platformModalTitle">Candidate Platform</h4>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="flex items-center mb-6">
+                    <div id="platformCandidateImage" class="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-green-100 mr-4 flex-shrink-0">
+                        <!-- Candidate image will be inserted here -->
+                    </div>
+                    <div>
+                        <h3 id="platformCandidateName" class="text-xl md:text-2xl font-bold text-gray-800"></h3>
+                        <p id="platformCandidatePartylist" class="text-green-600 font-medium"></p>
+                    </div>
+                </div>
+                
+                <div class="space-y-4" id="platformContent">
+                    <div class="p-12 flex items-center justify-center">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-gray-50 border-0 p-4">
+                <button type="button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg flex items-center transition duration-200" data-dismiss="modal">
+                    <i class="fa fa-times mr-2"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Responsive image fixes */
+    .candidate-card {
+        display: flex;
+        flex-direction: column;
+        border-width: 2px;
+        border-color: #e5e7eb;
+        transition: all 0.3s ease;
+    }
+    
+    .candidate-card.selected {
+        border-color: #10B981 !important;
+        border-width: 3px !important;
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .candidate-card .relative {
+        position: relative;
+        height: 0;
+        overflow: hidden;
+    }
+    
+    /* Ensure images maintain aspect ratio */
+    @media (max-width: 640px) {
+        .candidate-card .relative {
+            padding-top: 100%; /* 1:1 Aspect Ratio */
+        }
+        
+        .candidate-card h4 {
+            font-size: 1.25rem !important; /* Larger font on mobile */
+            line-height: 1.3;
+            padding: 0.25rem 0;
+        }
+        
+        .candidate-grid {
+            gap: 1rem !important; /* Tighter grid on mobile */
+        }
+    }
+    
+    /* Text enhancements */
+    .text-primary {
+        color: #38A169;
+    }
+    
+    /* Animation for title */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate__fadeIn {
+        animation: fadeIn 0.8s ease-out;
+    }
+    
+    /* Highlighted selected card */
+    .check-icon {
+        display: flex !important;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .selected .check-icon {
+        opacity: 1;
+    }
+    
+    /* Platform button styles */
+    .platform-btn {
+        z-index: 5;
+        position: relative;
+    }
+    
+    /* Make sure the platform button doesn't trigger the candidate selection */
+    .candidate-card {
+        position: relative;
+    }
+    
+    /* Ensure proper modal display on mobile */
+    @media (max-width: 640px) {
+        .modal-dialog {
+            margin: 0.5rem;
+        }
+        
+        #platformCandidateImage {
+            width: 3.5rem;
+            height: 3.5rem;
+        }
+    }
+</style>
 
 </body>
 </html>

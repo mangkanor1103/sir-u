@@ -73,71 +73,165 @@ if (isset($_POST['register'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verification</title>
+    <title>Student Verification | SIR-U</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="https://unpkg.com/alpinejs@3.10.3/dist/cdn.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .form-input {
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen flex items-center justify-center p-4">
 
-<div class="flex items-center justify-center min-h-screen">
-    <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-md transform transition-all duration-500 hover:scale-105">
-        <div class="text-center">
-            <i class="fas fa-user-check text-green-500 text-4xl mb-4"></i>
-            <h2 class="text-2xl font-bold text-green-600">Verification</h2>
+<div class="w-full max-w-md" x-data="{ formActive: true }">
+    <div class="bg-white rounded-xl overflow-hidden shadow-xl">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-center">
+            <div class="bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
+                <i class="fas fa-user-check text-white text-2xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-white">Student Verification</h2>
+            <p class="text-green-100 text-sm mt-1">Please complete your registration</p>
         </div>
 
-        <?php if (isset($_SESSION['error'])): ?>
-            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mt-4 rounded">
-                <p class="font-bold">Error</p>
-                <p><?= $_SESSION['error']; unset($_SESSION['error']); ?></p>
-            </div>
-        <?php endif; ?>
+        <!-- Notifications -->
+        <div class="p-6">
+            <?php if (isset($_SESSION['error'])): ?>
+                <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-md flex items-start" 
+                     x-data="{ show: true }" 
+                     x-show="show"
+                     x-transition>
+                    <div class="text-red-500 mr-3">
+                        <i class="fas fa-exclamation-circle text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium text-red-800">Error</p>
+                        <p class="text-red-700 text-sm"><?= $_SESSION['error']; unset($_SESSION['error']); ?></p>
+                    </div>
+                    <button @click="show = false" class="text-red-400 hover:text-red-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            <?php endif; ?>
 
-        <?php if (isset($_SESSION['success'])): ?>
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mt-4 rounded">
-                <p class="font-bold">Success</p>
-                <p><?= $_SESSION['success']; unset($_SESSION['success']); ?></p>
-            </div>
-        <?php endif; ?>
+            <?php if (isset($_SESSION['success'])): ?>
+                <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-md flex items-start"
+                     x-data="{ show: true }" 
+                     x-show="show"
+                     x-transition>
+                    <div class="text-green-500 mr-3">
+                        <i class="fas fa-check-circle text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium text-green-800">Success</p>
+                        <p class="text-green-700 text-sm"><?= $_SESSION['success']; unset($_SESSION['success']); ?></p>
+                    </div>
+                    <button @click="show = false" class="text-green-400 hover:text-green-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            <?php endif; ?>
 
-        <form method="POST" action="" class="mt-6">
-            <div class="mb-4">
-                <label for="name" class="block text-gray-700 font-medium">Name</label>
-                <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
-            </div>
-            <div class="mb-4">
-                <label for="year_section" class="block text-gray-700 font-medium">Year and Section</label>
-                <select id="year_section" name="year_section" class="w-full px-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                    <option value="">Select Year and Section</option>
-                    <?php
-                    while ($row = $courses_result->fetch_assoc()) {
-                        echo "<option value='" . htmlspecialchars($row['year_section']) . "'>" . htmlspecialchars($row['year_section']) . "</option>";
-                    }
-                    ?>
-                </select>
-            </div>
-            <div class="mb-4">
-                <label for="course" class="block text-gray-700 font-medium">Course</label>
-                <select id="course" name="course" class="w-full px-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                    <option value="">Select Course</option>
-                    <?php
-                    $courses_result = $conn->query($courses_query); // Re-fetch courses
-                    while ($row = $courses_result->fetch_assoc()) {
-                        echo "<option value='" . htmlspecialchars($row['course']) . "'>" . htmlspecialchars($row['course']) . "</option>";
-                    }
-                    ?>
-                </select>
-            </div>
-            <button type="submit" name="register" class="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition duration-300">
-                <i class="fas fa-check-circle"></i> Register
-            </button>
-        </form>
+            <!-- Form -->
+            <form method="POST" action="" class="space-y-5" x-show="formActive">
+                <div class="space-y-1">
+                    <label for="name" class="block text-gray-700 font-medium text-sm">Full Name</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        <input type="text" id="name" name="name" placeholder="Enter your full name" 
+                               class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50 form-input" required>
+                    </div>
+                </div>
+                
+                <div class="space-y-1">
+                    <label for="year_section" class="block text-gray-700 font-medium text-sm">Year and Section</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                            <i class="fas fa-layer-group"></i>
+                        </span>
+                        <select id="year_section" name="year_section" 
+                                class="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50 appearance-none form-input" required>
+                            <option value="" disabled selected>Select Year and Section</option>
+                            <?php
+                            mysqli_data_seek($courses_result, 0); // Reset pointer
+                            while ($row = $courses_result->fetch_assoc()) {
+                                echo "<option value='" . htmlspecialchars($row['year_section']) . "'>" . htmlspecialchars($row['year_section']) . "</option>";
+                            }
+                            ?>
+                        </select>
+                        <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 pointer-events-none">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="space-y-1">
+                    <label for="course" class="block text-gray-700 font-medium text-sm">Course</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                            <i class="fas fa-book"></i>
+                        </span>
+                        <select id="course" name="course" 
+                                class="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50 appearance-none form-input" required>
+                            <option value="" disabled selected>Select Course</option>
+                            <?php
+                            $courses_result = $conn->query($courses_query); // Re-fetch courses
+                            while ($row = $courses_result->fetch_assoc()) {
+                                echo "<option value='" . htmlspecialchars($row['course']) . "'>" . htmlspecialchars($row['course']) . "</option>";
+                            }
+                            ?>
+                        </select>
+                        <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 pointer-events-none">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                    </div>
+                </div>
+                
+                <button type="submit" name="register" 
+                        class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-6 rounded-lg font-medium flex items-center justify-center space-x-2 hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-green-500/30 transform hover:-translate-y-1">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Complete Registration</span>
+                </button>
+            </form>
 
-        <a href="index.php" class="flex items-center justify-center mt-4 text-gray-600 hover:text-green-500 transition duration-300">
-            <i class="fas fa-arrow-left mr-2"></i> Back to Home
-        </a>
+            <div class="text-center mt-6">
+                <a href="index.php" class="inline-flex items-center text-gray-600 hover:text-green-600 font-medium transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text-center mt-4 text-gray-500 text-xs">
+        <p>© <?= date('Y') ?> SIR-U Election System</p>
     </div>
 </div>
+
+<script>
+    // Add some simple form validation feedback
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const name = document.getElementById('name').value.trim();
+        const yearSection = document.getElementById('year_section').value;
+        const course = document.getElementById('course').value;
+        
+        if (!name || !yearSection || !course) {
+            e.preventDefault();
+            alert('Please fill in all required fields');
+        }
+    });
+</script>
 
 </body>
 </html>

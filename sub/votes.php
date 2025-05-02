@@ -2,15 +2,71 @@
 session_start();
 require 'conn.php';
 
+// Security enhancements - prevent caching to disable back button functionality
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+header("Expires: 0");
+
+// Verify proper session exists
 if (!isset($_SESSION['election_id'])) {
     header("Location: index.php");
     exit();
 }
+
+// Implement session fixation protection
+if (!isset($_SESSION['last_regeneration']) || 
+    (time() - $_SESSION['last_regeneration']) > 1800) {
+    // Regenerate session ID every 30 minutes
+    session_regenerate_id(true);
+    $_SESSION['last_regeneration'] = time();
+}
+
+// Use the timestamp mechanism to detect if user is trying to navigate backwards
+if (!isset($_SESSION['last_access_time'])) {
+    $_SESSION['last_access_time'] = time();
+}
+
+// Store current page as the last visited page
+$_SESSION['last_page'] = 'votes.php';
+
+// Set default refresh interval if not set
+if (!isset($_SESSION['refresh_interval'])) {
+    $_SESSION['refresh_interval'] = 60; // Default: 60 seconds (1 minute)
+}
+
+// Update refresh interval if requested
+if (isset($_POST['set_refresh'])) {
+    $new_interval = intval($_POST['refresh_interval']);
+    if ($new_interval >= 10 && $new_interval <= 300) { // Between 10 seconds and 5 minutes
+        $_SESSION['refresh_interval'] = $new_interval;
+    }
+}
+
+// Fix redirect loop - only check HTTP_REFERER if it exists and is not this page
+// Don't redirect if we're already on the votes.php page
+if (isset($_SERVER['HTTP_REFERER']) && 
+    !empty($_SERVER['HTTP_REFERER']) &&
+    !strpos($_SERVER['HTTP_REFERER'], 'votes.php') && 
+    $_SERVER['REQUEST_URI'] != '/sir-u/sub/votes.php') {
+    
+    // Set a flag to avoid infinite redirects
+    if (!isset($_SESSION['redirect_check'])) {
+        $_SESSION['redirect_check'] = true;
+        header("Location: votes.php");
+        exit();
+    }
+} else {
+    // Clear the redirect check flag when we're properly on the page
+    unset($_SESSION['redirect_check']);
+}
+
+// Handle back button POST - redirect to same page instead
 if (isset($_POST['back'])) {
-    unset($_SESSION['election_id']);
-    header("Location: ../index.php");
+    header("Location: votes.php");
     exit();
 }
+
 $election_id = $_SESSION['election_id'];
 
 // Fetch election details
@@ -49,7 +105,7 @@ if (isset($_POST['end_election']) || ($election_status == 1 && $election_end_tim
                                 (SELECT GROUP_CONCAT(CONCAT(id, '|', position_id, '|', firstname, '|', lastname, '|', photo, '|', platform, '|', partylist_id) SEPARATOR ';') FROM candidates WHERE election_id = '$election_id'),
                                 (SELECT GROUP_CONCAT(CONCAT(id, '|', voters_id) SEPARATOR ';') FROM voters WHERE election_id = '$election_id'),
                                 (SELECT GROUP_CONCAT(CONCAT(id, '|', voters_id, '|', candidate_id, '|', position_id, '|', timestamp) SEPARATOR ';') FROM votes WHERE election_id = '$election_id'),
-                                (SELECT GROUP_CONCAT(CONCAT(position_id, '|', description, '|', max_vote) SEPARATOR ';') FROM positions WHERE election_id = '$election_id'),
+                                (SELECT GROUP_CONConcat(CONCAT(position_id, '|', description, '|', max_vote) SEPARATOR ';') FROM positions WHERE election_id = '$election_id'),
                                 (SELECT GROUP_CONCAT(CONCAT(partylist_id, '|', name) SEPARATOR ';') FROM partylists WHERE election_id = '$election_id'))";
             $conn->query($history_sql) or die($conn->error);
         }
@@ -105,7 +161,7 @@ if (isset($_POST['extend_time'])) {
     }
 }
 
-// Calculate remaining time
+// Update the remaining time calculation section
 $remaining_time = null;
 if ($election_status == 1 && $election_end_time) {
     $remaining_time = strtotime($election_end_time) - time();
@@ -143,15 +199,26 @@ $positionsData = [];
 while ($row = $results->fetch_assoc()) {
     $candidate_count = $row['candidate_count'];
     $max_vote = $row['max_vote'];
+    $position_id = $row['position_id'];
 
     // Determine if the candidate is a winner
     $is_winner = false;
 
-    // For positions with max_vote = 1, only the top candidate is the winner
+    // For positions where max_vote = 1, we need to check 50%+1 rule for specific positions
     if ($max_vote == 1) {
-        $is_winner = count($positionsData[$row['position']] ?? []) < $max_vote;
+        // Check if this is a position that needs 50%+1 
+        $requires_majority = positionRequiresMajority($position_id, $conn);
+        
+        if ($requires_majority) {
+            // Position requires majority (50%+1)
+            $is_winner = ($row['total_votes'] >= $winning_threshold && 
+                         count($positionsData[$row['position']] ?? []) < $max_vote);
+        } else {
+            // Position only requires highest vote count
+            $is_winner = count($positionsData[$row['position']] ?? []) < $max_vote;
+        }
     } else {
-        // For positions with max_vote > 1, select up to max_vote candidates
+        // For positions with max_vote > 1, select up to max_vote candidates with highest votes
         $current_winners = $positionsData[$row['position']] ?? [];
         if (count($current_winners) < $max_vote) {
             $is_winner = true;
@@ -164,6 +231,15 @@ while ($row = $results->fetch_assoc()) {
         'is_winner' => $is_winner
     ];
 }
+
+// Add this function to determine which positions require majority voting
+function positionRequiresMajority($position_id, $conn) {
+    // You could store this in the database, or use a predefined list
+    // For now, let's use a simple array of position IDs that require majority
+    $majority_positions = [1]; // Assuming position_id 1 requires majority (e.g., President)
+    
+    return in_array($position_id, $majority_positions);
+}
 ?>
 
 <!DOCTYPE html>
@@ -171,33 +247,281 @@ while ($row = $results->fetch_assoc()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Election Results</title>
+    <title>Election Results Dashboard</title>
+    <!-- Add refresh meta tag -->
+    <meta http-equiv="refresh" content="<?php echo $_SESSION['refresh_interval']; ?>">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1e5631;
+            --primary-light: #e9f5e9;
+            --accent-color: #ffc107;
+            --danger-color: #e53935;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #164a25, #2e7d32);
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border-left: 4px solid transparent;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            border-left-color: var(--primary-color);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(46, 125, 50, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #2e7d32;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1e5631;
+        }
+        
+        /* Animated elements */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Winner badge */
+        .winner-badge {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .winner-badge::after {
+            content: 'WINNER';
+            position: absolute;
+            top: 10px;
+            right: -35px;
+            transform: rotate(45deg);
+            background: var(--accent-color);
+            color: #000;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 35px;
+            z-index: 1;
+        }
+        
+        /* Progress bars */
+        .progress-bar {
+            transition: width 1s ease-out;
+        }
+        
+        /* Timer display */
+        .time-segment {
+            background: #2e7d32;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            width: 2.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .time-segment::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .time-colon {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #2e7d32;
+            animation: blinkColon 1s infinite;
+        }
+        
+        @keyframes blinkColon {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .warning-time .time-segment {
+            background: #ff9800;
+            animation: pulseWarning 1.5s infinite;
+        }
+        
+        .danger-time .time-segment {
+            background: #e53935;
+            animation: pulseDanger 1s infinite;
+        }
+        
+        @keyframes pulseWarning {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
+        }
+        
+        @keyframes pulseDanger {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.7); transform: scale(1); }
+            50% { box-shadow: 0 0 0 10px rgba(229, 57, 53, 0); transform: scale(1.05); }
+        }
+        
+        /* Final Countdown Animation */
+        @keyframes finalCountNumber {
+            0% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.5); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+        
+        .final-count-number {
+            animation: finalCountNumber 1s ease-out forwards;
+            text-shadow: 0 0 20px rgba(229, 57, 53, 0.8);
+        }
+        
+        /* Floating background elements */
+        @keyframes float-slow {
+            0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); }
+            50% { transform: translateY(-20px) translateX(10px) rotate(5deg); }
+        }
+        
+        @keyframes float-medium {
+            0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); }
+            50% { transform: translateY(-15px) translateX(-15px) rotate(-5deg); }
+        }
+        
+        @keyframes float-fast {
+            0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); }
+            50% { transform: translateY(-10px) translateX(5px) rotate(3deg); }
+        }
+        
+        .float-slow { animation: float-slow 8s ease-in-out infinite; }
+        .float-medium { animation: float-medium 6s ease-in-out infinite; }
+        .float-fast { animation: float-fast 4s ease-in-out infinite; }
+        
+        /* Enhanced voting bars */
+        .vote-bar {
+            height: 12px;
+            transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .vote-bar-bg {
+            height: 12px;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(0, 0, 0, 0.05),
+                rgba(0, 0, 0, 0.05) 10px,
+                rgba(0, 0, 0, 0.1) 10px,
+                rgba(0, 0, 0, 0.1) 20px
+            );
+        }
+
+        /* Add styles for the refresh indicator */
+        .refresh-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(46, 125, 50, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .refresh-indicator:hover {
+            background: rgba(30, 86, 49, 1);
+            transform: translateY(-3px);
+        }
+        
+        .refresh-spinner {
+            animation: spin 2s linear infinite;
+        }
+        
+        .refresh-countdown {
+            min-width: 24px;
+            text-align: center;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
 
     <!-- Navigation Bar -->
-    <nav class="bg-green-700 text-white shadow-lg">
+    <nav class="gradient-bg text-white shadow-lg sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <img src="../pics/logo.png" alt="Logo" class="h-10 w-10">
+                <img src="../pics/logo.png" alt="Logo" class="h-12 w-12 rounded-full shadow-md border-2 border-white">
                 <a href="home.php" class="text-2xl font-bold flex items-center space-x-2">
                     <i class="fas fa-poll"></i>
                     <span>Election Dashboard</span>
                 </a>
             </div>
             <ul class="flex space-x-6">
+                <!-- Add refresh settings button -->
                 <li>
-                    <button onclick="openLogoutModal()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center space-x-2">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Log Out</span>
+                    <button onclick="openRefreshModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-full shadow-md transition-all duration-300 flex items-center space-x-2">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Auto-Refresh</span>
                     </button>
                 </li>
                 <li>
-                    <button onclick="openExtendTimeModal()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center space-x-2">
+                    <button onclick="openExtendTimeModal()" class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-full shadow-md transition-all duration-300 flex items-center space-x-2">
                         <i class="fas fa-clock"></i>
                         <span>Extend Time</span>
+                    </button>
+                </li>
+                <li>
+                    <button onclick="openLogoutModal()" class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-full shadow-md transition-all duration-300 flex items-center space-x-2">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Log Out</span>
                     </button>
                 </li>
             </ul>
@@ -205,133 +529,895 @@ while ($row = $results->fetch_assoc()) {
     </nav>
 
     <!-- Main Content -->
-    <div class="container mx-auto mt-10">
-        <h1 class="text-4xl font-bold text-center mb-6 text-green-700">Election Results</h1>
-
-        <!-- Remaining Time -->
-        <?php if ($remaining_time !== null): ?>
-            <div class="bg-green-700 text-white text-center py-3 rounded mb-6 flex items-center justify-center space-x-2">
-                <i class="fas fa-clock"></i>
-                <span>Remaining Time:</span>
-                <span id="remaining-time" class="font-bold"><?php echo gmdate("H:i:s", $remaining_time); ?></span>
+    <div class="container mx-auto mt-6 px-4 pb-16">
+        <!-- Centered Election Name -->
+        <div class="text-center mb-8 fade-in">
+            <h1 class="text-4xl font-bold text-green-700 mb-3">
+                <?php echo htmlspecialchars($election_name); ?>
+            </h1>
+            <div class="w-24 h-1 bg-green-600 mx-auto"></div>
+            <p class="text-gray-600 mt-3">Real-time Election Results</p>
+        </div>
+        
+        <!-- Election Info Card -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8 fade-in relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 -mt-8 -mr-8 bg-green-50 rounded-full opacity-70 z-0"></div>
+            <div class="absolute bottom-0 left-0 w-24 h-24 -mb-6 -ml-6 bg-green-50 rounded-full opacity-70 z-0"></div>
+            
+            <div class="relative z-10">
+                <!-- Remaining Time Display -->
+                <?php if ($remaining_time !== null): ?>
+                <div class="flex justify-center mb-6">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1 text-center font-medium">REMAINING TIME</p>
+                        <div id="time-display-container" class="flex items-center space-x-1">
+                            <div class="flex flex-col items-center">
+                                <div id="hours-display" class="time-segment text-xl">00</div>
+                                <span class="text-xs text-gray-500 mt-1">HRS</span>
+                            </div>
+                            <div class="time-colon">:</div>
+                            <div class="flex flex-col items-center">
+                                <div id="minutes-display" class="time-segment text-xl">00</div>
+                                <span class="text-xs text-gray-500 mt-1">MIN</span>
+                            </div>
+                            <div class="time-colon">:</div>
+                            <div class="flex flex-col items-center">
+                                <div id="seconds-display" class="time-segment text-xl">00</div>
+                                <span class="text-xs text-gray-500 mt-1">SEC</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+            
+                <!-- Stats Cards Row - Only showing total voters and voters who voted -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                    <!-- Total Voters Card -->
+                    <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-4 border-l-4 border-green-500 shadow-md card-hover">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Total Eligible Voters</p>
+                                <div class="flex items-end">
+                                    <p class="text-3xl font-bold text-green-700"><?php echo $total_voters; ?></p>
+                                    <p class="text-sm text-gray-500 ml-2 mb-1">registered</p>
+                                </div>
+                            </div>
+                            <div class="bg-white p-3 rounded-full shadow-inner">
+                                <i class="fas fa-users text-green-700 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Votes Cast Card -->
+                    <div id="votes-cast-container" class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-4 border-l-4 border-blue-500 shadow-md card-hover">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Votes Cast</p>
+                                <div class="flex items-end">
+                                    <p id="votes-cast-count" class="text-3xl font-bold text-blue-700">0</p>
+                                    <p class="text-sm text-gray-500 ml-2 mb-1">voters</p>
+                                </div>
+                            </div>
+                            <div class="bg-white p-3 rounded-full shadow-inner">
+                                <i class="fas fa-vote-yea text-blue-700 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 h-1 bg-gray-200 rounded-full">
+                            <div id="votes-cast-bar" class="h-1 bg-blue-500 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                        </div>
+                        <div class="mt-1 text-right text-xs text-gray-500">
+                            <span id="votes-cast-percentage">0%</span> turnout
+                        </div>
+                    </div>
+                </div>
             </div>
-        <?php endif; ?>
-
-        <!-- Results Table -->
+        </div>
+        
+        <!-- Results Tables -->
         <?php foreach ($positionsData as $position => $candidates): ?>
-            <h2 class="text-2xl font-bold mt-6 text-gray-700"><?php echo htmlspecialchars($position); ?></h2>
-            <div class="bg-white shadow-md rounded-lg p-6 mt-4">
-                <table class="table-auto w-full border-collapse border border-gray-300">
-                    <thead class="bg-green-700 text-white">
-                        <tr>
-                            <th class="border border-gray-300 px-4 py-2">Candidate</th>
-                            <th class="border border-gray-300 px-4 py-2">Total Votes</th>
-                            <th class="border border-gray-300 px-4 py-2">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($candidates as $candidate): ?>
-                            <tr class="hover:bg-green-100">
-                                <td class="border border-gray-300 px-4 py-2"><?php echo htmlspecialchars($candidate['candidate']); ?></td>
-                                <td class="border border-gray-300 px-4 py-2"><?php echo htmlspecialchars($candidate['total_votes']); ?></td>
-                                <td class="border border-gray-300 px-4 py-2">
-                                    <?php if ($candidate['is_winner']): ?>
-                                        <span class="text-green-700 font-bold">Winner</span>
-                                    <?php else: ?>
-                                        <span class="text-gray-500">Not Qualified</span>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+            <div class="bg-white shadow-lg rounded-xl p-6 mt-8 card-hover fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-green-700 flex items-center">
+                        <i class="fas fa-user-tie mr-2"></i><?php echo htmlspecialchars($position); ?>
+                    </h2>
+                    <div class="bg-purple-100 rounded-full px-4 py-1.5 text-sm flex items-center">
+                        <i class="fas fa-ban text-purple-700 mr-1.5"></i>
+                        <span class="text-gray-700">Abstained: </span>
+                        <span class="font-bold text-purple-700 ml-1"><?php echo $abstain_count[$position] ?? 'N/A'; ?></span>
+                    </div>
+                </div>
+                
+                <div class="space-y-6">
+                    <?php 
+                    // Determine if there's a tie
+                    $vote_counts = array_column($candidates, 'total_votes');
+                    $max_votes = max($vote_counts);
+                    $tied_candidates = array_filter($candidates, function($c) use ($max_votes) { 
+                        return $c['total_votes'] == $max_votes; 
+                    });
+                    $is_tie = count($tied_candidates) > 1 && $max_votes > 0;
+                    
+                    foreach ($candidates as $index => $candidate): 
+                        $percentage = $total_voters > 0 ? round(($candidate['total_votes'] / $total_voters) * 100, 1) : 0;
+                        $status_class = '';
+                        $status_text = '';
+                        $bar_color = 'bg-gray-400';
+                        $icon_class = '';
+                        
+                        // Determine status and class
+                        if ($candidate['total_votes'] == 0) {
+                            $status_class = 'text-gray-500 bg-gray-100';
+                            $status_text = 'No Votes';
+                            $bar_color = 'bg-gray-400';
+                            $icon_class = 'fa-face-meh';
+                        } elseif ($is_tie && $candidate['total_votes'] == $max_votes) {
+                            $status_class = 'text-yellow-600 font-bold bg-yellow-100';
+                            $status_text = 'Tie';
+                            $bar_color = 'bg-yellow-500';
+                            $icon_class = 'fa-balance-scale';
+                        } elseif ($candidate['is_winner']) {
+                            $status_class = 'text-green-600 font-bold bg-green-100';
+                            $status_text = 'Winner';
+                            $bar_color = 'bg-green-600';
+                            $icon_class = 'fa-crown';
+                        } else {
+                            $status_class = 'text-red-500 bg-red-50';
+                            $status_text = 'Not Qualified';
+                            $bar_color = 'bg-blue-500';
+                            $icon_class = 'fa-xmark';
+                        }
+                        
+                        // Determine max width of bar for comparison
+                        $max_percentage = $max_votes > 0 ? 100 : 0;
+                        $relative_percentage = $max_votes > 0 ? ($candidate['total_votes'] / $max_votes) * 100 : 0;
+                    ?>
+                    <div class="bg-gray-50 p-4 rounded-xl hover:shadow-md transition-shadow duration-200 relative <?php echo $candidate['is_winner'] ? 'border-l-4 border-green-500' : ''; ?>">
+                        <div class="flex flex-wrap justify-between items-center mb-3">
+                            <div class="font-medium text-lg"><?php echo htmlspecialchars($candidate['candidate']); ?></div>
+                            <div class="flex items-center space-x-3">
+                                <div class="font-bold text-lg flex items-center">
+                                    <span><?php echo $candidate['total_votes']; ?></span>
+                                    <span class="text-gray-500 text-sm ml-1">votes</span>
+                                </div>
+                                <div class="<?php echo $status_class; ?> px-3 py-1 rounded-full flex items-center">
+                                    <i class="fas <?php echo $icon_class; ?> mr-1.5 text-sm"></i>
+                                    <?php echo $status_text; ?>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Enhanced Bar representation -->
+                        <div class="relative vote-bar-bg rounded-full overflow-hidden mb-1">
+                            <div class="absolute top-0 left-0 h-full <?php echo $bar_color; ?> vote-bar transition-all duration-1000 rounded-full" 
+                                 style="width: <?php echo $relative_percentage; ?>%;" data-width="<?php echo $relative_percentage; ?>">
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                            <div>0 votes</div>
+                            <div><?php echo $percentage; ?>% of total voters</div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                    
+                    <!-- Enhanced Abstain Bar -->
+                    <?php 
+                    $abstain = $abstain_count[$position] ?? 0;
+                    $abstain_percentage = $total_voters > 0 ? round(($abstain / $total_voters) * 100, 1) : 0;
+                    $relative_abstain_percentage = $max_votes > 0 ? ($abstain / $max_votes) * 100 : 0;
+                    ?>
+                    <div class="bg-gray-50 p-4 rounded-xl hover:shadow-md transition-shadow duration-200 mt-2">
+                        <div class="flex flex-wrap justify-between items-center mb-3">
+                            <div class="font-medium text-lg text-purple-700 flex items-center">
+                                <i class="fas fa-ban mr-1.5"></i> Abstained
+                            </div>
+                            <div class="font-bold text-lg flex items-center text-purple-700">
+                                <span><?php echo $abstain; ?></span>
+                                <span class="text-gray-500 text-sm ml-1">votes</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Enhanced Abstain Bar representation -->
+                        <div class="relative vote-bar-bg rounded-full overflow-hidden mb-1">
+                            <div class="absolute top-0 left-0 h-full bg-purple-500 vote-bar transition-all duration-1000 rounded-full" 
+                                 style="width: <?php echo $relative_abstain_percentage; ?>%;" data-width="<?php echo $relative_abstain_percentage; ?>">
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                            <div>0 votes</div>
+                            <div><?php echo $abstain_percentage; ?>% of total voters</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         <?php endforeach; ?>
     </div>
 
     <!-- Logout Confirmation Modal -->
-    <div id="logoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
-            <h2 class="text-2xl font-bold text-green-700 mb-4 flex items-center space-x-2">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Confirm Logout</span>
-            </h2>
-            <p class="text-gray-700 mb-6">Are you sure you want to logout?</p>
+    <div id="logoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-96 transform transition-all duration-300 scale-100">
+            <div class="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
+                <h2 class="text-2xl font-bold text-red-600 flex items-center">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    <span>Confirm Logout</span>
+                </h2>
+                <button onclick="closeLogoutModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <p class="text-gray-700 mb-6">Are you sure you want to logout from the election system?</p>
             <div class="flex justify-end space-x-4">
-                <button onclick="closeLogoutModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
-                <a href="../logout.php" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Logout</a>
+                <button onclick="closeLogoutModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg transition-all duration-300 flex items-center">
+                    <i class="fas fa-times mr-1"></i> Cancel
+                </button>
+                <a href="../logout.php" class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-lg transition-all duration-300 flex items-center">
+                    <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Extend Time Modal -->
-    <div id="extendTimeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
-            <h2 class="text-2xl font-bold text-green-700 mb-4 flex items-center space-x-2">
-                <i class="fas fa-clock"></i>
-                <span>Extend Election Time</span>
-            </h2>
+    <div id="extendTimeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-96 transform transition-all duration-300 scale-100">
+            <div class="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
+                <h2 class="text-2xl font-bold text-green-700 flex items-center">
+                    <i class="fas fa-clock mr-2"></i>
+                    <span>Extend Election Time</span>
+                </h2>
+                <button onclick="closeExtendTimeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
             <form method="POST" action="">
+                <p class="text-gray-600 mb-4">Please specify how much time you want to add to the current election.</p>
+                
                 <div class="mb-4">
-                    <label for="hours" class="block text-sm font-medium text-gray-700">Hours</label>
-                    <input type="number" id="hours" name="hours" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" min="0" value="0">
+                    <label for="hours" class="block text-sm font-medium text-gray-700 mb-1">Hours</label>
+                    <div class="flex items-center">
+                        <button type="button" onclick="decrementHours()" class="bg-green-100 hover:bg-green-200 text-green-700 h-10 w-10 flex items-center justify-center rounded-l-lg">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="number" id="hours" name="hours" class="h-10 block w-full text-center border-green-200 focus:border-green-500 focus:ring-green-500 text-2xl font-bold text-green-700" min="0" value="1">
+                        <button type="button" onclick="incrementHours()" class="bg-green-100 hover:bg-green-200 text-green-700 h-10 w-10 flex items-center justify-center rounded-r-lg">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="mb-4">
-                    <label for="minutes" class="block text-sm font-medium text-gray-700">Minutes</label>
-                    <input type="number" id="minutes" name="minutes" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" min="0" value="0">
+                
+                <div class="mb-6">
+                    <label for="minutes" class="block text-sm font-medium text-gray-700 mb-1">Minutes</label>
+                    <div class="flex items-center">
+                        <button type="button" onclick="decrementMinutes()" class="bg-green-100 hover:bg-green-200 text-green-700 h-10 w-10 flex items-center justify-center rounded-l-lg">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="number" id="minutes" name="minutes" class="h-10 block w-full text-center border-green-200 focus:border-green-500 focus:ring-green-500 text-2xl font-bold text-green-700" min="0" max="59" value="0">
+                        <button type="button" onclick="incrementMinutes()" class="bg-green-100 hover:bg-green-200 text-green-700 h-10 w-10 flex items-center justify-center rounded-r-lg">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="flex justify-end space-x-4">
-                    <button type="button" onclick="closeExtendTimeModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
-                    <button type="submit" name="extend_time" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Extend</button>
+                
+                <div class="bg-green-50 rounded-lg p-3 mb-6 border border-green-200">
+                    <div class="flex items-center text-green-700">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <span id="timePreview">Adding 1 hour to election</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeExtendTimeModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-5 py-2 rounded-lg transition-all duration-300 flex items-center">
+                        <i class="fas fa-times mr-1"></i> Cancel
+                    </button>
+                    <button type="submit" name="extend_time" id="extendButton" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg transition-all duration-300 flex items-center">
+                        <i class="fas fa-check mr-1"></i> Extend Time
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script>
-        // Real-time countdown for remaining time
-        let remainingTime = <?php echo $remaining_time; ?>;
+    <!-- Refresh Settings Modal -->
+    <div id="refreshModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-96 transform transition-all duration-300 scale-100">
+            <div class="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
+                <h2 class="text-2xl font-bold text-blue-600 flex items-center">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    <span>Auto-Refresh Settings</span>
+                </h2>
+                <button onclick="closeRefreshModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form method="POST" action="">
+                <p class="text-gray-600 mb-4">Set how frequently the page should automatically refresh to show the latest results.</p>
+                
+                <div class="mb-6">
+                    <label for="refresh_interval" class="block text-sm font-medium text-gray-700 mb-1">Refresh Interval (seconds)</label>
+                    <div class="flex items-center">
+                        <button type="button" onclick="decrementRefresh()" class="bg-blue-100 hover:bg-blue-200 text-blue-700 h-10 w-10 flex items-center justify-center rounded-l-lg">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="number" id="refresh_interval" name="refresh_interval" class="h-10 block w-full text-center border-blue-200 focus:border-blue-500 focus:ring-blue-500 text-2xl font-bold text-blue-700" min="10" max="300" value="<?php echo $_SESSION['refresh_interval']; ?>">
+                        <button type="button" onclick="incrementRefresh()" class="bg-blue-100 hover:bg-blue-200 text-blue-700 h-10 w-10 flex items-center justify-center rounded-r-lg">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2">Minimum: 10 seconds, Maximum: 5 minutes (300 seconds)</p>
+                </div>
+                
+                <div class="bg-blue-50 rounded-lg p-3 mb-6 border border-blue-200">
+                    <div class="flex items-center text-blue-700">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <span id="refreshPreview">Page will refresh every 60 seconds</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeRefreshModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-5 py-2 rounded-lg transition-all duration-300 flex items-center">
+                        <i class="fas fa-times mr-1"></i> Cancel
+                    </button>
+                    <button type="submit" name="set_refresh" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition-all duration-300 flex items-center">
+                        <i class="fas fa-check mr-1"></i> Save Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
+    <!-- Refresh Indicator -->
+    <div class="refresh-indicator" onclick="openRefreshModal()">
+        <i class="fas fa-sync-alt refresh-spinner"></i>
+        <span>Auto-refresh in <span id="refresh-countdown" class="refresh-countdown"><?php echo $_SESSION['refresh_interval']; ?></span>s</span>
+    </div>
+
+    <!-- Final Countdown Modal -->
+    <div id="finalCountdownModal" class="hidden fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50">
+        <div class="text-center max-w-xl w-full px-4">
+            <h2 class="text-4xl md:text-6xl font-bold text-white mb-8 tracking-wider">Election Ending In</h2>
+            
+            <div id="final-countdown-number" class="text-9xl md:text-[150px] font-bold text-red-500 mb-8 final-count-number">10</div>
+            
+            <div class="w-full h-3 mx-auto bg-gray-800 rounded-full overflow-hidden mb-12">
+                <div id="countdown-progress" class="h-full bg-red-600 transition-all duration-1000 rounded-full" style="width: 100%"></div>
+            </div>
+            
+            <p id="countdown-message" class="text-2xl text-white mt-6 animate-pulse">Please finalize your votes now!</p>
+        </div>
+    </div>
+    
+    <!-- Election End Modal -->
+    <div id="electionEndModal" class="hidden fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-lg w-full mx-4 text-center transform transition-all duration-500 scale-100 relative overflow-hidden">
+            <!-- Confetti background -->
+            <div class="absolute inset-0 overflow-hidden">
+                <div class="confetti-piece bg-red-500"></div>
+                <div class="confetti-piece bg-yellow-500"></div>
+                <div class="confetti-piece bg-blue-500"></div>
+                <div class="confetti-piece bg-green-500"></div>
+                <div class="confetti-piece bg-purple-500"></div>
+                <div class="confetti-piece bg-orange-500"></div>
+                <div class="confetti-piece bg-teal-500"></div>
+            </div>
+            
+            <div class="relative z-10">
+                <div class="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-check-circle text-5xl text-green-600"></i>
+                </div>
+                
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Election Completed!</h2>
+                <p class="text-xl text-gray-600 mb-6">The voting period has ended. Thank you for your participation.</p>
+                
+                <button onclick="redirectToResults()" class="bg-green-600 hover:bg-green-700 text-white py-3 px-8 rounded-lg text-lg font-bold transition-all duration-300 shadow-lg flex items-center justify-center mx-auto">
+                    <i class="fas fa-chart-bar mr-2"></i> View Results
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-12 bg-gradient-to-r from-green-700 to-green-900 text-white text-center py-6 shadow-lg relative overflow-hidden">
+        <!-- Animated background elements -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 left-1/4 w-12 h-12 bg-white rounded-full float-slow"></div>
+            <div class="absolute bottom-1/3 right-1/3 w-8 h-8 bg-white rounded-full float-medium"></div>
+            <div class="absolute bottom-0 left-1/2 w-10 h-10 bg-white rounded-full float-fast"></div>
+        </div>
+        
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-lg font-bold">© <?php echo date('Y'); ?> Election System</p>
+                    <p class="text-sm mt-1 opacity-75">Building democracy through secure digital voting.</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="hover:text-green-200 transition-colors duration-300">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="hover:text-green-200 transition-colors duration-300">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="hover:text-green-200 transition-colors duration-300">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-green-600 text-sm">
+                <p>All rights reserved. Designed with <i class="fas fa-heart text-red-400 animate-pulse"></i> for secure elections.</p>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        /* Confetti Animation */
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 30px;
+            opacity: 0;
+            animation: confetti 5s ease-in-out infinite;
+        }
+        
+        .confetti-piece:nth-child(1) {
+            left: 10%;
+            animation-delay: 0s;
+            animation-duration: 4s;
+        }
+        
+        .confetti-piece:nth-child(2) {
+            left: 20%;
+            animation-delay: 0.5s;
+            animation-duration: 4.5s;
+        }
+        
+        .confetti-piece:nth-child(3) {
+            left: 30%;
+            animation-delay: 1s;
+            animation-duration: 5s;
+        }
+        
+        .confetti-piece:nth-child(4) {
+            left: 40%;
+            animation-delay: 1.5s;
+            animation-duration: 4.2s;
+        }
+        
+        .confetti-piece:nth-child(5) {
+            left: 50%;
+            animation-delay: 2s;
+            animation-duration: 4.8s;
+        }
+        
+        .confetti-piece:nth-child(6) {
+            left: 60%;
+            animation-delay: 2.5s;
+            animation-duration: 5.2s;
+        }
+        
+        .confetti-piece:nth-child(7) {
+            left: 70%;
+            animation-delay: 3s;
+            animation-duration: 4.5s;
+        }
+        
+        @keyframes confetti {
+            0% {
+                opacity: 1;
+                top: -100%;
+                transform: rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                top: 100%;
+                transform: rotate(720deg);
+            }
+        }
+    </style>
+
+    <script>
+        // Global variables
+        let remainingTime = <?php echo $remaining_time ?? 0; ?>;
+        let totalVoters = <?php echo $total_voters; ?>;
+        let isFinalCountdownShown = false;
+        let isEndModalShown = false;
+        let countdownSound;
+        let tickSound;
+        let finalSound;
+        
+        // Initialize sounds
+        function initSounds() {
+            // Check if the Audio API is available
+            if (typeof Audio !== 'undefined') {
+                try {
+                    countdownSound = new Audio('../sounds/countdown.mp3');
+                    tickSound = new Audio('../sounds/tick.mp3');
+                    finalSound = new Audio('../sounds/end.mp3');
+                    tickSound.volume = 0.5;
+                } catch (e) {
+                    console.warn("Sound initialization failed:", e);
+                }
+            }
+        }
+        
+        // Initialize as soon as page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initSounds();
+            animateBars();
+            calculateAbstains();
+            
+            // Start the countdown immediately with initial update
+            updateTimeDisplay(); // Immediately set the initial time display
+            setTimeout(updateRemainingTime, 1000); // Then start the countdown
+        });
+        
+        // Function to initially set the time display
+        function updateTimeDisplay() {
+            if (remainingTime > 0) {
+                const hours = Math.floor(remainingTime / 3600);
+                const minutes = Math.floor((remainingTime % 3600) / 60);
+                const seconds = remainingTime % 60;
+                
+                // Update display
+                document.getElementById('hours-display').textContent = String(hours).padStart(2, '0');
+                document.getElementById('minutes-display').textContent = String(minutes).padStart(2, '0');
+                document.getElementById('seconds-display').textContent = String(seconds).padStart(2, '0');
+                
+                // Apply appropriate styling
+                updateTimeDisplayStyle();
+            }
+        }
+        
+        // Function to update time display styling based on remaining time
+        function updateTimeDisplayStyle() {
+            const timeContainer = document.getElementById('time-display-container');
+            
+            if (timeContainer) {
+                // Change style when time is getting low
+                if (remainingTime <= 300 && remainingTime > 60) { // 5 minutes or less
+                    timeContainer.classList.add('warning-time');
+                    timeContainer.classList.remove('danger-time');
+                } 
+                else if (remainingTime <= 60) { // 1 minute or less
+                    timeContainer.classList.remove('warning-time');
+                    timeContainer.classList.add('danger-time');
+                }
+                else {
+                    timeContainer.classList.remove('warning-time');
+                    timeContainer.classList.remove('danger-time');
+                }
+            }
+        }
+        
+        // Animate voting bars on page load
+        function animateBars() {
+            setTimeout(() => {
+                const voteBars = document.querySelectorAll('.vote-bar');
+                voteBars.forEach(bar => {
+                    const targetWidth = bar.getAttribute('data-width') + '%';
+                    bar.style.width = targetWidth;
+                });
+            }, 500);
+        }
+        
+        // Calculate and display abstain counts
+        function calculateAbstains() {
+            const abstainCounts = <?php echo json_encode($abstain_count ?? []); ?>;
+            if (abstainCounts && Object.keys(abstainCounts).length > 0) {
+                const totalAbstains = Object.values(abstainCounts).reduce((sum, val) => sum + val, 0);
+                const abstainPercentage = totalVoters > 0 ? (totalAbstains / (totalVoters * Object.keys(abstainCounts).length)) * 100 : 0;
+                
+                document.getElementById('abstain-count').textContent = totalAbstains;
+                document.getElementById('abstain-bar').style.width = abstainPercentage + '%';
+            }
+        }
+
+        // Enhanced time display function
         function updateRemainingTime() {
             if (remainingTime > 0) {
                 remainingTime--;
                 const hours = Math.floor(remainingTime / 3600);
                 const minutes = Math.floor((remainingTime % 3600) / 60);
                 const seconds = remainingTime % 60;
-
-                document.getElementById('remaining-time').textContent =
-                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            } else {
-                document.getElementById('remaining-time').textContent = "00:00:00";
+                
+                // Update display
+                document.getElementById('hours-display').textContent = String(hours).padStart(2, '0');
+                document.getElementById('minutes-display').textContent = String(minutes).padStart(2, '0');
+                document.getElementById('seconds-display').textContent = String(seconds).padStart(2, '0');
+                
+                // Update display styling
+                updateTimeDisplayStyle();
+                
+                // Start final countdown at 10 seconds if not already shown
+                if (remainingTime <= 10 && !isFinalCountdownShown) {
+                    startFinalCountdown(remainingTime);
+                }
+                
+                // Schedule next update
+                setTimeout(updateRemainingTime, 1000);
+            } 
+            else {
+                // When time reaches zero
+                document.getElementById('hours-display').textContent = '00';
+                document.getElementById('minutes-display').textContent = '00';
+                document.getElementById('seconds-display').textContent = '00';
+                
+                if (!isEndModalShown) {
+                    showElectionEndModal();
+                }
             }
         }
-
-        setInterval(updateRemainingTime, 1000); // Update every second
-
-        // Auto-refresh the page every 10 seconds
-        setTimeout(() => {
-            location.reload();
-        }, 10000);
-
-        // Open the logout confirmation modal
+        
+        // Dramatic final countdown (10 seconds or less)
+        function startFinalCountdown(secondsLeft) {
+            isFinalCountdownShown = true;
+            const finalCountdownModal = document.getElementById('finalCountdownModal');
+            const countdownNumber = document.getElementById('final-countdown-number');
+            const countdownProgress = document.getElementById('countdown-progress');
+            
+            finalCountdownModal.classList.remove('hidden');
+            finalCountdownModal.classList.add('flex');
+            
+            // Set initial number
+            countdownNumber.textContent = secondsLeft;
+            
+            // Play alert sound
+            countdownSound.play();
+            
+            // Create a separate countdown for the modal
+            let currentSecond = secondsLeft;
+            
+            const finalCountInterval = setInterval(() => {
+                currentSecond--;
+                
+                if (currentSecond < 0) {
+                    clearInterval(finalCountInterval);
+                    finalCountdownModal.classList.add('hidden');
+                    showElectionEndModal();
+                    return;
+                }
+                
+                // Calculate width percentage for progress bar
+                const widthPercentage = (currentSecond / 10) * 100;
+                countdownProgress.style.width = `${widthPercentage}%`;
+                
+                // Remove previous animation
+                countdownNumber.classList.remove('final-count-number');
+                
+                // Update number with animation
+                setTimeout(() => {
+                    countdownNumber.textContent = currentSecond;
+                    countdownNumber.classList.add('final-count-number');
+                    
+                    // Play tick sound
+                    if (tickSound) {
+                        const newTickSound = tickSound.cloneNode();
+                        newTickSound.volume = 0.5;
+                        newTickSound.play();
+                    }
+                    
+                    // Update message for last 3 seconds
+                    if (currentSecond <= 3) {
+                        document.getElementById('countdown-message').textContent = "Time's almost up!";
+                        document.getElementById('countdown-message').classList.add('text-red-500');
+                        countdownNumber.classList.add('text-red-600');
+                    }
+                }, 10);
+                
+            }, 1000);
+        }
+        
+        // Show election end modal
+        function showElectionEndModal() {
+            isEndModalShown = true;
+            document.getElementById('finalCountdownModal').classList.add('hidden');
+            document.getElementById('electionEndModal').classList.remove('hidden');
+            document.getElementById('electionEndModal').classList.add('flex');
+            
+            // Play final sound
+            if (finalSound) {
+                finalSound.play();
+            }
+        }
+        
+        // Redirect to results page
+        function redirectToResults() {
+            window.location.href = 'results.php';
+        }
+        
+        // Modal functions
         function openLogoutModal() {
             document.getElementById('logoutModal').classList.remove('hidden');
+            document.getElementById('logoutModal').classList.add('flex');
         }
-
-        // Close the logout confirmation modal
+        
         function closeLogoutModal() {
             document.getElementById('logoutModal').classList.add('hidden');
+            document.getElementById('logoutModal').classList.remove('flex');
         }
-
-        // Open the extend time modal
+        
         function openExtendTimeModal() {
             document.getElementById('extendTimeModal').classList.remove('hidden');
+            document.getElementById('extendTimeModal').classList.add('flex');
+            updateTimePreview();
         }
-
-        // Close the extend time modal
+        
         function closeExtendTimeModal() {
             document.getElementById('extendTimeModal').classList.add('hidden');
+            document.getElementById('extendTimeModal').classList.remove('flex');
         }
+        
+        function openRefreshModal() {
+            document.getElementById('refreshModal').classList.remove('hidden');
+            document.getElementById('refreshModal').classList.add('flex');
+            updateRefreshPreview();
+        }
+        
+        function closeRefreshModal() {
+            document.getElementById('refreshModal').classList.add('hidden');
+            document.getElementById('refreshModal').classList.remove('flex');
+        }
+        
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const logoutModal = document.getElementById('logoutModal');
+            const extendTimeModal = document.getElementById('extendTimeModal');
+            const refreshModal = document.getElementById('refreshModal');
+            
+            if (event.target === logoutModal) {
+                closeLogoutModal();
+            }
+            if (event.target === extendTimeModal) {
+                closeExtendTimeModal();
+            }
+            if (event.target === refreshModal) {
+                closeRefreshModal();
+            }
+        }
+        
+        // Update time preview in Extend Time modal
+        function updateTimePreview() {
+            const hours = parseInt(document.getElementById('hours').value) || 0;
+            const minutes = parseInt(document.getElementById('minutes').value) || 0;
+            let totalMinutes = hours * 60 + minutes;
+            
+            // Adjust hours and minutes for display
+            let displayHours = Math.floor(totalMinutes / 60);
+            let displayMinutes = totalMinutes % 60;
+            
+            // Update preview text
+            document.getElementById('timePreview').textContent = `Adding ${displayHours} hour${displayHours !== 1 ? 's' : ''}, ${displayMinutes} minute${displayMinutes !== 1 ? 's' : ''} to election`;
+        }
+        
+        // Update refresh preview in Refresh Settings modal
+        function updateRefreshPreview() {
+            const seconds = parseInt(document.getElementById('refresh_interval').value) || 60;
+            let displayText = '';
+            
+            if (seconds < 60) {
+                displayText = `Page will refresh every ${seconds} seconds`;
+            } else {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                if (remainingSeconds === 0) {
+                    displayText = `Page will refresh every ${minutes} minute${minutes !== 1 ? 's' : ''}`;
+                } else {
+                    displayText = `Page will refresh every ${minutes} minute${minutes !== 1 ? 's' : ''} and ${remainingSeconds} second${remainingSeconds !== 1 ? 's' : ''}`;
+                }
+            }
+            
+            document.getElementById('refreshPreview').textContent = displayText;
+        }
+        
+        // Increment and decrement functions for hours and minutes
+        function incrementHours() {
+            document.getElementById('hours').value = parseInt(document.getElementById('hours').value || 0) + 1;
+            updateTimePreview();
+        }
+        
+        function decrementHours() {
+            let currentValue = parseInt(document.getElementById('hours').value || 0);
+            if (currentValue > 0) {
+                document.getElementById('hours').value = currentValue - 1;
+                updateTimePreview();
+            }
+        }
+        
+        function decrementMinutes() {
+            let currentValue = parseInt(document.getElementById('minutes').value || 0);
+            if (currentValue > 0) {
+                document.getElementById('minutes').value = currentValue - 1;
+                updateTimePreview();
+            }
+        }
+        
+        function incrementMinutes() {
+            let currentValue = parseInt(document.getElementById('minutes').value || 0);
+            if (currentValue < 59) {
+                document.getElementById('minutes').value = currentValue + 1;
+                updateTimePreview();
+            }
+        }
+        
+        // Increment and decrement functions for refresh interval
+        function incrementRefresh() {
+            const input = document.getElementById('refresh_interval');
+            let currentValue = parseInt(input.value) || 60;
+            if (currentValue < 300) {
+                const newValue = Math.min(currentValue + 10, 300);
+                input.value = newValue;
+                updateRefreshPreview();
+            }
+        }
+        
+        function decrementRefresh() {
+            const input = document.getElementById('refresh_interval');
+            let currentValue = parseInt(input.value) || 60;
+            if (currentValue > 10) {
+                const newValue = Math.max(currentValue - 10, 10);
+                input.value = newValue;
+                updateRefreshPreview();
+            }
+        }
+        
+        // Refresh countdown timer
+        let refreshCountdown = <?php echo $_SESSION['refresh_interval']; ?>;
+        
+        function updateRefreshCountdown() {
+            refreshCountdown--;
+            
+            if (refreshCountdown <= 0) {
+                // Let the meta refresh handle the actual page refresh
+                return;
+            }
+            
+            document.getElementById('refresh-countdown').textContent = refreshCountdown;
+            
+            // Add visual indicators when refresh is imminent
+            const indicator = document.querySelector('.refresh-indicator');
+            if (refreshCountdown <= 5) {
+                indicator.style.backgroundColor = 'rgba(229, 57, 53, 0.9)';
+                indicator.classList.add('pulse-animation');
+            } else if (refreshCountdown <= 10) {
+                indicator.style.backgroundColor = 'rgba(255, 152, 0, 0.9)';
+                indicator.classList.remove('pulse-animation');
+            } else {
+                indicator.style.backgroundColor = 'rgba(46, 125, 50, 0.9)';
+                indicator.classList.remove('pulse-animation');
+            }
+            
+            setTimeout(updateRefreshCountdown, 1000);
+        }
+        
+        // Initialize the refresh countdown
+        document.addEventListener('DOMContentLoaded', function() {
+            // Start existing initialization...
+            initSounds();
+            animateBars();
+            calculateAbstains();
+            updateTimeDisplay();
+            setTimeout(updateRemainingTime, 1000);
+            
+            // Start the refresh countdown
+            setTimeout(updateRefreshCountdown, 1000);
+            
+            // Close modals when clicking outside
+            window.onclick = function(event) {
+                const logoutModal = document.getElementById('logoutModal');
+                const extendTimeModal = document.getElementById('extendTimeModal');
+                const refreshModal = document.getElementById('refreshModal');
+                
+                if (event.target === logoutModal) {
+                    closeLogoutModal();
+                }
+                if (event.target === extendTimeModal) {
+                    closeExtendTimeModal();
+                }
+                if (event.target === refreshModal) {
+                    closeRefreshModal();
+                }
+            }
+        });
     </script>
 </body>
 </html>

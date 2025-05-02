@@ -8,6 +8,24 @@ if (!isset($_SESSION['election_id'])) {
 }
 
 $election_id = $_SESSION['election_id'];
+$current_page = basename($_SERVER['PHP_SELF']);
+
+// Fetch the current election name based on election_id from the session
+$election_query = "SELECT name, status FROM elections WHERE id = ?";
+$stmt = $conn->prepare($election_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$election = $result->fetch_assoc();
+$election_name = $election ? $election['name'] : 'Election not found';
+$election_status = $election ? $election['status'] : 0;
+
+// Check if election is active and redirect to votes.php if it is
+if ($election_status == 1) {
+    $_SESSION['error'] = "Cannot edit candidates because the election has already started.";
+    header("Location: votes.php");
+    exit();
+}
 
 // Function to delete a candidate
 function deleteCandidate($id) {
@@ -38,10 +56,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 header("Location: candidates.php");
                 exit();
             } else {
-                echo "<div class='alert alert-danger'>$createResult</div>";
+                $_SESSION['error'] = $createResult;
             }
         } else {
-            echo "<div class='alert alert-danger'>Error uploading photo!</div>";
+            $_SESSION['error'] = "Error uploading photo!";
         }
     } elseif ($action == "delete_candidate") {
         $id = $_POST['id'];
@@ -50,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             header("Location: candidates.php");
             exit();
         } else {
-            echo "<div class='alert alert-danger'>Error deleting candidate!</div>";
+            $_SESSION['error'] = "Error deleting candidate!";
         }
     } elseif ($action == "update_candidate") {
         $id = $_POST['id'];
@@ -71,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             header("Location: candidates.php");
             exit();
         } else {
-            echo "<div class='alert alert-danger'>Error updating candidate!</div>";
+            $_SESSION['error'] = "Error updating candidate!";
         }
     }
 }
@@ -160,9 +178,16 @@ function updateCandidate($id, $firstname, $lastname, $position_id, $partylist_id
 
     return $stmt->execute();
 }
+
 // Function to handle file upload
 function uploadPhoto($file) {
     $targetDir = "uploads/";
+    
+    // Create directory if it doesn't exist
+    if (!file_exists($targetDir)) {
+        mkdir($targetDir, 0777, true);
+    }
+    
     $targetFile = $targetDir . basename($file["name"]);
     $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
@@ -197,9 +222,6 @@ function uploadPhoto($file) {
 $candidates = getCandidates($election_id);
 $positions = getPositions($election_id);
 $partylists = getPartylists($election_id);
-
-$current_page = basename($_SERVER['PHP_SELF']);
-
 ?>
 
 <!DOCTYPE html>
@@ -207,292 +229,708 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Candidates Management</title>
+    <title>Manage Candidates | SIR-U</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-green-50 text-green-900 font-sans">
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
 
+    <!-- Top Navigation Bar -->
+    <nav class="bg-gradient-to-r from-primary-700 to-primary-800 text-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-3">
+                <!-- Logo and Title -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white p-1.5 rounded-full shadow-md">
+                        <img src="../pics/logo.png" alt="Logo" class="h-8 w-8">
+                    </div>
+                    <a href="home.php" class="text-xl font-bold tracking-tight">SIR-U Election System</a>
+                </div>
 
-    <!-- Navigation bar -->
-    <nav class="bg-green-700 text-white shadow-lg">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <!-- Logo and Title -->
-            <div class="flex items-center space-x-3">
-                <img src="../pics/logo.png" alt="Logo" class="h-10 w-10">
-                <a href="home.php" class="text-2xl font-bold">Election Dashboard</a>
+                <!-- Election Name Badge -->
+                <div class="hidden md:flex items-center bg-white/20 px-4 py-1.5 rounded-full backdrop-blur-sm">
+                    <i class="fas fa-vote-yea mr-2"></i>
+                    <span class="font-medium"><?php echo htmlspecialchars($election_name); ?></span>
+                </div>
+
+                <!-- Hamburger Menu for Mobile -->
+                <button id="menu-toggle" class="md:hidden focus:outline-none">
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
             </div>
-
-            <!-- Hamburger Menu for Mobile -->
-            <button id="menu-toggle" class="block md:hidden focus:outline-none">
-                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-            </button>
-
-            <!-- Navigation Links -->
-            <ul id="menu" class="hidden md:flex space-x-6">
-                <li><a href="home.php" class="hover:text-green-300 <?php echo $current_page == 'home.php' ? 'font-bold underline' : ''; ?>">Home</a></li>
-                <li><a href="partylist.php" class="hover:text-green-300 <?php echo $current_page == 'partylist.php' ? 'font-bold underline' : ''; ?>">Partylist</a></li>
-                <li><a href="positions.php" class="hover:text-green-300 <?php echo $current_page == 'positions.php' ? 'font-bold underline' : ''; ?>">Positions</a></li>
-                <li><a href="candidates.php" class="hover:text-green-300 <?php echo $current_page == 'candidates.php' ? 'font-bold underline' : ''; ?>">Candidates</a></li>
-                <li><a href="voters.php" class="hover:text-green-300 <?php echo $current_page == 'voters.php' ? 'font-bold underline' : ''; ?>">Voters</a></li>
-                <li><a href="start.php" class="hover:text-green-300 <?php echo $current_page == 'start.php' ? 'font-bold underline' : ''; ?>">Start</a></li>
-                <li>
-                    <a href="#" 
-                       class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" 
-                       onclick="confirmLogout(event);">
-                       Logout
-                    </a>
-                </li>
-            </ul>
         </div>
     </nav>
-    <!-- Script to toggle mobile menu -->
-<script>
-    document.getElementById('menu-toggle').addEventListener('click', function () {
-        const menu = document.getElementById('menu');
-        menu.classList.toggle('hidden');
-    });
-</script>
-    <!-- Main Content -->
-    <div class="container mx-auto mt-10">
-        <h2 class="text-3xl font-bold text-center mb-6">Manage Candidates</h2>
-        <p class="text-center text-lg mb-8">Add, edit, or delete candidates for the current election.</p>
 
-                <!-- Navigation Buttons -->
-<div class="flex justify-between items-center mb-6">
-    <a href="positions.php" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg">
-        &larr; Back to Positions
-    </a>
-    <button onclick="openAddModal()" class="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg mx-auto">
-        + Add Candidates
-    </button>
-    <a href="voters.php" 
-       class="px-6 py-3 rounded-lg text-white <?php echo ($candidates->num_rows > 0) ? 'bg-green-700 hover:bg-green-800' : 'bg-red-500 cursor-not-allowed'; ?>" 
-       <?php echo ($candidates->num_rows > 0) ? '' : 'onclick="return false;"'; ?>>
-        Next Step &rarr;
-    </a>
-</div>
+    <!-- Side Navigation & Content Container -->
+    <div class="flex flex-col md:flex-row flex-1">
+        
+        <!-- Side Navigation for Desktop -->
+        <aside class="hidden md:block bg-white w-64 shadow-lg h-[calc(100vh-64px)] sticky top-0 overflow-y-auto">
+            <div class="p-4 border-b border-gray-100">
+                <div class="text-sm font-medium text-gray-400 uppercase">Main Menu</div>
+            </div>
+            
+            <nav class="mt-2 px-2">
+                <!-- Dashboard Link -->
+                <a href="home.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'home.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                    <i class="fas fa-home w-5 h-5 mr-3 <?php echo $current_page == 'home.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
+                    <span>Dashboard</span>
+                </a>
+                
+                <!-- Partylist Link -->
+                <a href="partylist.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'partylist.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                    <i class="fas fa-flag w-5 h-5 mr-3 <?php echo $current_page == 'partylist.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
+                    <span>Partylists</span>
+                </a>
+                
+                <!-- Positions Link -->
+                <a href="positions.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'positions.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                    <i class="fas fa-sitemap w-5 h-5 mr-3 <?php echo $current_page == 'positions.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
+                    <span>Positions</span>
+                </a>
+                
+                <!-- Candidates Link -->
+                <a href="candidates.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'candidates.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                    <i class="fas fa-user-tie w-5 h-5 mr-3 <?php echo $current_page == 'candidates.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
+                    <span>Candidates</span>
+                </a>
+                
+                <!-- Voters Link -->
+                <a href="voters.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'voters.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                    <i class="fas fa-users w-5 h-5 mr-3 <?php echo $current_page == 'voters.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
+                    <span>Voters</span>
+                </a>
+                
+                <!-- Start Link -->
+                <a href="start.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'start.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                    <i class="fas fa-play-circle w-5 h-5 mr-3 <?php echo $current_page == 'start.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
+                    <span>Start Election</span>
+                </a>
+                
+                <hr class="my-4 border-gray-100">
+                
+                <!-- Logout Link -->
+                <a href="#" onclick="confirmLogout(event);" class="flex items-center px-4 py-3 mb-1 rounded-lg text-red-600 hover:bg-red-50">
+                    <i class="fas fa-sign-out-alt w-5 h-5 mr-3"></i>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <!-- Mobile Navigation Menu (Hidden by default) -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white w-full shadow-lg absolute z-50 top-16 left-0 right-0 transition-all duration-300 ease-in-out">
+            <nav class="py-2">
+                <a href="home.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'home.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                    <i class="fas fa-home mr-2"></i> Dashboard
+                </a>
+                <a href="partylist.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'partylist.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                    <i class="fas fa-flag mr-2"></i> Partylists
+                </a>
+                <a href="positions.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'positions.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                    <i class="fas fa-sitemap mr-2"></i> Positions
+                </a>
+                <a href="candidates.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'candidates.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                    <i class="fas fa-user-tie mr-2"></i> Candidates
+                </a>
+                <a href="voters.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'voters.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                    <i class="fas fa-users mr-2"></i> Voters
+                </a>
+                <a href="start.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'start.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                    <i class="fas fa-play-circle mr-2"></i> Start Election
+                </a>
+                <hr class="my-2 border-gray-100">
+                <a href="#" onclick="confirmLogout(event);" class="block px-6 py-3 text-red-600 hover:bg-red-50">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                </a>
+            </nav>
+        </div>
 
-<!-- Red Message -->
-<?php if ($candidates->num_rows == 0): ?>
-    <p class="text-red-500 mt-4 text-center">You must add at least one candidate to proceed to the next step.</p>
-<?php endif; ?>
-<!-- Candidates List -->
-<div class="bg-white shadow-md rounded-lg p-6">
-    <h3 class="text-2xl font-bold mb-4">Candidates List</h3>
+        <!-- Main Content -->
+        <main class="flex-1 p-4 md:p-6 bg-gray-50">
+            <!-- Mobile Election Name Badge -->
+            <div class="md:hidden bg-white rounded-lg shadow-sm p-3 mb-6 flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-vote-yea text-primary-600 mr-2"></i>
+                    <span class="font-medium"><?php echo htmlspecialchars($election_name); ?></span>
+                </div>
+                <div class="text-xs text-gray-500">Active Election</div>
+            </div>
 
-    <!-- Scrollable Table Container -->
-    <div class="overflow-x-auto">
-        <table class="table-auto w-full min-w-[900px] border-collapse border border-gray-300">
-            <thead class="bg-green-700 text-white">
-                <tr>
-                    <th class="border border-gray-300 px-4 py-2">Position</th>
-                    <th class="border border-gray-300 px-4 py-2">Name</th>
-                    <th class="border border-gray-300 px-4 py-2">Partylist</th>
-                    <th class="border border-gray-300 px-4 py-2">Platform</th>
-                    <th class="border border-gray-300 px-4 py-2">Photo</th>
-                    <th class="border border-gray-300 px-4 py-2">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($candidate = $candidates->fetch_assoc()): ?>
-                <tr class="hover:bg-green-100">
-                    <td class="border border-gray-300 px-4 py-2"><?php echo $candidate['position_description']; ?></td>
-                    <td class="border border-gray-300 px-4 py-2"><?php echo $candidate['firstname'] . ' ' . $candidate['lastname']; ?></td>
-                    <td class="border border-gray-300 px-4 py-2"><?php echo $candidate['partylist_name'] ?? 'None'; ?></td>
-                    <td class="border border-gray-300 px-4 py-2"><?php echo htmlspecialchars($candidate['platform']); ?></td>
-                    <td class="border border-gray-300 px-4 py-2">
-                        <?php if (!empty($candidate['photo'])): ?>
-                            <img src="<?php echo htmlspecialchars($candidate['photo']); ?>" alt="Candidate Photo" class="h-16 w-16 object-cover rounded">
-                        <?php else: ?>
-                            <span>No Photo</span>
-                        <?php endif; ?>
-                    </td>
-                    <td class="border border-gray-300 px-4 py-2">
-                        <button class="bg-green-500 hover:bg-blue-600 text-white px-4 py-2 rounded" 
-                            onclick="openEditModal(
-                                <?php echo $candidate['id']; ?>, 
-                                '<?php echo htmlspecialchars($candidate['firstname'], ENT_QUOTES); ?>', 
-                                '<?php echo htmlspecialchars($candidate['lastname'], ENT_QUOTES); ?>', 
-                                <?php echo $candidate['position_id']; ?>, 
-                                <?php echo $candidate['partylist_id'] ?? 'null'; ?>, 
-                                '<?php echo htmlspecialchars($candidate['platform'], ENT_QUOTES); ?>'
-                            )">
-                            Edit
-                        </button>
-                        <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" 
-                            onclick="openDeleteModal(<?php echo $candidate['id']; ?>)">
-                            Delete
-                        </button>
-                    </td>
-                </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+            <!-- Page Header -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-user-tie text-purple-600 mr-3"></i>
+                    Manage Candidates
+                </h1>
+                <p class="mt-2 text-gray-600 max-w-3xl">
+                    Add and manage candidates for <span class="font-medium"><?php echo htmlspecialchars($election_name); ?></span>.
+                    Associate each candidate with a position and optionally with a partylist.
+                </p>
+            </div>
+
+            <!-- Display Messages -->
+            <?php if (isset($_SESSION['error'])): ?>
+                <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-md">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-circle text-red-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></p>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($_SESSION['message'])): ?>
+                <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-md">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle text-green-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-green-700"><?php echo $_SESSION['message']; unset($_SESSION['message']); ?></p>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                <div class="flex space-x-2">
+                    <a href="positions.php" class="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i> Back to Positions
+                    </a>
+                </div>
+                
+                <div class="flex space-x-2">
+                    <button onclick="openAddModal()" class="flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors shadow-sm">
+                        <i class="fas fa-plus mr-2"></i> Add New Candidate
+                    </button>
+                    
+                    <a href="voters.php" 
+                       class="flex items-center px-4 py-2 rounded-lg transition-colors shadow-sm
+                              <?php echo ($candidates->num_rows > 0) ? 
+                                    'bg-primary-600 hover:bg-primary-700 text-white' : 
+                                    'bg-gray-300 text-gray-500 cursor-not-allowed'; ?>"
+                       <?php echo ($candidates->num_rows > 0) ? '' : 'onclick="return false;"'; ?>>
+                        Next: Voters <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Warning Message if no candidates -->
+            <?php if ($candidates->num_rows == 0): ?>
+                <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-md">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-circle text-red-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700">
+                                You must add at least one candidate to proceed to the next step.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Candidates Table -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="p-4 bg-purple-50 border-b border-purple-100">
+                    <h2 class="text-lg font-medium text-purple-800">
+                        <i class="fas fa-user-tie mr-2"></i> Candidate List
+                    </h2>
+                </div>
+
+                <?php if ($candidates->num_rows > 0): ?>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Position
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Candidate
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Partylist
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Platform
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Photo
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <?php
+                                mysqli_data_seek($candidates, 0); // Reset pointer
+                                while ($candidate = $candidates->fetch_assoc()): 
+                                ?>
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">
+                                                <?php echo htmlspecialchars($candidate['position_description']); ?>
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900">
+                                                        <?php echo htmlspecialchars($candidate['firstname'] . ' ' . $candidate['lastname']); ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <?php if (!empty($candidate['partylist_name'])): ?>
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                    <?php echo htmlspecialchars($candidate['partylist_name']); ?>
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="text-gray-400 text-xs">No Partylist</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm text-gray-900 max-w-xs truncate">
+                                                <?php echo htmlspecialchars($candidate['platform']); ?>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <?php if (!empty($candidate['photo'])): ?>
+                                                <img src="<?php echo htmlspecialchars($candidate['photo']); ?>" alt="Candidate Photo" class="h-12 w-12 object-cover rounded-full border border-gray-200 shadow-sm">
+                                            <?php else: ?>
+                                                <div class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                                                    <i class="fas fa-user text-gray-400"></i>
+                                                </div>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <button onclick="openEditModal(
+                                                <?php echo $candidate['id']; ?>, 
+                                                '<?php echo htmlspecialchars($candidate['firstname'], ENT_QUOTES); ?>', 
+                                                '<?php echo htmlspecialchars($candidate['lastname'], ENT_QUOTES); ?>', 
+                                                <?php echo $candidate['position_id']; ?>, 
+                                                <?php echo $candidate['partylist_id'] ?? 'null'; ?>, 
+                                                '<?php echo htmlspecialchars($candidate['platform'], ENT_QUOTES); ?>'
+                                                )" 
+                                                    class="text-purple-600 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 px-3 py-1 rounded-md transition-colors mr-2">
+                                                <i class="fas fa-edit mr-1"></i> Edit
+                                            </button>
+                                            <button onclick="openDeleteModal(<?php echo $candidate['id']; ?>)" 
+                                                    class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md transition-colors">
+                                                <i class="fas fa-trash-alt mr-1"></i> Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <div class="py-12 text-center">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 text-purple-500 mb-4">
+                            <i class="fas fa-user-tie text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900">No candidates yet</h3>
+                        <p class="mt-2 text-sm text-gray-500">Get started by adding candidates to your election.</p>
+                        <div class="mt-6">
+                            <button onclick="openAddModal()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700">
+                                <i class="fas fa-plus mr-2"></i> Add Candidate
+                            </button>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Footer -->
+            <footer class="mt-12 text-center text-gray-500 text-sm">
+                <p>© <?php echo date('Y'); ?> SIR-U Election System | All Rights Reserved</p>
+            </footer>
+        </main>
     </div>
-</div>
 
-
-    <!-- Add Modal -->
-    <div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
-            <h2 class="text-2xl font-bold text-green-700 mb-4">Add Candidate</h2>
-            <form method="POST" action="" enctype="multipart/form-data">
+    <!-- Add Candidate Modal -->
+    <div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full transform transition-all">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                    <i class="fas fa-plus-circle text-purple-500 mr-2"></i>
+                    Add New Candidate
+                </h3>
+                <button type="button" onclick="closeAddModal()" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form method="POST" action="" enctype="multipart/form-data" class="p-6 space-y-4">
                 <input type="hidden" name="action" value="create_candidate">
-                <div class="mb-4">
-                    <label for="firstname" class="block text-sm font-medium text-gray-700">First Name</label>
-                    <input type="text" id="firstname" name="firstname" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="firstname" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                        <div class="relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-user text-gray-400"></i>
+                            </div>
+                            <input type="text" name="firstname" id="firstname" 
+                                   class="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
+                                   placeholder="First name" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="lastname" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                        <input type="text" name="lastname" id="lastname" 
+                               class="focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-300 rounded-md py-3" 
+                               placeholder="Last name" required>
+                    </div>
                 </div>
-                <div class="mb-4">
-                    <label for="lastname" class="block text-sm font-medium text-gray-700">Last Name</label>
-                    <input type="text" id="lastname" name="lastname" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>
+
+                <div>
+                    <label for="position_id" class="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                    <div class="relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-sitemap text-gray-400"></i>
+                        </div>
+                        <select name="position_id" id="position_id" 
+                                class="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" required>
+                            <option value="">Select Position</option>
+                            <?php
+                            mysqli_data_seek($positions, 0); // Reset pointer
+                            while ($position = $positions->fetch_assoc()): 
+                            ?>
+                                <option value="<?php echo $position['position_id']; ?>"><?php echo htmlspecialchars($position['description']); ?></option>
+                            <?php endwhile; ?>
+                        </select>
+                        <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 pointer-events-none">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                    </div>
                 </div>
-                <div class="mb-4">
-                    <label for="position_id" class="block text-sm font-medium text-gray-700">Position</label>
-                    <select id="position_id" name="position_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>
-                        <option value="">Select Position</option>
-                        <?php while ($position = $positions->fetch_assoc()): ?>
-                            <option value="<?php echo $position['position_id']; ?>"><?php echo $position['description']; ?></option>
-                        <?php endwhile; ?>
-                    </select>
+
+                <div>
+                    <label for="partylist_id" class="block text-sm font-medium text-gray-700 mb-1">Partylist (Optional)</label>
+                    <div class="relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-flag text-gray-400"></i>
+                        </div>
+                        <select name="partylist_id" id="partylist_id" 
+                                class="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3">
+                            <option value="">No Partylist</option>
+                            <?php
+                            mysqli_data_seek($partylists, 0); // Reset pointer
+                            while ($partylist = $partylists->fetch_assoc()): 
+                            ?>
+                                <option value="<?php echo $partylist['partylist_id']; ?>"><?php echo htmlspecialchars($partylist['name']); ?></option>
+                            <?php endwhile; ?>
+                        </select>
+                        <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 pointer-events-none">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                    </div>
                 </div>
-                <div class="mb-4">
-                    <label for="partylist_id" class="block text-sm font-medium text-gray-700">Partylist</label>
-                    <select id="partylist_id" name="partylist_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                        <option value="">Select Partylist</option>
-                        <?php while ($partylist = $partylists->fetch_assoc()): ?>
-                            <option value="<?php echo $partylist['partylist_id']; ?>"><?php echo $partylist['name']; ?></option>
-                        <?php endwhile; ?>
-                    </select>
+
+                <div>
+                    <label for="platform" class="block text-sm font-medium text-gray-700 mb-1">Platform</label>
+                    <div class="relative rounded-md shadow-sm">
+                        <div class="absolute top-3 left-0 pl-3 flex items-start pointer-events-none">
+                            <i class="fas fa-align-left text-gray-400"></i>
+                        </div>
+                        <textarea name="platform" id="platform" rows="3" 
+                                  class="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" 
+                                  placeholder="Enter candidate's platform" required></textarea>
+                    </div>
                 </div>
-                <div class="mb-4">
-                    <label for="platform" class="block text-sm font-medium text-gray-700">Platform</label>
-                    <textarea id="platform" name="platform" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required></textarea>
+
+                <div>
+                    <label for="photo" class="block text-sm font-medium text-gray-700 mb-1">Photo</label>
+                    <div class="mt-1 flex items-center">
+                        <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100 mr-3">
+                            <svg class="h-full w-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                        </span>
+                        <input type="file" name="photo" id="photo" 
+                               class="focus:ring-purple-500 focus:border-purple-500 block sm:text-sm border-gray-300 rounded-md py-2" 
+                               accept="image/*" required>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Max file size: 20MB. Supported formats: JPG, PNG, GIF</p>
                 </div>
-                <div class="mb-4">
-                    <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
-                    <input type="file" id="photo" name="photo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" accept="image/*" required>
-                </div>
-                <div class="flex justify-end space-x-4">
-                    <button type="button" onclick="closeAddModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
-                    <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Add</button>
+                
+                <div class="pt-2 flex justify-end space-x-3">
+                    <button type="button" onclick="closeAddModal()" 
+                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                        <i class="fas fa-save mr-2"></i> Save Candidate
+                    </button>
                 </div>
             </form>
         </div>
     </div>
-<!-- Edit Modal -->
-<div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-96">
-        <h2 class="text-2xl font-bold text-green-700 mb-4">Edit Candidate</h2>
-        <form method="POST" action="" enctype="multipart/form-data">
-            <input type="hidden" name="action" value="update_candidate">
-            <input type="hidden" id="editCandidateId" name="id">
-            <div class="mb-4">
-                <label for="editFirstname" class="block text-sm font-medium text-gray-700">First Name</label>
-                <input type="text" id="editFirstname" name="firstname" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>
-            </div>
-            <div class="mb-4">
-                <label for="editLastname" class="block text-sm font-medium text-gray-700">Last Name</label>
-                <input type="text" id="editLastname" name="lastname" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>
-            </div>
-            <div class="mb-4">
-                <label for="editPositionId" class="block text-sm font-medium text-gray-700">Position</label>
-                <select id="editPositionId" name="position_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>
-                    <option value="">Select Position</option>
-                    <?php foreach ($positions as $position): ?>
-                        <option value="<?php echo $position['position_id']; ?>"><?php echo $position['description']; ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="mb-4">
-                <label for="editPartylistId" class="block text-sm font-medium text-gray-700">Partylist</label>
-                <select id="editPartylistId" name="partylist_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                    <option value="">Select Partylist</option>
-                    <?php foreach ($partylists as $partylist): ?>
-                        <option value="<?php echo $partylist['partylist_id']; ?>"><?php echo $partylist['name']; ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="mb-4">
-                <label for="editPlatform" class="block text-sm font-medium text-gray-700">Platform</label>
-                <textarea id="editPlatform" name="platform" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required></textarea>
-            </div>
-            <div class="mb-4">
-                <label for="editPhoto" class="block text-sm font-medium text-gray-700">Photo</label>
-                <input type="file" id="editPhoto" name="photo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" accept="image/*">
-            </div>
-            <div class="flex justify-end space-x-4">
-                <button type="button" onclick="closeEditModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
-                <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">Update</button>
-            </div>
-        </form>
-    </div>
-</div>
 
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-96">
-            <h2 class="text-2xl font-bold text-red-700 mb-4">Confirm Deletion</h2>
-            <p class="text-gray-700 mb-6">Are you sure you want to delete this candidate?</p>
-            <form method="POST" action="">
-                <input type="hidden" name="action" value="delete_candidate">
-                <input type="hidden" id="deleteCandidateId" name="id">
-                <div class="flex justify-end space-x-4">
-                    <button type="button" onclick="closeDeleteModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Cancel</button>
-                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Delete</button>
+    <!-- Edit Candidate Modal -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full transform transition-all">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                    <i class="fas fa-edit text-purple-500 mr-2"></i>
+                    Edit Candidate
+                </h3>
+                <button type="button" onclick="closeEditModal()" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form method="POST" action="" enctype="multipart/form-data" class="p-6 space-y-4">
+                <input type="hidden" name="action" value="update_candidate">
+                <input type="hidden" id="editCandidateId" name="id">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="editFirstname" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                        <div class="relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-user text-gray-400"></i>
+                            </div>
+                            <input type="text" name="firstname" id="editFirstname" 
+                                   class="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
+                                   placeholder="First name" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="editLastname" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                        <input type="text" name="lastname" id="editLastname" 
+                               class="focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-300 rounded-md py-3" 
+                               placeholder="Last name" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="editPositionId" class="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                    <div class="relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-sitemap text-gray-400"></i>
+                        </div>
+                        <select name="position_id" id="editPositionId" 
+                                class="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" required>
+                            <option value="">Select Position</option>
+                            <?php
+                            mysqli_data_seek($positions, 0); // Reset pointer
+                            while ($position = $positions->fetch_assoc()): 
+                            ?>
+                                <option value="<?php echo $position['position_id']; ?>"><?php echo htmlspecialchars($position['description']); ?></option>
+                            <?php endwhile; ?>
+                        </select>
+                        <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 pointer-events-none">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="editPartylistId" class="block text-sm font-medium text-gray-700 mb-1">Partylist (Optional)</label>
+                    <div class="relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-flag text-gray-400"></i>
+                        </div>
+                        <select name="partylist_id" id="editPartylistId" 
+                                class="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3">
+                            <option value="">No Partylist</option>
+                            <?php
+                            mysqli_data_seek($partylists, 0); // Reset pointer
+                            while ($partylist = $partylists->fetch_assoc()): 
+                            ?>
+                                <option value="<?php echo $partylist['partylist_id']; ?>"><?php echo htmlspecialchars($partylist['name']); ?></option>
+                            <?php endwhile; ?>
+                        </select>
+                        <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 pointer-events-none">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="editPlatform" class="block text-sm font-medium text-gray-700 mb-1">Platform</label>
+                    <div class="relative rounded-md shadow-sm">
+                        <div class="absolute top-3 left-0 pl-3 flex items-start pointer-events-none">
+                            <i class="fas fa-align-left text-gray-400"></i>
+                        </div>
+                        <textarea name="platform" id="editPlatform" rows="3" 
+                                  class="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" 
+                                  placeholder="Enter candidate's platform" required></textarea>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="editPhoto" class="block text-sm font-medium text-gray-700 mb-1">Photo (Leave empty to keep current photo)</label>
+                    <div class="mt-1 flex items-center">
+                        <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100 mr-3">
+                            <svg class="h-full w-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                        </span>
+                        <input type="file" name="photo" id="editPhoto" 
+                               class="focus:ring-purple-500 focus:border-purple-500 block sm:text-sm border-gray-300 rounded-md py-2" 
+                               accept="image/*">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Max file size: 20MB. Supported formats: JPG, PNG, GIF</p>
+                </div>
+                
+                <div class="pt-2 flex justify-end space-x-3">
+                    <button type="button" onclick="closeEditModal()" 
+                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                        <i class="fas fa-save mr-2"></i> Update Candidate
+                    </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full transform transition-all">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                    <i class="fas fa-trash-alt text-red-500 mr-2"></i>
+                    Delete Candidate
+                </h3>
+                <button type="button" onclick="closeDeleteModal()" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <div class="flex items-center justify-center bg-red-100 rounded-full w-16 h-16 mx-auto mb-4">
+                    <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
+                </div>
+                
+                <p class="text-center text-gray-800 font-medium">Are you sure you want to delete this candidate?</p>
+                <p class="text-center text-red-600 text-sm mt-4">This action cannot be undone.</p>
+                
+                <form method="POST" action="" class="mt-6">
+                    <input type="hidden" name="action" value="delete_candidate">
+                    <input type="hidden" id="deleteCandidateId" name="id">
+                    
+                    <div class="flex justify-center space-x-3">
+                        <button type="button" onclick="closeDeleteModal()" 
+                                class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                               class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            <i class="fas fa-trash-alt mr-2"></i> Delete Permanently
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <script>
-        // Function to open the logout confirmation modal
-        function openLogoutModal(event) {
-            event.preventDefault(); // Prevent the default link behavior
-            document.getElementById('logoutModal').classList.remove('hidden');
-        }
+        // Toggle the mobile menu
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
 
-        // Function to close the logout confirmation modal
-        function closeLogoutModal() {
-            document.getElementById('logoutModal').classList.add('hidden');
-        }
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
 
-        // Function to open the add candidate modal
+        // Modal functions
         function openAddModal() {
             document.getElementById('addModal').classList.remove('hidden');
+            document.getElementById('firstname').focus();
         }
 
-        // Function to close the add candidate modal
         function closeAddModal() {
             document.getElementById('addModal').classList.add('hidden');
         }
 
         function openEditModal(id, firstname, lastname, positionId, partylistId, platform) {
-    document.getElementById('editCandidateId').value = id;
-    document.getElementById('editFirstname').value = firstname;
-    document.getElementById('editLastname').value = lastname;
-    document.getElementById('editPositionId').value = positionId;
-    document.getElementById('editPartylistId').value = partylistId;
-    document.getElementById('editPlatform').value = platform;
-    document.getElementById('editModal').classList.remove('hidden');
-}
+            document.getElementById('editCandidateId').value = id;
+            document.getElementById('editFirstname').value = firstname;
+            document.getElementById('editLastname').value = lastname;
+            document.getElementById('editPositionId').value = positionId;
+            document.getElementById('editPartylistId').value = partylistId === null ? '' : partylistId;
+            document.getElementById('editPlatform').value = platform;
+            document.getElementById('editModal').classList.remove('hidden');
+            document.getElementById('editFirstname').focus();
+        }
 
-        // Function to close the edit candidate modal
         function closeEditModal() {
             document.getElementById('editModal').classList.add('hidden');
         }
 
-        // Function to open the delete confirmation modal
         function openDeleteModal(id) {
             document.getElementById('deleteCandidateId').value = id;
             document.getElementById('deleteModal').classList.remove('hidden');
         }
 
-        // Function to close the delete confirmation modal
         function closeDeleteModal() {
             document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        // SweetAlert confirmation for logging out
+        function confirmLogout(event) {
+            event.preventDefault();
+
+            Swal.fire({
+                title: 'Log Out?',
+                text: "You will be logged out of the election system.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, log out',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#16a34a',
+                cancelButtonColor: '#6b7280',
+                heightAuto: false,
+                customClass: {
+                    popup: 'rounded-lg'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '../index.php';
+                }
+            });
         }
     </script>
 </body>

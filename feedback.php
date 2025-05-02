@@ -42,59 +42,93 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['feedback_submit'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Submit Feedback</title>
-    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#70C237',
+                        'primary-dark': '#5AA12E',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body {
-            background: linear-gradient(135deg, #d4f8e8, #a0e4b0);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Arial', sans-serif;
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
         }
-        .feedback-container {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            animation: fadeInUp 0.6s ease-in-out;
-            width: 100%;
-            max-width: 500px;
-        }
-        .btn-green {
-            background-color: #28a745;
-            border: none;
-        }
-        .btn-green:hover {
-            background-color: #218838;
-        }
-        .btn-red {
-            background-color: #dc3545;
-            border: none;
-        }
-        .btn-red:hover {
-            background-color: #c82333;
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
         }
     </style>
 </head>
-<body>
-    <div class="feedback-container animate__animated animate__fadeInUp">
-        <h2 class="text-center text-success">Submit Feedback</h2>
-        <form action="feedback.php" method="POST">
-            <div class="form-group mt-3">
-                <label for="feedback" class="fw-bold">Your Feedback:</label>
-                <textarea class="form-control" id="feedback" name="feedback" rows="4" required></textarea>
+<body class="bg-gradient-to-br from-green-50 to-green-100 min-h-screen flex flex-col items-center justify-center p-4">
+    <!-- Success animation -->
+    <div class="mb-8 text-center">
+        <div class="text-6xl text-green-500 float-animation">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-800 mt-4">Thank You For Voting!</h1>
+        <p class="text-gray-600">Your vote has been successfully recorded</p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden transition-all duration-300 transform hover:shadow-xl">
+        <div class="bg-primary p-5 text-white">
+            <h2 class="text-xl font-bold text-center">We Value Your Feedback</h2>
+            <p class="text-center text-sm opacity-90">Help us improve the voting experience</p>
+        </div>
+        
+        <form action="feedback.php" method="POST" class="p-6">
+            <div class="mb-4">
+                <label for="feedback" class="block text-gray-700 font-medium mb-2">Share your thoughts:</label>
+                <textarea 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                    id="feedback" 
+                    name="feedback" 
+                    rows="4" 
+                    placeholder="Was the voting process easy? Any suggestions for improvement?"
+                    required
+                ></textarea>
             </div>
-            <p class="text-center text-success mt-3">Thank you for voting! Your vote has been successfully submitted.</p> <!-- Static thank you message -->
-            <div class="d-flex justify-content-between mt-4">
-                <button type="submit" name="feedback_submit" class="btn btn-green px-4 py-2 text-white">Submit</button>
+            
+            <div class="mt-6 flex flex-col md:flex-row gap-3 justify-between">
+                <a href="index.php" class="inline-flex items-center justify-center px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full font-medium transition-colors duration-200">
+                    <i class="fas fa-home mr-2"></i> Return Home
+                </a>
+                <button 
+                    type="submit" 
+                    name="feedback_submit" 
+                    class="inline-flex items-center justify-center px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-full font-medium transition-colors duration-200"
+                >
+                    <i class="fas fa-paper-plane mr-2"></i> Submit Feedback
+                </button>
             </div>
         </form>
+
+        <div class="bg-gray-50 p-4 text-center border-t border-gray-100">
+            <form action="feedback.php" method="POST" class="inline-block">
+                <button 
+                    type="submit" 
+                    name="exit" 
+                    class="text-gray-500 hover:text-gray-700 text-sm font-medium"
+                >
+                    <i class="fas fa-sign-out-alt mr-1"></i> Sign Out
+                </button>
+            </form>
+        </div>
     </div>
-    <script src="js/jquery.min.js"></script>
-    <script src="js/bootstrap.bundle.min.js"></script>
+
+    <!-- Additional instructions -->
+    <div class="mt-6 text-center text-gray-500 text-sm">
+        <p>If you have any issues, please contact the election administrator</p>
+    </div>
 </body>
 </html>
