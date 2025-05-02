@@ -9,6 +9,11 @@ if(isset($_POST['id'])){
     $result = $conn->query($sql);
     $row = $result->fetch_assoc();
 
+    echo "<div id='printable-content'>";
+    echo "<h4>Election Results Summary</h4>";
+    echo "<h5>Election Name: ".$row['election_title']."</h5>";
+    echo "<p>Date: ".$row['deleted_at']."</p>";
+
     // Function to calculate and display vote summary
     function displayVoteSummary($votes, $candidates, $positions) {
         if(empty($votes) || empty($candidates) || empty($positions)) {
@@ -57,17 +62,12 @@ if(isset($_POST['id'])){
             }
         }
 
-        $output = "";
-        
         // Display results by position
+        echo "<div class='results-container'>";
         foreach($positionDetails as $position_id => $position_name) {
-            $output .= "<div class='position-section mb-4'>";
-            $output .= "<div class='position-header bg-green-700 text-white py-2 px-4 rounded-t-lg'>";
-            $output .= "<h5 class='m-0 font-bold'>Position: $position_name</h5>";
-            $output .= "</div>";
-            
-            $output .= "<div class='bg-white shadow-sm rounded-b-lg'>";
-            
+            echo "<div class='position-results'>";
+            echo "<h6 class='position-title'>$position_name</h6>";
+
             if(isset($voteCounts[$position_id])) {
                 // Sort candidates by vote count
                 arsort($voteCounts[$position_id]);
@@ -78,219 +78,132 @@ if(isset($_POST['id'])){
                 // Calculate minimum votes needed to win (50% + 1)
                 $minimumVotesToWin = floor($totalVotes / 2) + 1;
 
-                $output .= "<table class='w-full'>";
-                $output .= "<thead class='bg-gray-100'>";
-                $output .= "<tr>
-                        <th class='py-2 px-4 text-left'>Rank</th>
-                        <th class='py-2 px-4 text-left'>Candidate</th>
-                        <th class='py-2 px-4 text-left'>Votes</th>
-                        <th class='py-2 px-4 text-left'>Percentage</th>
-                        <th class='py-2 px-4 text-left'>Status</th>
+                echo "<table class='table table-bordered table-striped'>";
+                echo "<thead class='thead-dark'>";
+                echo "<tr>
+                        <th>Rank</th>
+                        <th>Candidate</th>
+                        <th>Votes</th>
+                        <th>Percentage</th>
+                        <th>Status</th>
                     </tr></thead>";
-                $output .= "<tbody>";
+                echo "<tbody>";
 
                 $rank = 1;
-                $rowClass = '';
                 foreach($voteCounts[$position_id] as $candidate_id => $votes) {
                     if(isset($candidateDetails[$candidate_id])) {
                         $percentage = ($totalVotes > 0) ? round(($votes / $totalVotes) * 100, 2) : 0;
-                        $rowClass = ($rank % 2 === 0) ? 'bg-white' : 'bg-gray-50';
 
                         // Determine status based on 50%+1 rule
                         if($rank === 1) {
                             if($votes >= $minimumVotesToWin) {
-                                $status = "<span class='winner-tag'>WINNER</span>";
+                                $status = "<span class='badge bg-success'>WINNER</span>";
                             } else {
-                                $status = "<span class='tie-tag'>RE-ELECTION</span>";
+                                $status = "<span class='badge bg-warning'>RE-ELECTION NEEDED</span>";
                             }
                         } else {
-                            $status = "";
+                            $status = "<span class='badge bg-secondary'>RUNNER-UP</span>";
                         }
 
-                        $output .= "<tr class='$rowClass border-b'>";
-                        $output .= "<td class='py-2 px-4'>" . $rank . "</td>";
-                        $output .= "<td class='py-2 px-4 font-medium'>" . $candidateDetails[$candidate_id]['name'] . "</td>";
-                        $output .= "<td class='py-2 px-4 font-bold'>" . $votes . "</td>";
-                        $output .= "<td class='py-2 px-4'>" . $percentage . "%</td>";
-                        $output .= "<td class='py-2 px-4'>" . $status . "</td>";
-                        $output .= "</tr>";
+                        echo "<tr>";
+                        echo "<td>" . $rank . "</td>";
+                        echo "<td>" . $candidateDetails[$candidate_id]['name'] . "</td>";
+                        echo "<td>" . $votes . "</td>";
+                        echo "<td>" . $percentage . "%</td>";
+                        echo "<td>" . $status . "</td>";
+                        echo "</tr>";
                         $rank++;
                     }
                 }
-                
-                $output .= "<tr class='bg-gray-100 border-t-2 border-gray-300'>";
-                $output .= "<td colspan='2' class='py-2 px-4'><strong>Total Votes:</strong></td>";
-                $output .= "<td class='py-2 px-4 font-bold'>" . $totalVotes . "</td>";
-                $output .= "<td class='py-2 px-4'>100%</td>";
-                $output .= "<td></td>";
-                $output .= "</tr>";
-                
-                $output .= "</tbody>";
-                $output .= "</table>";
+                echo "</tbody>";
+                echo "<tfoot>
+                        <tr class='table-info'>
+                            <td colspan='2'><strong>Total Votes:</strong></td>
+                            <td><strong>" . $totalVotes . "</strong></td>
+                            <td><strong>100%</strong></td>
+                            <td></td>
+                        </tr>
+                        <tr class='table-warning'>
+                            <td colspan='2'><strong>Votes Needed to Win (50%+1):</strong></td>
+                            <td colspan='3'><strong>" . $minimumVotesToWin . " votes</strong></td>
+                        </tr>
+                    </tfoot>";
+                echo "</table>";
             } else {
-                $output .= "<div class='py-4 px-4 text-center text-yellow-700 bg-yellow-50'>No votes recorded for this position.</div>";
+                echo "<p class='alert alert-warning'>No votes recorded for this position.</p>";
             }
-            
-            $output .= "</div>";
-            $output .= "</div>";
+            echo "</div>";
         }
-        
-        return $output;
+        echo "</div>";
     }
-    
-    // Start the HTML output
-    ?>
-    
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title><?php echo $row['election_title']; ?> - Historical Results</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-            
-            body {
-                font-family: 'Poppins', sans-serif;
-                background-color: #f8f9fa;
-                margin: 0;
-                padding: 0;
-            }
-            
-            .container {
-                max-width: 1000px;
-                margin: 0 auto;
-                padding: 20px;
-            }
-            
-            .winner-tag {
-                background-color: #4CAF50;
-                color: white;
-                padding: 2px 6px;
-                border-radius: 4px;
-                font-size: 12px;
-                font-weight: bold;
-            }
-            
-            .tie-tag {
-                background-color: #FFC107;
-                color: #212121;
-                padding: 2px 6px;
-                border-radius: 4px;
-                font-size: 12px;
-                font-weight: bold;
-            }
-            
-            @media print {
-                .no-print {
-                    display: none;
-                }
-                
-                body {
-                    background-color: white;
-                    font-family: 'Poppins', sans-serif;
-                }
-                
-                .container {
-                    max-width: 100%;
-                    padding: 0;
-                    margin: 0;
-                }
-                
-                .position-header {
-                    background-color: #1b5e20 !important;
-                    color: white !important;
-                    print-color-adjust: exact;
-                    -webkit-print-color-adjust: exact;
-                }
-                
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    page-break-inside: auto;
-                }
-                
-                tr {
-                    page-break-inside: avoid;
-                    page-break-after: auto;
-                }
-                
-                th, td {
-                    padding: 8px;
-                    border: 1px solid #ddd;
-                }
-                
-                th {
-                    background-color: #f2f2f2 !important;
-                    print-color-adjust: exact;
-                    -webkit-print-color-adjust: exact;
-                }
-                
-                .winner-tag {
-                    background-color: #4CAF50 !important;
-                    color: white !important;
-                    print-color-adjust: exact;
-                    -webkit-print-color-adjust: exact;
-                }
-                
-                .tie-tag {
-                    background-color: #FFC107 !important;
-                    color: #212121 !important;
-                    print-color-adjust: exact;
-                    -webkit-print-color-adjust: exact;
-                }
-                
-                .certification {
-                    page-break-before: avoid;
-                }
-            }
-        </style>
-    </head>
-    <body>
-        <div id="printable-content" class="container">
-            <!-- Header -->
-            <div class="text-center mb-6">
-                <h1 class="text-3xl font-bold text-green-800"><?php echo $row['election_title']; ?></h1>
-                <p class="text-gray-600">Historical Election Results</p>
-                <p class="text-sm text-gray-500 mt-2">Archived on: <?php echo date('F j, Y', strtotime($row['deleted_at'])); ?></p>
-            </div>
-            
-            <!-- Results by Position -->
-            <div class="results-container">
-                <?php echo displayVoteSummary($row['votes'], $row['candidates'], $row['positions']); ?>
-            </div>
-            
-            <!-- Certification -->
-            <div class="certification mt-10 pt-6 border-t-2 border-green-700">
-                <div class="text-center">
-                    <p class="text-gray-600 mb-6">This is an archived record of the election results.</p>
-                    
-                    <div class="inline-block">
-                        <div class="border-b border-gray-400 w-48 h-8 mx-auto mb-1"></div>
-                        <p class="font-semibold">Election Administrator</p>
-                    </div>
-                    
-                    <div class="text-xs text-gray-500 mt-10">
-                        <p>Archive ID: <?php echo strtoupper(substr(md5($row['id']), 0, 8)); ?></p>
-                        <p>Retrieved on <?php echo date('Y-m-d H:i:s'); ?></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Print/Back Buttons -->
-        <div class="container mt-6 mb-10 flex justify-center no-print">
-            <button onclick="window.print()" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-md mr-4">
-                <i class="fa fa-print"></i> Print Results
-            </button>
-            <button onclick="window.location.reload()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md">
-                Back
-            </button>
-        </div>
-    </body>
-    </html>
-    
-    <?php
+
+    // Display the vote summary
+    displayVoteSummary($row['votes'], $row['candidates'], $row['positions']);
+
+    echo "</div>"; // Close printable-content div
+
+    // Add print button
+    echo "<button class='btn btn-success' id='print-button'><i class='fa fa-print'></i> Print Results</button>";
 }
 ?>
+
+<style>
+.results-container {
+    margin: 20px 0;
+}
+.position-results {
+    margin-bottom: 30px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.position-title {
+    color: #2c3e50;
+    border-bottom: 2px solid #28a745;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+.badge {
+    padding: 5px 10px;
+    border-radius: 3px;
+}
+.bg-success {
+    background-color: #28a745;
+    color: white;
+}
+.bg-warning {
+    background-color: #ffc107;
+    color: #000;
+}
+.bg-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+table {
+    margin-top: 10px;
+    width: 100%;
+}
+.thead-dark th {
+    background-color: #343a40;
+    color: white;
+}
+.table-info {
+    background-color: #e3f2fd;
+}
+.table-warning {
+    background-color: #fff3cd;
+}
+</style>
+
+<script>
+document.getElementById('print-button').addEventListener('click', function() {
+    var printContent = document.getElementById('printable-content').innerHTML;
+    var originalContent = document.body.innerHTML;
+
+    document.body.innerHTML = "<h2>Election Results Summary</h2>" + printContent;
+    window.print();
+    document.body.innerHTML = originalContent;
+    location.reload();
+});
+</script>
