@@ -30,19 +30,6 @@ if (!isset($_SESSION['last_access_time'])) {
 // Store current page as the last visited page
 $_SESSION['last_page'] = 'votes.php';
 
-// Set default refresh interval if not set
-if (!isset($_SESSION['refresh_interval'])) {
-    $_SESSION['refresh_interval'] = 60; // Default: 60 seconds (1 minute)
-}
-
-// Update refresh interval if requested
-if (isset($_POST['set_refresh'])) {
-    $new_interval = intval($_POST['refresh_interval']);
-    if ($new_interval >= 10 && $new_interval <= 300) { // Between 10 seconds and 5 minutes
-        $_SESSION['refresh_interval'] = $new_interval;
-    }
-}
-
 // Fix redirect loop - only check HTTP_REFERER if it exists and is not this page
 // Don't redirect if we're already on the votes.php page
 if (isset($_SERVER['HTTP_REFERER']) && 
@@ -86,6 +73,14 @@ $stmt->bind_param("i", $election_id);
 $stmt->execute();
 $total_voters_result = $stmt->get_result()->fetch_assoc();
 $total_voters = $total_voters_result['total_voters'] ?? 0;
+
+// Add query to count distinct voters who have already voted
+$votes_cast_query = "SELECT COUNT(DISTINCT voters_id) AS votes_cast FROM votes WHERE election_id = ?";
+$stmt = $conn->prepare($votes_cast_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$votes_cast_result = $stmt->get_result()->fetch_assoc();
+$votes_cast = $votes_cast_result['votes_cast'] ?? 0;
 
 // Calculate the threshold for winning (50% + 1)
 $winning_threshold = ceil(($total_voters / 2) + 1);
@@ -209,7 +204,13 @@ while ($row = $results->fetch_assoc()) {
         // Check if this is a position that needs 50%+1 
         $requires_majority = positionRequiresMajority($position_id, $conn);
         
-        if ($requires_majority) {
+        // Check if this is the only candidate in the position
+        $is_single_candidate = ($candidate_count == 1);
+        
+        if ($is_single_candidate) {
+            // For single candidates, they must get 50% + 1 of total votes to win
+            $is_winner = ($row['total_votes'] >= $winning_threshold);
+        } else if ($requires_majority) {
             // Position requires majority (50%+1)
             $is_winner = ($row['total_votes'] >= $winning_threshold && 
                          count($positionsData[$row['position']] ?? []) < $max_vote);
@@ -248,8 +249,6 @@ function positionRequiresMajority($position_id, $conn) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Election Results Dashboard</title>
-    <!-- Add refresh meta tag -->
-    <meta http-equiv="refresh" content="<?php echo $_SESSION['refresh_interval']; ?>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -454,42 +453,6 @@ function positionRequiresMajority($position_id, $conn) {
                 rgba(0, 0, 0, 0.1) 20px
             );
         }
-
-        /* Add styles for the refresh indicator */
-        .refresh-indicator {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(46, 125, 50, 0.9);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 30px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 30;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-        }
-        
-        .refresh-indicator:hover {
-            background: rgba(30, 86, 49, 1);
-            transform: translateY(-3px);
-        }
-        
-        .refresh-spinner {
-            animation: spin 2s linear infinite;
-        }
-        
-        .refresh-countdown {
-            min-width: 24px;
-            text-align: center;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
@@ -505,13 +468,6 @@ function positionRequiresMajority($position_id, $conn) {
                 </a>
             </div>
             <ul class="flex space-x-6">
-                <!-- Add refresh settings button -->
-                <li>
-                    <button onclick="openRefreshModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-full shadow-md transition-all duration-300 flex items-center space-x-2">
-                        <i class="fas fa-sync-alt"></i>
-                        <span>Auto-Refresh</span>
-                    </button>
-                </li>
                 <li>
                     <button onclick="openExtendTimeModal()" class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-full shadow-md transition-all duration-300 flex items-center space-x-2">
                         <i class="fas fa-clock"></i>
@@ -594,7 +550,7 @@ function positionRequiresMajority($position_id, $conn) {
                             <div>
                                 <p class="text-sm text-gray-500 mb-1">Votes Cast</p>
                                 <div class="flex items-end">
-                                    <p id="votes-cast-count" class="text-3xl font-bold text-blue-700">0</p>
+                                    <p id="votes-cast-count" class="text-3xl font-bold text-blue-700"><?php echo $votes_cast; ?></p>
                                     <p class="text-sm text-gray-500 ml-2 mb-1">voters</p>
                                 </div>
                             </div>
@@ -817,61 +773,6 @@ function positionRequiresMajority($position_id, $conn) {
         </div>
     </div>
 
-    <!-- Refresh Settings Modal -->
-    <div id="refreshModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-96 transform transition-all duration-300 scale-100">
-            <div class="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
-                <h2 class="text-2xl font-bold text-blue-600 flex items-center">
-                    <i class="fas fa-sync-alt mr-2"></i>
-                    <span>Auto-Refresh Settings</span>
-                </h2>
-                <button onclick="closeRefreshModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            
-            <form method="POST" action="">
-                <p class="text-gray-600 mb-4">Set how frequently the page should automatically refresh to show the latest results.</p>
-                
-                <div class="mb-6">
-                    <label for="refresh_interval" class="block text-sm font-medium text-gray-700 mb-1">Refresh Interval (seconds)</label>
-                    <div class="flex items-center">
-                        <button type="button" onclick="decrementRefresh()" class="bg-blue-100 hover:bg-blue-200 text-blue-700 h-10 w-10 flex items-center justify-center rounded-l-lg">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <input type="number" id="refresh_interval" name="refresh_interval" class="h-10 block w-full text-center border-blue-200 focus:border-blue-500 focus:ring-blue-500 text-2xl font-bold text-blue-700" min="10" max="300" value="<?php echo $_SESSION['refresh_interval']; ?>">
-                        <button type="button" onclick="incrementRefresh()" class="bg-blue-100 hover:bg-blue-200 text-blue-700 h-10 w-10 flex items-center justify-center rounded-r-lg">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                    <p class="text-sm text-gray-500 mt-2">Minimum: 10 seconds, Maximum: 5 minutes (300 seconds)</p>
-                </div>
-                
-                <div class="bg-blue-50 rounded-lg p-3 mb-6 border border-blue-200">
-                    <div class="flex items-center text-blue-700">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        <span id="refreshPreview">Page will refresh every 60 seconds</span>
-                    </div>
-                </div>
-                
-                <div class="flex justify-end space-x-3">
-                    <button type="button" onclick="closeRefreshModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-5 py-2 rounded-lg transition-all duration-300 flex items-center">
-                        <i class="fas fa-times mr-1"></i> Cancel
-                    </button>
-                    <button type="submit" name="set_refresh" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition-all duration-300 flex items-center">
-                        <i class="fas fa-check mr-1"></i> Save Settings
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Refresh Indicator -->
-    <div class="refresh-indicator" onclick="openRefreshModal()">
-        <i class="fas fa-sync-alt refresh-spinner"></i>
-        <span>Auto-refresh in <span id="refresh-countdown" class="refresh-countdown"><?php echo $_SESSION['refresh_interval']; ?></span>s</span>
-    </div>
-
     <!-- Final Countdown Modal -->
     <div id="finalCountdownModal" class="hidden fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50">
         <div class="text-center max-w-xl w-full px-4">
@@ -1042,13 +943,22 @@ function positionRequiresMajority($position_id, $conn) {
         
         // Initialize as soon as page loads
         document.addEventListener('DOMContentLoaded', function() {
+            // Update votes cast display
+            const votesCast = <?php echo $votes_cast; ?>;
+            const votesCastPercentage = totalVoters > 0 ? ((votesCast / totalVoters) * 100).toFixed(1) : 0;
+            
+            document.getElementById('votes-cast-count').textContent = votesCast;
+            document.getElementById('votes-cast-bar').style.width = votesCastPercentage + '%';
+            document.getElementById('votes-cast-percentage').textContent = votesCastPercentage + '%';
+            
+            // Your existing initializations
             initSounds();
             animateBars();
             calculateAbstains();
             
             // Start the countdown immediately with initial update
-            updateTimeDisplay(); // Immediately set the initial time display
-            setTimeout(updateRemainingTime, 1000); // Then start the countdown
+            updateTimeDisplay();
+            setTimeout(updateRemainingTime, 1000);
         });
         
         // Function to initially set the time display
@@ -1247,31 +1157,16 @@ function positionRequiresMajority($position_id, $conn) {
             document.getElementById('extendTimeModal').classList.remove('flex');
         }
         
-        function openRefreshModal() {
-            document.getElementById('refreshModal').classList.remove('hidden');
-            document.getElementById('refreshModal').classList.add('flex');
-            updateRefreshPreview();
-        }
-        
-        function closeRefreshModal() {
-            document.getElementById('refreshModal').classList.add('hidden');
-            document.getElementById('refreshModal').classList.remove('flex');
-        }
-        
         // Close modals when clicking outside
         window.onclick = function(event) {
             const logoutModal = document.getElementById('logoutModal');
             const extendTimeModal = document.getElementById('extendTimeModal');
-            const refreshModal = document.getElementById('refreshModal');
             
             if (event.target === logoutModal) {
                 closeLogoutModal();
             }
             if (event.target === extendTimeModal) {
                 closeExtendTimeModal();
-            }
-            if (event.target === refreshModal) {
-                closeRefreshModal();
             }
         }
         
@@ -1287,26 +1182,6 @@ function positionRequiresMajority($position_id, $conn) {
             
             // Update preview text
             document.getElementById('timePreview').textContent = `Adding ${displayHours} hour${displayHours !== 1 ? 's' : ''}, ${displayMinutes} minute${displayMinutes !== 1 ? 's' : ''} to election`;
-        }
-        
-        // Update refresh preview in Refresh Settings modal
-        function updateRefreshPreview() {
-            const seconds = parseInt(document.getElementById('refresh_interval').value) || 60;
-            let displayText = '';
-            
-            if (seconds < 60) {
-                displayText = `Page will refresh every ${seconds} seconds`;
-            } else {
-                const minutes = Math.floor(seconds / 60);
-                const remainingSeconds = seconds % 60;
-                if (remainingSeconds === 0) {
-                    displayText = `Page will refresh every ${minutes} minute${minutes !== 1 ? 's' : ''}`;
-                } else {
-                    displayText = `Page will refresh every ${minutes} minute${minutes !== 1 ? 's' : ''} and ${remainingSeconds} second${remainingSeconds !== 1 ? 's' : ''}`;
-                }
-            }
-            
-            document.getElementById('refreshPreview').textContent = displayText;
         }
         
         // Increment and decrement functions for hours and minutes
@@ -1338,86 +1213,6 @@ function positionRequiresMajority($position_id, $conn) {
                 updateTimePreview();
             }
         }
-        
-        // Increment and decrement functions for refresh interval
-        function incrementRefresh() {
-            const input = document.getElementById('refresh_interval');
-            let currentValue = parseInt(input.value) || 60;
-            if (currentValue < 300) {
-                const newValue = Math.min(currentValue + 10, 300);
-                input.value = newValue;
-                updateRefreshPreview();
-            }
-        }
-        
-        function decrementRefresh() {
-            const input = document.getElementById('refresh_interval');
-            let currentValue = parseInt(input.value) || 60;
-            if (currentValue > 10) {
-                const newValue = Math.max(currentValue - 10, 10);
-                input.value = newValue;
-                updateRefreshPreview();
-            }
-        }
-        
-        // Refresh countdown timer
-        let refreshCountdown = <?php echo $_SESSION['refresh_interval']; ?>;
-        
-        function updateRefreshCountdown() {
-            refreshCountdown--;
-            
-            if (refreshCountdown <= 0) {
-                // Let the meta refresh handle the actual page refresh
-                return;
-            }
-            
-            document.getElementById('refresh-countdown').textContent = refreshCountdown;
-            
-            // Add visual indicators when refresh is imminent
-            const indicator = document.querySelector('.refresh-indicator');
-            if (refreshCountdown <= 5) {
-                indicator.style.backgroundColor = 'rgba(229, 57, 53, 0.9)';
-                indicator.classList.add('pulse-animation');
-            } else if (refreshCountdown <= 10) {
-                indicator.style.backgroundColor = 'rgba(255, 152, 0, 0.9)';
-                indicator.classList.remove('pulse-animation');
-            } else {
-                indicator.style.backgroundColor = 'rgba(46, 125, 50, 0.9)';
-                indicator.classList.remove('pulse-animation');
-            }
-            
-            setTimeout(updateRefreshCountdown, 1000);
-        }
-        
-        // Initialize the refresh countdown
-        document.addEventListener('DOMContentLoaded', function() {
-            // Start existing initialization...
-            initSounds();
-            animateBars();
-            calculateAbstains();
-            updateTimeDisplay();
-            setTimeout(updateRemainingTime, 1000);
-            
-            // Start the refresh countdown
-            setTimeout(updateRefreshCountdown, 1000);
-            
-            // Close modals when clicking outside
-            window.onclick = function(event) {
-                const logoutModal = document.getElementById('logoutModal');
-                const extendTimeModal = document.getElementById('extendTimeModal');
-                const refreshModal = document.getElementById('refreshModal');
-                
-                if (event.target === logoutModal) {
-                    closeLogoutModal();
-                }
-                if (event.target === extendTimeModal) {
-                    closeExtendTimeModal();
-                }
-                if (event.target === refreshModal) {
-                    closeRefreshModal();
-                }
-            }
-        });
     </script>
 </body>
 </html>
