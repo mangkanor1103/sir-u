@@ -82,6 +82,14 @@ $stmt->execute();
 $votes_cast_result = $stmt->get_result()->fetch_assoc();
 $votes_cast = $votes_cast_result['votes_cast'] ?? 0;
 
+// Count abstain votes (where candidate_id is NULL)
+$abstain_votes_query = "SELECT COUNT(*) AS abstain_votes FROM votes WHERE election_id = ? AND candidate_id IS NULL";
+$stmt = $conn->prepare($abstain_votes_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$abstain_votes_result = $stmt->get_result()->fetch_assoc();
+$abstain_votes = $abstain_votes_result['abstain_votes'] ?? 0;
+
 // Calculate the threshold for winning (50% + 1)
 $winning_threshold = ceil(($total_voters / 2) + 1);
 
@@ -254,6 +262,7 @@ function positionRequiresMajority($position_id, $conn) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta http-equiv="refresh" content="10">
     <style>
         :root {
             --primary-color: #1e5631;
@@ -526,8 +535,8 @@ function positionRequiresMajority($position_id, $conn) {
                 </div>
                 <?php endif; ?>
             
-                <!-- Stats Cards Row - Only showing total voters and voters who voted -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                <!-- Stats Cards Row -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
                     <!-- Total Voters Card -->
                     <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-4 border-l-4 border-green-500 shadow-md card-hover">
                         <div class="flex justify-between items-center">
@@ -565,6 +574,28 @@ function positionRequiresMajority($position_id, $conn) {
                             <span id="votes-cast-percentage">0%</span> turnout
                         </div>
                     </div>
+                    
+                    <!-- Abstain Votes Card -->
+                    <div id="abstain-votes-container" class="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-xl p-4 border-l-4 border-yellow-500 shadow-md card-hover">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Abstain/Null Votes</p>
+                                <div class="flex items-end">
+                                    <p id="abstain-votes-count" class="text-3xl font-bold text-yellow-700"><?php echo $abstain_votes; ?></p>
+                                    <p class="text-sm text-gray-500 ml-2 mb-1">votes</p>
+                                </div>
+                            </div>
+                            <div class="bg-white p-3 rounded-full shadow-inner">
+                                <i class="fas fa-ban text-yellow-700 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 h-1 bg-gray-200 rounded-full">
+                            <div id="abstain-votes-bar" class="h-1 bg-yellow-500 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                        </div>
+                        <div class="mt-1 text-right text-xs text-gray-500">
+                            <span id="abstain-votes-percentage">0%</span> of total votes
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -576,11 +607,6 @@ function positionRequiresMajority($position_id, $conn) {
                     <h2 class="text-2xl font-bold text-green-700 flex items-center">
                         <i class="fas fa-user-tie mr-2"></i><?php echo htmlspecialchars($position); ?>
                     </h2>
-                    <div class="bg-purple-100 rounded-full px-4 py-1.5 text-sm flex items-center">
-                        <i class="fas fa-ban text-purple-700 mr-1.5"></i>
-                        <span class="text-gray-700">Abstained: </span>
-                        <span class="font-bold text-purple-700 ml-1"><?php echo $abstain_count[$position] ?? 'N/A'; ?></span>
-                    </div>
                 </div>
                 
                 <div class="space-y-6">
@@ -654,35 +680,6 @@ function positionRequiresMajority($position_id, $conn) {
                         </div>
                     </div>
                     <?php endforeach; ?>
-                    
-                    <!-- Enhanced Abstain Bar -->
-                    <?php 
-                    $abstain = $abstain_count[$position] ?? 0;
-                    $abstain_percentage = $total_voters > 0 ? round(($abstain / $total_voters) * 100, 1) : 0;
-                    $relative_abstain_percentage = $max_votes > 0 ? ($abstain / $max_votes) * 100 : 0;
-                    ?>
-                    <div class="bg-gray-50 p-4 rounded-xl hover:shadow-md transition-shadow duration-200 mt-2">
-                        <div class="flex flex-wrap justify-between items-center mb-3">
-                            <div class="font-medium text-lg text-purple-700 flex items-center">
-                                <i class="fas fa-ban mr-1.5"></i> Abstained
-                            </div>
-                            <div class="font-bold text-lg flex items-center text-purple-700">
-                                <span><?php echo $abstain; ?></span>
-                                <span class="text-gray-500 text-sm ml-1">votes</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Enhanced Abstain Bar representation -->
-                        <div class="relative vote-bar-bg rounded-full overflow-hidden mb-1">
-                            <div class="absolute top-0 left-0 h-full bg-purple-500 vote-bar transition-all duration-1000 rounded-full" 
-                                 style="width: <?php echo $relative_abstain_percentage; ?>%;" data-width="<?php echo $relative_abstain_percentage; ?>">
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center text-xs text-gray-500">
-                            <div>0 votes</div>
-                            <div><?php echo $abstain_percentage; ?>% of total voters</div>
-                        </div>
-                    </div>
                 </div>
             </div>
         <?php endforeach; ?>
@@ -945,16 +942,23 @@ function positionRequiresMajority($position_id, $conn) {
         document.addEventListener('DOMContentLoaded', function() {
             // Update votes cast display
             const votesCast = <?php echo $votes_cast; ?>;
+            const abstainVotes = <?php echo $abstain_votes; ?>;
+            const totalVoters = <?php echo $total_voters; ?>;
+            
             const votesCastPercentage = totalVoters > 0 ? ((votesCast / totalVoters) * 100).toFixed(1) : 0;
+            const abstainPercentage = votesCast > 0 ? ((abstainVotes / votesCast) * 100).toFixed(1) : 0;
             
             document.getElementById('votes-cast-count').textContent = votesCast;
             document.getElementById('votes-cast-bar').style.width = votesCastPercentage + '%';
             document.getElementById('votes-cast-percentage').textContent = votesCastPercentage + '%';
             
+            document.getElementById('abstain-votes-count').textContent = abstainVotes;
+            document.getElementById('abstain-votes-bar').style.width = abstainPercentage + '%';
+            document.getElementById('abstain-votes-percentage').textContent = abstainPercentage + '%';
+            
             // Your existing initializations
             initSounds();
             animateBars();
-            calculateAbstains();
             
             // Start the countdown immediately with initial update
             updateTimeDisplay();
@@ -1008,18 +1012,6 @@ function positionRequiresMajority($position_id, $conn) {
                     bar.style.width = targetWidth;
                 });
             }, 500);
-        }
-        
-        // Calculate and display abstain counts
-        function calculateAbstains() {
-            const abstainCounts = <?php echo json_encode($abstain_count ?? []); ?>;
-            if (abstainCounts && Object.keys(abstainCounts).length > 0) {
-                const totalAbstains = Object.values(abstainCounts).reduce((sum, val) => sum + val, 0);
-                const abstainPercentage = totalVoters > 0 ? (totalAbstains / (totalVoters * Object.keys(abstainCounts).length)) * 100 : 0;
-                
-                document.getElementById('abstain-count').textContent = totalAbstains;
-                document.getElementById('abstain-bar').style.width = abstainPercentage + '%';
-            }
         }
 
         // Enhanced time display function
