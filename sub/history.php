@@ -12,6 +12,8 @@ include 'conn.php'; // Include the database connection
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deleted Elections History | Election System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Add SweetAlert2 library -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -79,11 +81,7 @@ include 'conn.php'; // Include the database connection
                     <a href="dashboard.php" class="text-2xl font-bold tracking-tight">Election System</a>
                 </div>
                 <div class="flex items-center space-x-6">
-                    <a href="dashboard.php" class="hover:text-primary-200 transition duration-300 flex items-center space-x-1">
-                        <i class="fas fa-home"></i>
-                        <span>Dashboard</span>
-                    </a>
-                    <a href="logout.php" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium transition duration-300 flex items-center space-x-1">
+                    <a href="javascript:void(0)" onclick="confirmLogout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium transition duration-300 flex items-center space-x-1">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Logout</span>
                     </a>
@@ -100,10 +98,6 @@ include 'conn.php'; // Include the database connection
                     </span>
                     Deleted Elections History
                 </h1>
-                <a href="dashboard.php" class="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-full transition duration-300 flex items-center space-x-2 shadow-sm">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>Back to Dashboard</span>
-                </a>
             </div>
             
             <div class="bg-white shadow-custom rounded-xl p-6 border border-gray-100">
@@ -483,6 +477,30 @@ include 'conn.php'; // Include the database connection
                 });
             });
         });
+        
+        // Logout confirmation function
+        function confirmLogout() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You will be logged out of the system!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#16a34a',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, logout!',
+                background: '#ffffff',
+                borderRadius: '15px',
+                iconColor: '#16a34a',
+                customClass: {
+                    confirmButton: 'px-5 py-2 rounded-lg',
+                    cancelButton: 'px-5 py-2 rounded-lg'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "logout.php";
+                }
+            });
+        }
     </script>
 </body>
 </html>

@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['election_code_submit']
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Election Access</title>
+    <title>Election Access Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -58,64 +58,74 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['election_code_submit']
         }
         
         .login-container {
-            width: 400px;
-            background: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 40px;
+            width: 420px;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+            padding: 45px;
             animation: fadeIn 1s ease-in-out;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .login-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
         }
         
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
+            from { opacity: 0; transform: translateY(-30px); }
             to { opacity: 1; transform: translateY(0); }
         }
         
         @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
         }
         
         .login-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
         }
         
         .login-header h1 {
-            color: #105c3e;
-            font-size: 28px;
+            background: linear-gradient(45deg, #105c3e, #2e7d32);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 32px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             letter-spacing: 1px;
         }
         
         .login-header p {
-            color: #6b7280;
+            color: #4b5563;
             font-size: 16px;
+            font-weight: 500;
         }
         
         .form-group {
-            margin-bottom: 24px;
+            margin-bottom: 28px;
         }
         
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             color: #374151;
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 15px;
+            font-weight: 600;
         }
         
         .form-control {
             width: 100%;
-            padding: 14px;
-            background: rgba(255, 255, 255, 0.8);
-            border: 2px solid rgba(76, 211, 130, 0.3);
-            border-radius: 12px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.85);
+            border: 2px solid rgba(76, 211, 130, 0.4);
+            border-radius: 14px;
             font-size: 16px;
+            font-weight: 500;
             color: #1f2937;
             outline: none;
             transition: all 0.3s ease;
@@ -124,85 +134,113 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['election_code_submit']
         .form-control:focus {
             border-color: #2e7d32;
             background: white;
-            box-shadow: 0 0 0 4px rgba(76, 211, 130, 0.2);
+            box-shadow: 0 0 0 5px rgba(76, 211, 130, 0.2);
         }
         
         .submit-btn {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             background: linear-gradient(45deg, #2e7d32, #4caf50);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
+            border-radius: 14px;
+            font-size: 17px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 10px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .submit-btn:hover {
             background: linear-gradient(45deg, #1b5e20, #43a047);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(46, 125, 50, 0.4);
+        }
+        
+        .submit-btn i {
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+        
+        .submit-btn:hover i {
+            transform: translateX(4px);
         }
         
         .links {
             display: flex;
             justify-content: space-between;
-            margin-top: 20px;
+            margin-top: 25px;
             font-size: 14px;
+            font-weight: 500;
         }
         
         .links a {
             color: #2e7d32;
             text-decoration: none;
-            font-weight: 500;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         
         .links a:hover {
             color: #1b5e20;
-            text-decoration: underline;
+            transform: translateX(3px);
+        }
+        
+        .links a:first-child:hover {
+            transform: translateX(-3px);
         }
         
         .error-message {
             background-color: #fee2e2;
             border-left: 4px solid #ef4444;
             color: #b91c1c;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 25px;
+            border-radius: 10px;
             font-size: 14px;
             display: flex;
             align-items: center;
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
         }
         
         .error-message i {
-            margin-right: 8px;
-            font-size: 16px;
+            margin-right: 10px;
+            font-size: 18px;
         }
         
-        /* Floating shapes animation */
+        /* Enhanced floating shapes animation */
         .shape {
             position: absolute;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.12);
             border-radius: 50%;
             backdrop-filter: blur(5px);
             z-index: -1;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         .shape-1 {
-            width: 150px;
-            height: 150px;
+            width: 180px;
+            height: 180px;
             top: 15%;
             left: 10%;
             animation: float 8s infinite ease-in-out;
         }
         
         .shape-2 {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             bottom: 20%;
             right: 15%;
             animation: float 6s infinite ease-in-out;
@@ -210,8 +248,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['election_code_submit']
         }
         
         .shape-3 {
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             bottom: 30%;
             left: 25%;
             animation: float 7s infinite ease-in-out;
@@ -219,38 +257,82 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['election_code_submit']
         }
         
         .shape-4 {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             top: 30%;
             right: 25%;
             animation: float 5s infinite ease-in-out;
             animation-delay: 1.5s;
         }
-
-        /* Logo animation */
+        
+        /* Enhanced logo animation */
         .logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 25px;
             border-radius: 50%;
-            background: white;
+            background: linear-gradient(145deg, #ffffff, #f1f1f1);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
             position: relative;
             overflow: hidden;
-        }
-        
-        .logo img {
-            width: 60px;
-            height: 60px;
-            object-fit: contain;
             transition: all 0.3s ease;
         }
         
+        .logo::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            20% { transform: translateX(100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .logo img {
+            width: 65px;
+            height: 65px;
+            object-fit: contain;
+            transition: all 0.4s ease;
+            z-index: 2;
+        }
+        
+        .logo:hover {
+            transform: rotate(5deg) scale(1.05);
+            box-shadow: 0 8px 30px rgba(46, 125, 50, 0.25);
+        }
+        
         .logo:hover img {
-            transform: scale(1.1);
+            transform: scale(1.15);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 500px) {
+            .login-container {
+                width: 90%;
+                padding: 30px 25px;
+            }
+            
+            .logo {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .login-header h1 {
+                font-size: 26px;
+            }
+            
+            .form-control, .submit-btn {
+                padding: 14px;
+            }
         }
     </style>
 </head>
@@ -264,9 +346,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['election_code_submit']
     <div class="login-container">
         <div class="login-header">
             <div class="logo">
-                <img src="../pics/logo.png" alt="Logo">
+                <img src="../pics/logo.png" alt="Election System Logo">
             </div>
-            <h1>Election Access</h1>
+            <h1>Election Access Portal</h1>
             <p>Enter your election code to continue</p>
         </div>
         
@@ -285,25 +367,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['election_code_submit']
                     id="election_code" 
                     name="election_code" 
                     class="form-control" 
-                    placeholder="Enter your unique code" 
+                    placeholder="Enter your unique election code" 
                     required
                     autocomplete="off"
                 >
             </div>
             <button type="submit" name="election_code_submit" class="submit-btn">
-                <i class="fas fa-arrow-right-to-bracket mr-2"></i>
-                Enter Election
+                Access Election
+                <i class="fas fa-arrow-right"></i>
             </button>
         </form>
         
         <div class="links">
             <a href="../index.php">
-                <i class="fas fa-arrow-left mr-1"></i> Back to Home
+                <i class="fas fa-arrow-left"></i> Back to Main Page
             </a>
             <a href="historylogin.php">
-                <i class="fas fa-history mr-1"></i> View Election History
+                <i class="fas fa-history"></i> View Election History
             </a>
         </div>
     </div>
+
+    <!-- Optional: Add a subtle particle effect with JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const logo = document.querySelector('.logo');
+            logo.addEventListener('mouseover', function() {
+                this.style.transform = 'rotate(' + (Math.random() * 10 - 5) + 'deg) scale(1.05)';
+            });
+            logo.addEventListener('mouseout', function() {
+                this.style.transform = '';
+            });
+        });
+    </script>
 </body>
 </html>
