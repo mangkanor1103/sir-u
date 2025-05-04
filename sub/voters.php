@@ -344,7 +344,7 @@ $totalVoters = countVoters($election_id);
             <!-- Page Header -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-users text-teal-600 mr-3"></i>
+                    <i class="fas fa-users text-primary-600 mr-3"></i>
                     Manage Voters
                 </h1>
                 <p class="mt-2 text-gray-600 max-w-3xl">
@@ -354,7 +354,7 @@ $totalVoters = countVoters($election_id);
             </div>
 
             <!-- Stats Card -->
-            <div class="bg-gradient-to-r from-teal-500 to-teal-600 rounded-xl shadow-sm mb-6 overflow-hidden">
+            <div class="bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl shadow-sm mb-6 overflow-hidden">
                 <div class="p-6 text-white">
                     <div class="flex items-center justify-between">
                         <div>
@@ -381,7 +381,7 @@ $totalVoters = countVoters($election_id);
                 </div>
                 
                 <div class="flex space-x-2">
-                    <button onclick="openGenerateModal()" class="flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors shadow-sm">
+                    <button onclick="openGenerateModal()" class="flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors shadow-sm">
                         <i class="fas fa-plus mr-2"></i> Generate New Codes
                     </button>
                     
@@ -427,16 +427,16 @@ $totalVoters = countVoters($election_id);
             
             <!-- Batch Navigation -->
             <?php if (count($prefixes) > 0): ?>
-                <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-6">
-                    <h3 class="font-medium text-indigo-700 mb-2 flex items-center">
+                <div class="bg-primary-50 border border-primary-100 rounded-xl p-4 mb-6">
+                    <h3 class="font-medium text-primary-700 mb-2 flex items-center">
                         <i class="fas fa-layer-group mr-2"></i> Browse Voter Code Batches
                     </h3>
                     <div class="flex flex-wrap gap-2">
                         <?php foreach ($prefixes as $prefix): ?>
                             <a href="?prefix=<?php echo $prefix; ?>" 
                                class="px-3 py-1 rounded-full text-sm <?php echo ($prefix === $currentPrefix) ? 
-                                     'bg-indigo-600 text-white' : 
-                                     'bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-100'; ?>">
+                                     'bg-primary-600 text-white' : 
+                                     'bg-white text-primary-700 border border-primary-200 hover:bg-primary-100'; ?>">
                                 <?php echo htmlspecialchars($prefix); ?>
                             </a>
                         <?php endforeach; ?>
@@ -447,8 +447,8 @@ $totalVoters = countVoters($election_id);
             <!-- Voter Codes Display -->
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                 <?php if ($voters->num_rows > 0): ?>
-                    <div class="p-4 bg-teal-50 border-b border-teal-100 flex items-center justify-between">
-                        <h2 class="text-lg font-medium text-teal-800">
+                    <div class="p-4 bg-primary-50 border-b border-primary-100 flex items-center justify-between">
+                        <h2 class="text-lg font-medium text-primary-800">
                             <i class="fas fa-ticket-alt mr-2"></i> 
                             Voter Codes for Batch: <?php echo htmlspecialchars($currentPrefix); ?>
                         </h2>
@@ -464,7 +464,7 @@ $totalVoters = countVoters($election_id);
                             mysqli_data_seek($voters, 0); // Reset pointer
                             while ($row = $voters->fetch_assoc()): 
                             ?>
-                                <div class="border border-gray-200 rounded-md px-3 py-2 text-center bg-gray-50 hover:bg-teal-50 hover:border-teal-200 transition-colors font-mono">
+                                <div class="border border-gray-200 rounded-md px-3 py-2 text-center bg-gray-50 hover:bg-primary-50 hover:border-primary-200 transition-colors font-mono">
                                     <?php echo htmlspecialchars($row['voters_id']); ?>
                                 </div>
                             <?php endwhile; ?>
@@ -472,7 +472,7 @@ $totalVoters = countVoters($election_id);
                     </div>
                 <?php else: ?>
                     <div class="p-12 text-center">
-                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-teal-100 text-teal-500 mb-4">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 text-primary-500 mb-4">
                             <i class="fas fa-users text-2xl"></i>
                         </div>
                         <h3 class="text-lg font-medium text-gray-900">No voter codes yet</h3>
@@ -481,7 +481,7 @@ $totalVoters = countVoters($election_id);
                         <?php else: ?>
                             <p class="mt-2 text-sm text-gray-500">Get started by generating voter codes for your election.</p>
                             <div class="mt-6">
-                                <button onclick="openGenerateModal()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700">
+                                <button onclick="openGenerateModal()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700">
                                     <i class="fas fa-plus mr-2"></i> Generate Voter Codes
                                 </button>
                             </div>
@@ -492,7 +492,7 @@ $totalVoters = countVoters($election_id);
             
             <!-- Footer -->
             <footer class="mt-12 text-center text-gray-500 text-sm">
-                <p>© <?php echo date('Y'); ?> SIR-U Election System | All Rights Reserved</p>
+            <p>© <?php echo date('Y'); ?> Votesys Election System | All Rights Reserved</p>
             </footer>
         </main>
     </div>
@@ -502,7 +502,7 @@ $totalVoters = countVoters($election_id);
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full transform transition-all">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="text-lg font-medium text-gray-900 flex items-center">
-                    <i class="fas fa-ticket-alt text-teal-500 mr-2"></i>
+                    <i class="fas fa-ticket-alt text-primary-500 mr-2"></i>
                     Generate Voter Codes
                 </h3>
                 <button type="button" onclick="closeGenerateModal()" class="text-gray-400 hover:text-gray-500">
@@ -520,7 +520,7 @@ $totalVoters = countVoters($election_id);
                             <i class="fas fa-tag text-gray-400"></i>
                         </div>
                         <input type="text" name="prefix" id="prefix" 
-                               class="focus:ring-teal-500 focus:border-teal-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
+                               class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
                                placeholder="e.g., VOTE" maxlength="10">
                     </div>
                     <p class="mt-1 text-xs text-gray-500">Max 10 characters. Leave blank to use election name.</p>
@@ -533,7 +533,7 @@ $totalVoters = countVoters($election_id);
                             <i class="fas fa-text-width text-gray-400"></i>
                         </div>
                         <select name="length" id="length" 
-                                class="focus:ring-teal-500 focus:border-teal-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3">
+                                class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3">
                             <option value="4">4 characters</option>
                             <option value="6" selected>6 characters</option>
                             <option value="8">8 characters</option>
@@ -552,7 +552,7 @@ $totalVoters = countVoters($election_id);
                             <i class="fas fa-hashtag text-gray-400"></i>
                         </div>
                         <input type="number" name="count" id="count" min="1" max="1000" value="20"
-                               class="focus:ring-teal-500 focus:border-teal-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
+                               class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
                                placeholder="Enter number of codes" required>
                     </div>
                     <p class="mt-1 text-xs text-gray-500">Between 1 and 1000 codes</p>
@@ -572,11 +572,11 @@ $totalVoters = countVoters($election_id);
                 
                 <div class="pt-2 flex justify-end space-x-3">
                     <button type="button" onclick="closeGenerateModal()" 
-                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         Cancel
                     </button>
                     <button type="submit" 
-                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         <i class="fas fa-plus mr-2"></i> Generate Codes
                     </button>
                 </div>
@@ -611,7 +611,7 @@ $totalVoters = countVoters($election_id);
                     
                     <div class="flex justify-center space-x-3">
                         <button type="button" onclick="closeClearModal()" 
-                                class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                                class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                             Cancel
                         </button>
                         <button type="submit" 
@@ -760,7 +760,7 @@ $totalVoters = countVoters($election_id);
             });
             
             printWindow.document.write(`<div class="date">Generated on ${dateString}</div>`);
-            printWindow.document.write(`<div class="footer">SIR-U Election System - Batch: ${prefix}</div>`);
+            printWindow.document.write(`<div class="footer">Votesys Election System - Batch: ${prefix}</div>`);
             
             printWindow.document.write('</body></html>');
             printWindow.document.close();

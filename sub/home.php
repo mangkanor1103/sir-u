@@ -199,7 +199,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     Election Dashboard
                 </h1>
                 <p class="mt-2 text-gray-600 max-w-3xl">
-                    Welcome to the SIR-U Election System dashboard. Follow the setup process below to configure and launch your election successfully.
+                    Welcome to the Votesys Election System dashboard. Follow the setup process below to configure and launch your election successfully.
                 </p>
             </div>
 
@@ -207,14 +207,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                 <!-- Step 1: Partylists -->
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
-                    <div class="h-2 bg-blue-500"></div>
+                    <div class="h-2 bg-primary-500"></div>
                     <div class="p-5">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-500 mb-4">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-100 text-primary-500 mb-4">
                             <i class="fas fa-flag text-xl"></i>
                         </div>
                         <h3 class="text-lg font-semibold mb-1">Step 1: Partylists</h3>
                         <p class="text-gray-600 text-sm mb-4">Create and manage partylists for your election.</p>
-                        <a href="partylist.php" class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium">
+                        <a href="partylist.php" class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium">
                             Set Up <i class="fas fa-arrow-right ml-2 text-xs"></i>
                         </a>
                     </div>
@@ -222,14 +222,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 
                 <!-- Step 2: Positions -->
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
-                    <div class="h-2 bg-amber-500"></div>
+                    <div class="h-2 bg-primary-500"></div>
                     <div class="p-5">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 text-amber-500 mb-4">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-100 text-primary-500 mb-4">
                             <i class="fas fa-sitemap text-xl"></i>
                         </div>
                         <h3 class="text-lg font-semibold mb-1">Step 2: Positions</h3>
                         <p class="text-gray-600 text-sm mb-4">Define the available positions and vote limits.</p>
-                        <a href="positions.php" class="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium">
+                        <a href="positions.php" class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium">
                             Set Up <i class="fas fa-arrow-right ml-2 text-xs"></i>
                         </a>
                     </div>
@@ -237,14 +237,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 
                 <!-- Step 3: Candidates -->
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
-                    <div class="h-2 bg-purple-500"></div>
+                    <div class="h-2 bg-primary-500"></div>
                     <div class="p-5">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 text-purple-500 mb-4">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-100 text-primary-500 mb-4">
                             <i class="fas fa-user-tie text-xl"></i>
                         </div>
                         <h3 class="text-lg font-semibold mb-1">Step 3: Candidates</h3>
                         <p class="text-gray-600 text-sm mb-4">Add and manage candidates for each position.</p>
-                        <a href="candidates.php" class="inline-flex items-center text-purple-600 hover:text-purple-700 font-medium">
+                        <a href="candidates.php" class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium">
                             Set Up <i class="fas fa-arrow-right ml-2 text-xs"></i>
                         </a>
                     </div>
@@ -252,14 +252,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 
                 <!-- Step 4: Voters -->
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
-                    <div class="h-2 bg-teal-500"></div>
+                    <div class="h-2 bg-primary-500"></div>
                     <div class="p-5">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-teal-100 text-teal-500 mb-4">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-100 text-primary-500 mb-4">
                             <i class="fas fa-users text-xl"></i>
                         </div>
                         <h3 class="text-lg font-semibold mb-1">Step 4: Voters</h3>
                         <p class="text-gray-600 text-sm mb-4">Register and manage eligible voters.</p>
-                        <a href="voters.php" class="inline-flex items-center text-teal-600 hover:text-teal-700 font-medium">
+                        <a href="voters.php" class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium">
                             Set Up <i class="fas fa-arrow-right ml-2 text-xs"></i>
                         </a>
                     </div>
@@ -284,8 +284,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <!-- Quick Stats Section -->
             <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div class="bg-white p-6 rounded-xl shadow-sm flex items-center">
-                    <div class="rounded-full bg-blue-100 p-3 mr-4">
-                        <i class="fas fa-flag text-blue-600"></i>
+                    <div class="rounded-full bg-primary-100 p-3 mr-4">
+                        <i class="fas fa-flag text-primary-600"></i>
                     </div>
                     <div>
                         <div class="text-sm text-gray-500 font-medium">Total Partylists</div>
@@ -305,8 +305,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </div>
                 
                 <div class="bg-white p-6 rounded-xl shadow-sm flex items-center">
-                    <div class="rounded-full bg-amber-100 p-3 mr-4">
-                        <i class="fas fa-sitemap text-amber-600"></i>
+                    <div class="rounded-full bg-primary-100 p-3 mr-4">
+                        <i class="fas fa-sitemap text-primary-600"></i>
                     </div>
                     <div>
                         <div class="text-sm text-gray-500 font-medium">Total Positions</div>
@@ -326,8 +326,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </div>
                 
                 <div class="bg-white p-6 rounded-xl shadow-sm flex items-center">
-                    <div class="rounded-full bg-purple-100 p-3 mr-4">
-                        <i class="fas fa-user-tie text-purple-600"></i>
+                    <div class="rounded-full bg-primary-100 p-3 mr-4">
+                        <i class="fas fa-user-tie text-primary-600"></i>
                     </div>
                     <div>
                         <div class="text-sm text-gray-500 font-medium">Total Candidates</div>
@@ -347,8 +347,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </div>
                 
                 <div class="bg-white p-6 rounded-xl shadow-sm flex items-center">
-                    <div class="rounded-full bg-teal-100 p-3 mr-4">
-                        <i class="fas fa-users text-teal-600"></i>
+                    <div class="rounded-full bg-primary-100 p-3 mr-4">
+                        <i class="fas fa-users text-primary-600"></i>
                     </div>
                     <div>
                         <div class="text-sm text-gray-500 font-medium">Registered Voters</div>

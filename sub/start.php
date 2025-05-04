@@ -224,7 +224,7 @@ if ($election_status == 1 && $election_end_time && strtotime($election_end_time)
             <!-- Page Header -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-play-circle text-indigo-600 mr-3"></i>
+                    <i class="fas fa-play-circle text-primary-600 mr-3"></i>
                     Start Election
                 </h1>
                 <p class="mt-2 text-gray-600 max-w-3xl">
@@ -233,21 +233,6 @@ if ($election_status == 1 && $election_end_time && strtotime($election_end_time)
                 </p>
             </div>
             
-            <!-- Action Buttons -->
-            <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
-                <div class="flex space-x-2">
-                    <a href="voters.php" class="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
-                        <i class="fas fa-arrow-left mr-2"></i> Back to Voters
-                    </a>
-                </div>
-                
-                <div class="flex space-x-2">
-                    <a href="home.php" class="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
-                        <i class="fas fa-home mr-2"></i> Dashboard
-                    </a>
-                </div>
-            </div>
-           
             <!-- Check Current Election Status -->
             <?php if ($election_status == 1): ?>
             <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-md">
@@ -274,8 +259,8 @@ if ($election_status == 1 && $election_end_time && strtotime($election_end_time)
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Election Requirements Card -->
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                    <div class="bg-indigo-50 px-6 py-4 border-b border-indigo-100">
-                        <h2 class="text-lg font-semibold text-indigo-800 flex items-center">
+                    <div class="bg-primary-50 px-6 py-4 border-b border-primary-100">
+                        <h2 class="text-lg font-semibold text-primary-800 flex items-center">
                             <i class="fas fa-clipboard-check mr-2"></i> Election Requirements
                         </h2>
                     </div>
@@ -427,8 +412,8 @@ if ($election_status == 1 && $election_end_time && strtotime($election_end_time)
                 
                 <!-- Set Election Time Card -->
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                    <div class="bg-indigo-50 px-6 py-4 border-b border-indigo-100">
-                        <h2 class="text-lg font-semibold text-indigo-800 flex items-center">
+                    <div class="bg-primary-50 px-6 py-4 border-b border-primary-100">
+                        <h2 class="text-lg font-semibold text-primary-800 flex items-center">
                             <i class="fas fa-clock mr-2"></i> Set Election Duration
                         </h2>
                     </div>
@@ -448,7 +433,7 @@ if ($election_status == 1 && $election_end_time && strtotime($election_end_time)
                                                     <i class="far fa-clock text-gray-400"></i>
                                                 </div>
                                                 <input type="number" id="time_limit_hours" name="time_limit_hours" 
-                                                       class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-3 sm:text-sm border-gray-300 rounded-md" 
+                                                       class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 pr-3 sm:text-sm border-gray-300 rounded-md" 
                                                        min="0" max="999" value="0" required>
                                             </div>
                                         </div>
@@ -459,7 +444,7 @@ if ($election_status == 1 && $election_end_time && strtotime($election_end_time)
                                                     <i class="far fa-clock text-gray-400"></i>
                                                 </div>
                                                 <input type="number" id="time_limit_minutes" name="time_limit_minutes" 
-                                                       class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 pr-3 sm:text-sm border-gray-300 rounded-md" 
+                                                       class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 pr-3 sm:text-sm border-gray-300 rounded-md" 
                                                        min="1" max="59" value="30" required>
                                             </div>
                                         </div>
@@ -480,19 +465,19 @@ if ($election_status == 1 && $election_end_time && strtotime($election_end_time)
                                 <?php endif; ?>
                                 
                                 <!-- Election Preview -->
-                                <div class="border border-indigo-100 bg-indigo-50 rounded-lg p-4">
-                                    <h4 class="text-sm font-semibold text-indigo-800 mb-2">Election Preview</h4>
+                                <div class="border border-primary-100 bg-primary-50 rounded-lg p-4">
+                                    <h4 class="text-sm font-semibold text-primary-800 mb-2">Election Preview</h4>
                                     <div class="space-y-1 text-sm">
-                                        <p class="text-indigo-700">
+                                        <p class="text-primary-700">
                                             <span class="font-medium">Election Name:</span> <?php echo htmlspecialchars($election_name); ?>
                                         </p>
-                                        <p class="text-indigo-700">
+                                        <p class="text-primary-700">
                                             <span class="font-medium">Total Positions:</span> <?php echo $positions_count; ?>
                                         </p>
-                                        <p class="text-indigo-700">
+                                        <p class="text-primary-700">
                                             <span class="font-medium">Total Candidates:</span> <?php echo $candidates_count; ?>
                                         </p>
-                                        <p class="text-indigo-700">
+                                        <p class="text-primary-700">
                                             <span class="font-medium">Available Voters:</span> <?php echo $voters_count; ?>
                                         </p>
                                     </div>
@@ -516,7 +501,7 @@ if ($election_status == 1 && $election_end_time && strtotime($election_end_time)
                                             You must complete all requirements before starting the election.
                                         </p>
                                     <?php else: ?>
-                                        <p class="text-indigo-500 text-sm text-center mt-3">
+                                        <p class="text-primary-500 text-sm text-center mt-3">
                                             <i class="fas fa-info-circle mr-1"></i>
                                             Once the election is started, the voting process will begin and voters can cast their votes.
                                         </p>
@@ -550,8 +535,8 @@ if ($election_status == 1 && $election_end_time && strtotime($election_end_time)
             
             <!-- Help Section -->
             <div class="mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
-                <div class="bg-blue-50 px-6 py-4 border-b border-blue-100">
-                    <h2 class="text-lg font-semibold text-blue-800 flex items-center">
+                <div class="bg-primary-50 px-6 py-4 border-b border-primary-100">
+                    <h2 class="text-lg font-semibold text-primary-800 flex items-center">
                         <i class="fas fa-info-circle mr-2"></i> Need Help?
                     </h2>
                 </div>
@@ -560,7 +545,7 @@ if ($election_status == 1 && $election_end_time && strtotime($election_end_time)
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="font-medium text-gray-800 mb-2 flex items-center">
-                                <i class="fas fa-question-circle text-blue-500 mr-2"></i>
+                                <i class="fas fa-question-circle text-primary-500 mr-2"></i>
                                 How to Start an Election
                             </h3>
                             <p class="text-sm text-gray-600">
@@ -569,7 +554,7 @@ if ($election_status == 1 && $election_end_time && strtotime($election_end_time)
                         </div>
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="font-medium text-gray-800 mb-2 flex items-center">
-                                <i class="fas fa-history text-blue-500 mr-2"></i>
+                                <i class="fas fa-history text-primary-500 mr-2"></i>
                                 Election Duration
                             </h3>
                             <p class="text-sm text-gray-600">
@@ -578,7 +563,7 @@ if ($election_status == 1 && $election_end_time && strtotime($election_end_time)
                         </div>
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="font-medium text-gray-800 mb-2 flex items-center">
-                                <i class="fas fa-shield-alt text-blue-500 mr-2"></i>
+                                <i class="fas fa-shield-alt text-primary-500 mr-2"></i>
                                 Election Security
                             </h3>
                             <p class="text-sm text-gray-600">
@@ -591,7 +576,7 @@ if ($election_status == 1 && $election_end_time && strtotime($election_end_time)
             
             <!-- Footer -->
             <footer class="mt-12 text-center text-gray-500 text-sm">
-                <p>© <?php echo date('Y'); ?> SIR-U Election System | All Rights Reserved</p>
+                <p>© <?php echo date('Y'); ?> Votesys Election System | All Rights Reserved</p>
             </footer>
         </main>
     </div>

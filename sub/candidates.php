@@ -386,7 +386,7 @@ $partylists = getPartylists($election_id);
             <!-- Page Header -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-user-tie text-purple-600 mr-3"></i>
+                    <i class="fas fa-user-tie text-primary-600 mr-3"></i>
                     Manage Candidates
                 </h1>
                 <p class="mt-2 text-gray-600 max-w-3xl">
@@ -431,7 +431,7 @@ $partylists = getPartylists($election_id);
                 </div>
                 
                 <div class="flex space-x-2">
-                    <button onclick="openAddModal()" class="flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors shadow-sm">
+                    <button onclick="openAddModal()" class="flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors shadow-sm">
                         <i class="fas fa-plus mr-2"></i> Add New Candidate
                     </button>
                     
@@ -464,8 +464,8 @@ $partylists = getPartylists($election_id);
 
             <!-- Candidates Table -->
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div class="p-4 bg-purple-50 border-b border-purple-100">
-                    <h2 class="text-lg font-medium text-purple-800">
+                <div class="p-4 bg-primary-50 border-b border-primary-100">
+                    <h2 class="text-lg font-medium text-primary-800">
                         <i class="fas fa-user-tie mr-2"></i> Candidate List
                     </h2>
                 </div>
@@ -502,13 +502,13 @@ $partylists = getPartylists($election_id);
                                 ?>
                                     <tr class="hover:bg-gray-50 transition-colors">
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-100 text-primary-800">
                                                 <?php echo htmlspecialchars($candidate['position_description']); ?>
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
-                                                <div class="ml-4">
+                                                <div class="ml-0">
                                                     <div class="text-sm font-medium text-gray-900">
                                                         <?php echo htmlspecialchars($candidate['firstname'] . ' ' . $candidate['lastname']); ?>
                                                     </div>
@@ -517,7 +517,7 @@ $partylists = getPartylists($election_id);
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <?php if (!empty($candidate['partylist_name'])): ?>
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-100 text-primary-800">
                                                     <?php echo htmlspecialchars($candidate['partylist_name']); ?>
                                                 </span>
                                             <?php else: ?>
@@ -547,7 +547,7 @@ $partylists = getPartylists($election_id);
                                                 <?php echo $candidate['partylist_id'] ?? 'null'; ?>, 
                                                 '<?php echo htmlspecialchars($candidate['platform'], ENT_QUOTES); ?>'
                                                 )" 
-                                                    class="text-purple-600 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 px-3 py-1 rounded-md transition-colors mr-2">
+                                                    class="text-primary-600 hover:text-primary-900 bg-primary-50 hover:bg-primary-100 px-3 py-1 rounded-md transition-colors mr-2">
                                                 <i class="fas fa-edit mr-1"></i> Edit
                                             </button>
                                             <button onclick="openDeleteModal(<?php echo $candidate['id']; ?>)" 
@@ -562,13 +562,13 @@ $partylists = getPartylists($election_id);
                     </div>
                 <?php else: ?>
                     <div class="py-12 text-center">
-                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 text-purple-500 mb-4">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 text-primary-500 mb-4">
                             <i class="fas fa-user-tie text-xl"></i>
                         </div>
                         <h3 class="text-lg font-medium text-gray-900">No candidates yet</h3>
                         <p class="mt-2 text-sm text-gray-500">Get started by adding candidates to your election.</p>
                         <div class="mt-6">
-                            <button onclick="openAddModal()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700">
+                            <button onclick="openAddModal()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700">
                                 <i class="fas fa-plus mr-2"></i> Add Candidate
                             </button>
                         </div>
@@ -578,7 +578,7 @@ $partylists = getPartylists($election_id);
 
             <!-- Footer -->
             <footer class="mt-12 text-center text-gray-500 text-sm">
-                <p>© <?php echo date('Y'); ?> SIR-U Election System | All Rights Reserved</p>
+            <p>© <?php echo date('Y'); ?> Votesys Election System | All Rights Reserved</p>
             </footer>
         </main>
     </div>
@@ -588,7 +588,7 @@ $partylists = getPartylists($election_id);
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full transform transition-all">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="text-lg font-medium text-gray-900 flex items-center">
-                    <i class="fas fa-plus-circle text-purple-500 mr-2"></i>
+                    <i class="fas fa-plus-circle text-primary-500 mr-2"></i>
                     Add New Candidate
                 </h3>
                 <button type="button" onclick="closeAddModal()" class="text-gray-400 hover:text-gray-500">
@@ -607,14 +607,14 @@ $partylists = getPartylists($election_id);
                                 <i class="fas fa-user text-gray-400"></i>
                             </div>
                             <input type="text" name="firstname" id="firstname" 
-                                   class="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
+                                   class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
                                    placeholder="First name" required>
                         </div>
                     </div>
                     <div>
                         <label for="lastname" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
                         <input type="text" name="lastname" id="lastname" 
-                               class="focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-300 rounded-md py-3" 
+                               class="focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md py-3" 
                                placeholder="Last name" required>
                     </div>
                 </div>
@@ -626,7 +626,7 @@ $partylists = getPartylists($election_id);
                             <i class="fas fa-sitemap text-gray-400"></i>
                         </div>
                         <select name="position_id" id="position_id" 
-                                class="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" required>
+                                class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" required>
                             <option value="">Select Position</option>
                             <?php
                             mysqli_data_seek($positions, 0); // Reset pointer
@@ -648,7 +648,7 @@ $partylists = getPartylists($election_id);
                             <i class="fas fa-flag text-gray-400"></i>
                         </div>
                         <select name="partylist_id" id="partylist_id" 
-                                class="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3">
+                                class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3">
                             <option value="">No Partylist</option>
                             <?php
                             mysqli_data_seek($partylists, 0); // Reset pointer
@@ -670,7 +670,7 @@ $partylists = getPartylists($election_id);
                             <i class="fas fa-align-left text-gray-400"></i>
                         </div>
                         <textarea name="platform" id="platform" rows="3" 
-                                  class="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" 
+                                  class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" 
                                   placeholder="Enter candidate's platform" required></textarea>
                     </div>
                 </div>
@@ -684,7 +684,7 @@ $partylists = getPartylists($election_id);
                             </svg>
                         </span>
                         <input type="file" name="photo" id="photo" 
-                               class="focus:ring-purple-500 focus:border-purple-500 block sm:text-sm border-gray-300 rounded-md py-2" 
+                               class="focus:ring-primary-500 focus:border-primary-500 block sm:text-sm border-gray-300 rounded-md py-2" 
                                accept="image/*" required>
                     </div>
                     <p class="text-xs text-gray-500 mt-1">Max file size: 20MB. Supported formats: JPG, PNG, GIF</p>
@@ -692,11 +692,11 @@ $partylists = getPartylists($election_id);
                 
                 <div class="pt-2 flex justify-end space-x-3">
                     <button type="button" onclick="closeAddModal()" 
-                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         Cancel
                     </button>
                     <button type="submit" 
-                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         <i class="fas fa-save mr-2"></i> Save Candidate
                     </button>
                 </div>
@@ -709,7 +709,7 @@ $partylists = getPartylists($election_id);
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full transform transition-all">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="text-lg font-medium text-gray-900 flex items-center">
-                    <i class="fas fa-edit text-purple-500 mr-2"></i>
+                    <i class="fas fa-edit text-primary-500 mr-2"></i>
                     Edit Candidate
                 </h3>
                 <button type="button" onclick="closeEditModal()" class="text-gray-400 hover:text-gray-500">
@@ -729,14 +729,14 @@ $partylists = getPartylists($election_id);
                                 <i class="fas fa-user text-gray-400"></i>
                             </div>
                             <input type="text" name="firstname" id="editFirstname" 
-                                   class="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
+                                   class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
                                    placeholder="First name" required>
                         </div>
                     </div>
                     <div>
                         <label for="editLastname" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
                         <input type="text" name="lastname" id="editLastname" 
-                               class="focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-300 rounded-md py-3" 
+                               class="focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md py-3" 
                                placeholder="Last name" required>
                     </div>
                 </div>
@@ -748,7 +748,7 @@ $partylists = getPartylists($election_id);
                             <i class="fas fa-sitemap text-gray-400"></i>
                         </div>
                         <select name="position_id" id="editPositionId" 
-                                class="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" required>
+                                class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" required>
                             <option value="">Select Position</option>
                             <?php
                             mysqli_data_seek($positions, 0); // Reset pointer
@@ -770,7 +770,7 @@ $partylists = getPartylists($election_id);
                             <i class="fas fa-flag text-gray-400"></i>
                         </div>
                         <select name="partylist_id" id="editPartylistId" 
-                                class="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3">
+                                class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3">
                             <option value="">No Partylist</option>
                             <?php
                             mysqli_data_seek($partylists, 0); // Reset pointer
@@ -792,7 +792,7 @@ $partylists = getPartylists($election_id);
                             <i class="fas fa-align-left text-gray-400"></i>
                         </div>
                         <textarea name="platform" id="editPlatform" rows="3" 
-                                  class="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" 
+                                  class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" 
                                   placeholder="Enter candidate's platform" required></textarea>
                     </div>
                 </div>
@@ -806,7 +806,7 @@ $partylists = getPartylists($election_id);
                             </svg>
                         </span>
                         <input type="file" name="photo" id="editPhoto" 
-                               class="focus:ring-purple-500 focus:border-purple-500 block sm:text-sm border-gray-300 rounded-md py-2" 
+                               class="focus:ring-primary-500 focus:border-primary-500 block sm:text-sm border-gray-300 rounded-md py-2" 
                                accept="image/*">
                     </div>
                     <p class="text-xs text-gray-500 mt-1">Max file size: 20MB. Supported formats: JPG, PNG, GIF</p>
@@ -814,11 +814,11 @@ $partylists = getPartylists($election_id);
                 
                 <div class="pt-2 flex justify-end space-x-3">
                     <button type="button" onclick="closeEditModal()" 
-                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         Cancel
                     </button>
                     <button type="submit" 
-                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         <i class="fas fa-save mr-2"></i> Update Candidate
                     </button>
                 </div>
@@ -853,7 +853,7 @@ $partylists = getPartylists($election_id);
                     
                     <div class="flex justify-center space-x-3">
                         <button type="button" onclick="closeDeleteModal()" 
-                                class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                                class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                             Cancel
                         </button>
                         <button type="submit" 

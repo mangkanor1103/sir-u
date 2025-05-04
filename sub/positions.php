@@ -251,7 +251,8 @@ $positions = getPositions($election_id);
             <!-- Page Header -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-sitemap text-amber-600 mr-3"></i>
+
+                <i class="fas fa-sitemap text-primary-600 mr-3"></i>
                     Manage Positions
                 </h1>
                 <p class="mt-2 text-gray-600 max-w-3xl">
@@ -269,7 +270,7 @@ $positions = getPositions($election_id);
                 </div>
                 
                 <div class="flex space-x-2">
-                    <button onclick="openAddModal()" class="flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors shadow-sm">
+                    <button onclick="openAddModal()" class="flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors shadow-sm">
                         <i class="fas fa-plus mr-2"></i> Add Position
                     </button>
                     
@@ -302,8 +303,8 @@ $positions = getPositions($election_id);
             
             <!-- Positions Table -->
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div class="p-4 bg-amber-50 border-b border-amber-100">
-                    <h2 class="text-lg font-medium text-amber-800">
+                <div class="p-4 bg-primary-50 border-b border-primary-100">
+                    <h2 class="text-lg font-medium text-primary-800">
                         <i class="fas fa-list-ul mr-2"></i> Positions List
                     </h2>
                 </div>
@@ -332,8 +333,8 @@ $positions = getPositions($election_id);
                                     <tr class="hover:bg-gray-50 transition-colors">
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
-                                                <div class="flex-shrink-0 h-10 w-10 bg-amber-100 rounded-full flex items-center justify-center">
-                                                    <i class="fas fa-sitemap text-amber-500"></i>
+                                                <div class="flex-shrink-0 h-10 w-10 bg-primary-100 rounded-full flex items-center justify-center">
+                                                    <i class="fas fa-sitemap text-primary-500"></i>
                                                 </div>
                                                 <div class="ml-4">
                                                     <div class="text-sm font-medium text-gray-900">
@@ -343,13 +344,13 @@ $positions = getPositions($election_id);
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-100 text-primary-800">
                                                 <?php echo htmlspecialchars($row['max_vote']); ?> vote<?php echo $row['max_vote'] > 1 ? 's' : ''; ?>
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <button onclick="openEditModal(<?php echo $row['position_id']; ?>, '<?php echo addslashes($row['description']); ?>', <?php echo $row['max_vote']; ?>)" 
-                                                    class="text-amber-600 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-3 py-1 rounded-md transition-colors mr-2">
+                                                    class="text-primary-600 hover:text-primary-900 bg-primary-50 hover:bg-primary-100 px-3 py-1 rounded-md transition-colors mr-2">
                                                 <i class="fas fa-edit mr-1"></i> Edit
                                             </button>
                                             <button onclick="openDeleteModal(<?php echo $row['position_id']; ?>, '<?php echo addslashes($row['description']); ?>')" 
@@ -364,13 +365,13 @@ $positions = getPositions($election_id);
                     </div>
                 <?php else: ?>
                     <div class="py-12 text-center">
-                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 text-amber-500 mb-4">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 text-primary-500 mb-4">
                             <i class="fas fa-sitemap text-xl"></i>
                         </div>
                         <h3 class="text-lg font-medium text-gray-900">No positions yet</h3>
                         <p class="mt-2 text-sm text-gray-500">Get started by creating a new position.</p>
                         <div class="mt-6">
-                            <button onclick="openAddModal()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700">
+                            <button onclick="openAddModal()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700">
                                 <i class="fas fa-plus mr-2"></i> Add Position
                             </button>
                         </div>
@@ -390,7 +391,7 @@ $positions = getPositions($election_id);
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full transform transition-all">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="text-lg font-medium text-gray-900 flex items-center">
-                    <i class="fas fa-plus-circle text-amber-500 mr-2"></i>
+                    <i class="fas fa-plus-circle text-primary-500 mr-2"></i>
                     Add New Position
                 </h3>
                 <button type="button" onclick="closeAddModal()" class="text-gray-400 hover:text-gray-500">
@@ -408,7 +409,7 @@ $positions = getPositions($election_id);
                             <i class="fas fa-sitemap text-gray-400"></i>
                         </div>
                         <input type="text" name="description" id="description" 
-                               class="focus:ring-amber-500 focus:border-amber-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
+                               class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
                                placeholder="Enter position name (e.g. President)" required>
                     </div>
                 </div>
@@ -420,7 +421,7 @@ $positions = getPositions($election_id);
                             <i class="fas fa-check-double text-gray-400"></i>
                         </div>
                         <input type="number" name="max_vote" id="max_vote" min="1" value="1"
-                               class="focus:ring-amber-500 focus:border-amber-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
+                               class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
                                placeholder="Enter maximum votes" required>
                     </div>
                     <p class="mt-1 text-xs text-gray-500">Number of candidates a voter can select for this position</p>
@@ -428,11 +429,11 @@ $positions = getPositions($election_id);
                 
                 <div class="pt-2 flex justify-end space-x-3">
                     <button type="button" onclick="closeAddModal()" 
-                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         Cancel
                     </button>
                     <button type="submit" 
-                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         <i class="fas fa-save mr-2"></i> Save Position
                     </button>
                 </div>
@@ -445,7 +446,7 @@ $positions = getPositions($election_id);
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full transform transition-all">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="text-lg font-medium text-gray-900 flex items-center">
-                    <i class="fas fa-edit text-amber-500 mr-2"></i>
+                    <i class="fas fa-edit text-primary-500 mr-2"></i>
                     Edit Position
                 </h3>
                 <button type="button" onclick="closeEditModal()" class="text-gray-400 hover:text-gray-500">
@@ -464,7 +465,7 @@ $positions = getPositions($election_id);
                             <i class="fas fa-sitemap text-gray-400"></i>
                         </div>
                         <input type="text" name="description" id="editDescription" 
-                               class="focus:ring-amber-500 focus:border-amber-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
+                               class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
                                placeholder="Enter position name" required>
                     </div>
                 </div>
@@ -476,7 +477,7 @@ $positions = getPositions($election_id);
                             <i class="fas fa-check-double text-gray-400"></i>
                         </div>
                         <input type="number" name="max_vote" id="editMaxVote" min="1"
-                               class="focus:ring-amber-500 focus:border-amber-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
+                               class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
                                placeholder="Enter maximum votes" required>
                     </div>
                     <p class="mt-1 text-xs text-gray-500">Number of candidates a voter can select for this position</p>
@@ -484,11 +485,11 @@ $positions = getPositions($election_id);
                 
                 <div class="pt-2 flex justify-end space-x-3">
                     <button type="button" onclick="closeEditModal()" 
-                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         Cancel
                     </button>
                     <button type="submit" 
-                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         <i class="fas fa-save mr-2"></i> Update Position
                     </button>
                 </div>
@@ -524,7 +525,7 @@ $positions = getPositions($election_id);
                     
                     <div class="flex justify-center space-x-3">
                         <button type="button" onclick="closeDeleteModal()" 
-                                class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+                                class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                             Cancel
                         </button>
                         <button type="submit" 

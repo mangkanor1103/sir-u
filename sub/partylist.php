@@ -192,7 +192,7 @@ $result = $stmt->get_result();
             <!-- Page Header -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
-                    <i class="fas fa-flag text-blue-600 mr-3"></i>
+                    <i class="fas fa-flag text-primary-600 mr-3"></i>
                     Manage Partylists
                 </h1>
                 <p class="mt-2 text-gray-600 max-w-3xl">
@@ -210,7 +210,7 @@ $result = $stmt->get_result();
                 </div>
                 
                 <div class="flex space-x-2">
-                    <button onclick="openAddModal()" class="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-sm">
+                    <button onclick="openAddModal()" class="flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors shadow-sm">
                         <i class="fas fa-plus mr-2"></i> Add New Partylist
                     </button>
                     
@@ -243,8 +243,8 @@ $result = $stmt->get_result();
             
             <!-- Partylists Table -->
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div class="p-4 bg-blue-50 border-b border-blue-100">
-                    <h2 class="text-lg font-medium text-blue-800">
+                <div class="p-4 bg-primary-50 border-b border-primary-100">
+                    <h2 class="text-lg font-medium text-primary-800">
                         <i class="fas fa-list-ul mr-2"></i> Partylists
                     </h2>
                 </div>
@@ -270,8 +270,8 @@ $result = $stmt->get_result();
                                     <tr class="hover:bg-gray-50 transition-colors">
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
-                                                <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                                    <i class="fas fa-flag text-blue-500"></i>
+                                                <div class="flex-shrink-0 h-10 w-10 bg-primary-100 rounded-full flex items-center justify-center">
+                                                    <i class="fas fa-flag text-primary-500"></i>
                                                 </div>
                                                 <div class="ml-4">
                                                     <div class="text-sm font-medium text-gray-900">
@@ -282,7 +282,7 @@ $result = $stmt->get_result();
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <button onclick="openEditModal(<?php echo $row['partylist_id']; ?>, '<?php echo addslashes($row['name']); ?>')" 
-                                                    class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors mr-2">
+                                                    class="text-primary-600 hover:text-primary-900 bg-primary-50 hover:bg-primary-100 px-3 py-1 rounded-md transition-colors mr-2">
                                                 <i class="fas fa-edit mr-1"></i> Edit
                                             </button>
                                             <button onclick="openDeleteModal(<?php echo $row['partylist_id']; ?>, '<?php echo addslashes($row['name']); ?>')" 
@@ -297,13 +297,13 @@ $result = $stmt->get_result();
                     </div>
                 <?php else: ?>
                     <div class="py-12 text-center">
-                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-500 mb-4">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 text-primary-500 mb-4">
                             <i class="fas fa-flag-checkered text-xl"></i>
                         </div>
                         <h3 class="text-lg font-medium text-gray-900">No partylists yet</h3>
                         <p class="mt-2 text-sm text-gray-500">Get started by creating a new partylist.</p>
                         <div class="mt-6">
-                            <button onclick="openAddModal()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                            <button onclick="openAddModal()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700">
                                 <i class="fas fa-plus mr-2"></i> Add Partylist
                             </button>
                         </div>
@@ -323,7 +323,7 @@ $result = $stmt->get_result();
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full transform transition-all">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="text-lg font-medium text-gray-900 flex items-center">
-                    <i class="fas fa-plus-circle text-blue-500 mr-2"></i>
+                    <i class="fas fa-plus-circle text-primary-500 mr-2"></i>
                     Add New Partylist
                 </h3>
                 <button type="button" onclick="closeAddModal()" class="text-gray-400 hover:text-gray-500">
@@ -339,18 +339,18 @@ $result = $stmt->get_result();
                             <i class="fas fa-flag text-gray-400"></i>
                         </div>
                         <input type="text" name="partylistName" id="partylistName" 
-                               class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
+                               class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
                                placeholder="Enter partylist name" required>
                     </div>
                 </div>
                 
                 <div class="pt-2 flex justify-end space-x-3">
                     <button type="button" onclick="closeAddModal()" 
-                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         Cancel
                     </button>
                     <button type="submit" 
-                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         <i class="fas fa-save mr-2"></i> Save Partylist
                     </button>
                 </div>
@@ -363,7 +363,7 @@ $result = $stmt->get_result();
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full transform transition-all">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="text-lg font-medium text-gray-900 flex items-center">
-                    <i class="fas fa-edit text-blue-500 mr-2"></i>
+                    <i class="fas fa-edit text-primary-500 mr-2"></i>
                     Edit Partylist
                 </h3>
                 <button type="button" onclick="closeEditModal()" class="text-gray-400 hover:text-gray-500">
@@ -381,18 +381,18 @@ $result = $stmt->get_result();
                             <i class="fas fa-flag text-gray-400"></i>
                         </div>
                         <input type="text" name="name" id="editPartylistName" 
-                               class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
+                               class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
                                placeholder="Enter partylist name" required>
                     </div>
                 </div>
                 
                 <div class="pt-2 flex justify-end space-x-3">
                     <button type="button" onclick="closeEditModal()" 
-                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         Cancel
                     </button>
                     <button type="submit" 
-                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         <i class="fas fa-save mr-2"></i> Update Partylist
                     </button>
                 </div>
@@ -424,7 +424,7 @@ $result = $stmt->get_result();
                 
                 <div class="mt-6 flex justify-center space-x-3">
                     <button type="button" onclick="closeDeleteModal()" 
-                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                         Cancel
                     </button>
                     <a id="deleteConfirmLink" href="#" 

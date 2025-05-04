@@ -474,55 +474,8 @@ if (isset($_SESSION['admin'])) {
             <i class="fas fa-chevron-down text-white text-2xl drop-shadow-lg"></i>
         </div>
     </section>
-    
-    <!-- About System Section -->
-    <section class="min-h-screen w-full flex items-center justify-center px-6 py-20 bg-gradient-to-b from-transparent to-brand-green-900/30">
-        <div class="glass-effect w-full max-w-7xl p-10 z-10 card-glow">
-            <h2 class="text-3xl md:text-4xl font-bold text-brand-green-800 mb-10 text-center">
-                <i class="fas fa-vote-yea text-brand-green-600 mr-3"></i>
-                About Our Voting System
-            </h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-white/90 p-8 rounded-xl hover-scale border-2 border-brand-green-200 shadow-lg">
-                    <div class="flex items-center gap-4 mb-5">
-                        <div class="p-4 bg-brand-green-100 text-brand-green-700 rounded-full">
-                            <i class="fas fa-shield-alt text-2xl"></i>
-                        </div>
-                        <h3 class="font-bold text-brand-green-800 text-2xl">Secure & Reliable</h3>
-                    </div>
-                    <p class="text-gray-700 text-lg sm-text-larger leading-relaxed">End-to-end encrypted voting platform ensuring data integrity and voter privacy. Designed to prevent fraud and maintain election integrity at every step of the process.</p>
-                </div>
-                
-                <div class="bg-white/90 p-8 rounded-xl hover-scale border-2 border-brand-green-200 shadow-lg">
-                    <div class="flex items-center gap-4 mb-5">
-                        <div class="p-4 bg-brand-green-100 text-brand-green-700 rounded-full">
-                            <i class="fas fa-chart-bar text-2xl"></i>
-                        </div>
-                        <h3 class="font-bold text-brand-green-800 text-2xl">Real-time Results</h3>
-                    </div>
-                    <p class="text-gray-700 text-lg sm-text-larger leading-relaxed">Instant vote counting and result generation after polls close. Detailed analytics and visualization tools for comprehensive election insights and transparent reporting.</p>
-                </div>
-                
-                <div class="bg-white/90 p-8 rounded-xl hover-scale border-2 border-brand-green-200 shadow-lg">
-                    <div class="flex items-center gap-4 mb-5">
-                        <div class="p-4 bg-brand-green-100 text-brand-green-700 rounded-full">
-                            <i class="fas fa-mobile-alt text-2xl"></i>
-                        </div>
-                        <h3 class="font-bold text-brand-green-800 text-2xl">Accessible Anywhere</h3>
-                    </div>
-                    <p class="text-gray-700 text-lg sm-text-larger leading-relaxed">Mobile-responsive design allows voting from any device. Streamlined interface ensures easy voting process for all users regardless of technical expertise or device type.</p>
-                </div>
-            </div>
-            
-            <div class="mt-10 text-center">
-                <p class="text-gray-700 text-lg">
-                    © 2025 Votesys.Online - Developed for educational institutions and organizations
-                </p>
-            </div>
-        </div>
-    </section>
 
+    
    <!-- Team Section -->
 <section class="min-h-screen w-full flex items-center justify-center px-6 py-20 bg-gradient-to-b from-brand-green-900/30 to-transparent">
     <div class="glass-effect w-full max-w-7xl p-10 z-10 card-glow">
@@ -541,7 +494,7 @@ if (isset($_SESSION['admin'])) {
                 <div>
                     <h4 class="text-2xl font-bold text-brand-green-800">Kian A. Rodriguez</h4>
                     <p class="text-brand-green-600 font-medium text-lg mb-4">Project Lead & Full-stack Developer</p>
-                    <p class="text-gray-700 mb-4">Led the entire development process, including frontend and backend integration, ensuring project success for Minsū Bongabong Campus, College of Computer Studies.</p>
+                    <p class="text-gray-700 mb-4">Led the entire development process, including frontend and backend integration, ensuring project success for Minsu Bongabong Campus, College of Computer Studies.</p>
                 </div>
             </div>
         </div>
@@ -591,7 +544,7 @@ if (isset($_SESSION['admin'])) {
                         </div>
                     </li>
                     <li class="flex items-center gap-4">
-                        <img src="https://randomuser.me/api/portraits/women/62.jpg" alt="Joan Manzano" class="w-12 h-12 rounded-full object-cover">
+                        <img src="pics/5.jpg" alt="Joan Manzano" class="w-12 h-12 rounded-full object-cover">
                         <div>
                             <h5 class="font-semibold text-brand-green-800">Joan Manzano</h5>
                             <p class="text-gray-700">Backend Developer</p>
@@ -643,16 +596,64 @@ if (isset($_SESSION['admin'])) {
                 <i class="fas fa-chalkboard-teacher text-brand-green-600 mr-2"></i> Faculty Advisor
             </h3>
             <div class="flex gap-4 bg-white/90 p-6 rounded-xl border-2 border-brand-green-200 shadow-lg hover-scale">
-                <img src="https://randomuser.me/api/portraits/men/72.jpg" alt="Sir Uriel Melendrez" class="w-16 h-16 rounded-full object-cover">
+                <img src="pics/6.jpg" alt="Sir Uriel Melendrez" class="w-16 h-16 rounded-full object-cover">
                 <div>
-                    <h4 class="text-xl font-bold text-brand-green-800">Sir Uriel Melendrez</h4>
+                    <h4 class="text-xl font-bold text-brand-green-800">Sir Uriel Melendres</h4>
                     <p class="text-brand-green-600">Faculty Advisor</p>
-                    <p class="text-gray-700 text-sm mt-1">College of Computer Studies - Minsū Bongabong Campus</p>
+                    <p class="text-gray-700 text-sm mt-1">College of Computer Studies - Minsu Bongabong Campus</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
+    
+    <!-- About System Section -->
+    <section class="min-h-screen w-full flex items-center justify-center px-6 py-20 bg-gradient-to-b from-transparent to-brand-green-900/30">
+        <div class="glass-effect w-full max-w-7xl p-10 z-10 card-glow">
+            <h2 class="text-3xl md:text-4xl font-bold text-brand-green-800 mb-10 text-center">
+                <i class="fas fa-vote-yea text-brand-green-600 mr-3"></i>
+                About Our Voting System
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white/90 p-8 rounded-xl hover-scale border-2 border-brand-green-200 shadow-lg">
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="p-4 bg-brand-green-100 text-brand-green-700 rounded-full">
+                            <i class="fas fa-shield-alt text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-brand-green-800 text-2xl">Secure & Reliable</h3>
+                    </div>
+                    <p class="text-gray-700 text-lg sm-text-larger leading-relaxed">End-to-end encrypted voting platform ensuring data integrity and voter privacy. Designed to prevent fraud and maintain election integrity at every step of the process.</p>
+                </div>
+                
+                <div class="bg-white/90 p-8 rounded-xl hover-scale border-2 border-brand-green-200 shadow-lg">
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="p-4 bg-brand-green-100 text-brand-green-700 rounded-full">
+                            <i class="fas fa-chart-bar text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-brand-green-800 text-2xl">Real-time Results</h3>
+                    </div>
+                    <p class="text-gray-700 text-lg sm-text-larger leading-relaxed">Instant vote counting and result generation after polls close. Detailed analytics and visualization tools for comprehensive election insights and transparent reporting.</p>
+                </div>
+                
+                <div class="bg-white/90 p-8 rounded-xl hover-scale border-2 border-brand-green-200 shadow-lg">
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="p-4 bg-brand-green-100 text-brand-green-700 rounded-full">
+                            <i class="fas fa-mobile-alt text-2xl"></i>
+                        </div>
+                        <h3 class="font-bold text-brand-green-800 text-2xl">Accessible Anywhere</h3>
+                    </div>
+                    <p class="text-gray-700 text-lg sm-text-larger leading-relaxed">Mobile-responsive design allows voting from any device. Streamlined interface ensures easy voting process for all users regardless of technical expertise or device type.</p>
+                </div>
+            </div>
+            
+            <div class="mt-10 text-center">
+                <p class="text-gray-700 text-lg">
+                    © 2025 Votesys.Online - Developed for educational institutions and organizations
+                </p>
+            </div>
+        </div>
+    </section>
 
 
     <!-- Add particles.js -->
