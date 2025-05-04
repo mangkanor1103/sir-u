@@ -21,11 +21,10 @@ if (isset($_SESSION['admin'])) {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            padding: 0;
+            padding: 15px;
             animation: slideshow 12s infinite linear;
-            overflow: hidden;
         }
 
         @keyframes slideshow {
@@ -42,7 +41,7 @@ if (isset($_SESSION['admin'])) {
         .login-box {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(12px);
-            padding: 40px;
+            padding: 35px 30px;
             border-radius: 24px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
             text-align: center;
@@ -52,6 +51,7 @@ if (isset($_SESSION['admin'])) {
             animation: fadeIn 0.8s ease-in-out;
             color: #333;
             transition: transform 0.3s, box-shadow 0.3s;
+            margin: 10px auto;
         }
 
         .login-box:hover {
@@ -68,7 +68,7 @@ if (isset($_SESSION['admin'])) {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .logo-container img {
@@ -95,8 +95,8 @@ if (isset($_SESSION['admin'])) {
         }
 
         .login-box-msg {
-            margin: 0 0 25px;
-            padding: 10px 0;
+            margin: 0 0 20px;
+            padding: 8px 0;
             font-size: 1.4em;
             font-weight: 600;
             color: #166534;
@@ -106,11 +106,11 @@ if (isset($_SESSION['admin'])) {
             display: flex;
             justify-content: space-between;
             gap: 20px;
-            margin: 30px 0;
+            margin: 25px 0;
         }
 
         .btn {
-            padding: 16px 20px;
+            padding: 14px 18px;
             border: none;
             border-radius: 12px;
             font-size: 1.2em;
@@ -157,10 +157,10 @@ if (isset($_SESSION['admin'])) {
         }
 
         .callout {
-            padding: 16px;
+            padding: 14px;
             border-radius: 12px;
-            margin-top: 20px;
-            margin-bottom: 20px;
+            margin-top: 15px;
+            margin-bottom: 15px;
             font-weight: 500;
             font-size: 1.1em;
         }
@@ -172,7 +172,7 @@ if (isset($_SESSION['admin'])) {
         }
 
         .mt20 {
-            margin-top: 20px;
+            margin-top: 18px;
             font-size: 1.1em;
         }
 
@@ -190,7 +190,7 @@ if (isset($_SESSION['admin'])) {
 
         /* Floating shapes */
         .shape {
-            position: absolute;
+            position: fixed;
             background: rgba(255, 255, 255, 0.12);
             border-radius: 50%;
             backdrop-filter: blur(5px);
@@ -239,20 +239,42 @@ if (isset($_SESSION['admin'])) {
             100% { transform: translateY(0px) rotate(0deg); }
         }
 
+        /* Container wrapper to help with vertical centering */
+        .container-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 100vh;
+        }
+
         @media (max-width: 767px) {
-            .login-box {
-                padding: 30px;
-                margin: 0 20px;
+            body {
+                padding: 15px;
+                overflow-y: auto;
+                align-items: center;
+                justify-content: center;
+                height: auto;
             }
+            
+            .login-box {
+                padding: 25px 20px;
+                margin: 15px auto;
+                max-width: 90%;
+            }
+            
             .logo-container img {
                 max-width: 65px;
             }
+            
             .logo-container .votesys {
                 font-size: 1.8em;
             }
+            
             .admin-buttons {
                 gap: 12px;
             }
+            
             .btn {
                 font-size: 1.1em;
                 padding: 14px;
@@ -261,28 +283,49 @@ if (isset($_SESSION['admin'])) {
 
         @media (max-width: 480px) {
             .login-box {
-                padding: 25px 20px;
+                padding: 22px 18px;
+                margin: 0 auto;
             }
+            
             .logo-container {
                 flex-direction: column;
-                gap: 10px;
+                gap: 8px;
+                margin-bottom: 15px;
             }
+            
             .logo-container img {
-                max-width: 60px;
+                max-width: 55px;
                 margin-right: 0;
             }
+            
             .logo-container .votesys {
-                font-size: 1.6em;
+                font-size: 1.5em;
             }
+            
             .login-box-msg {
-                font-size: 1.3em;
+                font-size: 1.2em;
+                margin-bottom: 15px;
             }
+            
             .admin-buttons {
                 flex-direction: column;
-                gap: 15px;
+                gap: 12px;
+                margin: 15px 0;
             }
+            
             .btn-admin, .btn-subadmin {
                 width: 100%;
+                padding: 12px;
+            }
+            
+            .mt20 {
+                margin-top: 15px;
+                font-size: 0.95em;
+            }
+            
+            /* Hide some shapes on very small screens */
+            .shape-3, .shape-4 {
+                display: none;
             }
         }
     </style>
@@ -295,34 +338,36 @@ if (isset($_SESSION['admin'])) {
     <div class="shape shape-3"></div>
     <div class="shape shape-4"></div>
 
-    <div class="login-box">
-        <div class="logo-container">
-            <img src="pics/logo.png" alt="University Logo">
-            <div class="votesys">Votesys.Online</div>
-        </div>
-        
-        <p class="login-box-msg">Manage an Election</p>
-        <div class="admin-buttons">
-            <a href="admin/index.php" class="btn btn-admin">
-                <i class="fas fa-user-shield"></i> Admin
-            </a>
-            <a href="sub/index.php" class="btn btn-subadmin">
-                <i class="fas fa-user-cog"></i> Sub Admin
-            </a>
-        </div>
+    <div class="container-wrapper">
+        <div class="login-box">
+            <div class="logo-container">
+                <img src="pics/logo.png" alt="University Logo">
+                <div class="votesys">Votesys.Online</div>
+            </div>
+            
+            <p class="login-box-msg">Manage an Election</p>
+            <div class="admin-buttons">
+                <a href="admin/index.php" class="btn btn-admin">
+                    <i class="fas fa-user-shield"></i> Admin
+                </a>
+                <a href="sub/index.php" class="btn btn-subadmin">
+                    <i class="fas fa-user-cog"></i> Sub Admin
+                </a>
+            </div>
 
-        <?php
-            if (isset($_SESSION['error'])) {
-                echo "
-                    <div class='callout callout-danger text-center'>
-                        <p>" . $_SESSION['error'] . "</p>
-                    </div>
-                ";
-                unset($_SESSION['error']);
-            }
-        ?>
+            <?php
+                if (isset($_SESSION['error'])) {
+                    echo "
+                        <div class='callout callout-danger text-center'>
+                            <p>" . $_SESSION['error'] . "</p>
+                        </div>
+                    ";
+                    unset($_SESSION['error']);
+                }
+            ?>
 
-        <p class="mt20">Go <a href="index.php">Back to Homepage</a></p>
+            <p class="mt20">Go <a href="index.php">Back to Homepage</a></p>
+        </div>
     </div>
 
     <?php include 'includes/scripts.php' ?>

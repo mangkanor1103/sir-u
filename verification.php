@@ -156,28 +156,6 @@ if (isset($_POST['register'])) {
                 </div>
                 
                 <div class="space-y-1">
-                    <label for="year_section" class="block text-gray-700 font-medium text-sm">Year and Section</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                            <i class="fas fa-layer-group"></i>
-                        </span>
-                        <select id="year_section" name="year_section" 
-                                class="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50 appearance-none form-input" required>
-                            <option value="" disabled selected>Select Year and Section</option>
-                            <?php
-                            mysqli_data_seek($courses_result, 0); // Reset pointer
-                            while ($row = $courses_result->fetch_assoc()) {
-                                echo "<option value='" . htmlspecialchars($row['year_section']) . "'>" . htmlspecialchars($row['year_section']) . "</option>";
-                            }
-                            ?>
-                        </select>
-                        <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 pointer-events-none">
-                            <i class="fas fa-chevron-down"></i>
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="space-y-1">
                     <label for="course" class="block text-gray-700 font-medium text-sm">Course</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
@@ -190,6 +168,28 @@ if (isset($_POST['register'])) {
                             $courses_result = $conn->query($courses_query); // Re-fetch courses
                             while ($row = $courses_result->fetch_assoc()) {
                                 echo "<option value='" . htmlspecialchars($row['course']) . "'>" . htmlspecialchars($row['course']) . "</option>";
+                            }
+                            ?>
+                        </select>
+                        <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 pointer-events-none">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="space-y-1">
+                    <label for="year_section" class="block text-gray-700 font-medium text-sm">Year and Section</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                            <i class="fas fa-layer-group"></i>
+                        </span>
+                        <select id="year_section" name="year_section" 
+                                class="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50 appearance-none form-input" required>
+                            <option value="" disabled selected>Select Year and Section</option>
+                            <?php
+                            mysqli_data_seek($courses_result, 0); // Reset pointer
+                            while ($row = $courses_result->fetch_assoc()) {
+                                echo "<option value='" . htmlspecialchars($row['year_section']) . "'>" . htmlspecialchars($row['year_section']) . "</option>";
                             }
                             ?>
                         </select>

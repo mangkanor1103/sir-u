@@ -262,7 +262,7 @@ function positionRequiresMajority($position_id, $conn) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <meta http-equiv="refresh" content="10">
+    <meta http-equiv="refresh" content="60">
     <style>
         :root {
             --primary-color: #1e5631;
@@ -959,11 +959,50 @@ function positionRequiresMajority($position_id, $conn) {
             // Your existing initializations
             initSounds();
             animateBars();
+            checkScreenSize();
             
             // Start the countdown immediately with initial update
             updateTimeDisplay();
             setTimeout(updateRemainingTime, 1000);
+            
+            // Add resize event listener for responsive adjustments
+            window.addEventListener('resize', checkScreenSize);
         });
+        
+        // Check screen size and adjust UI accordingly
+        function checkScreenSize() {
+            const isMobile = window.innerWidth < 640;
+            const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
+            
+            // Adjust navigation bar
+            const navContainer = document.querySelector('nav .container');
+            if (isMobile) {
+                navContainer.classList.add('flex-col', 'space-y-3');
+                navContainer.classList.remove('flex-row', 'justify-between');
+                document.querySelector('nav ul').classList.add('w-full', 'justify-center');
+            } else {
+                navContainer.classList.remove('flex-col', 'space-y-3');
+                navContainer.classList.add('flex-row', 'justify-between');
+                document.querySelector('nav ul').classList.remove('w-full', 'justify-center');
+            }
+            
+            // Adjust candidate display
+            const candidateCards = document.querySelectorAll('.bg-gray-50.p-4.rounded-xl');
+            candidateCards.forEach(card => {
+                const nameEl = card.querySelector('.font-medium.text-lg');
+                const statsEl = card.querySelector('.flex.items-center.space-x-3');
+                
+                if (isMobile) {
+                    nameEl.classList.add('text-base', 'mb-2');
+                    statsEl.classList.add('flex-wrap', 'gap-2', 'justify-start');
+                    statsEl.classList.remove('space-x-3');
+                } else {
+                    nameEl.classList.remove('text-base', 'mb-2');
+                    statsEl.classList.remove('flex-wrap', 'gap-2', 'justify-start');
+                    statsEl.classList.add('space-x-3');
+                }
+            });
+        }
         
         // Function to initially set the time display
         function updateTimeDisplay() {
@@ -1033,6 +1072,7 @@ function positionRequiresMajority($position_id, $conn) {
                 // Start final countdown at 10 seconds if not already shown
                 if (remainingTime <= 10 && !isFinalCountdownShown) {
                     startFinalCountdown(remainingTime);
+                    isFinalCountdownShown = true;
                 }
                 
                 // Schedule next update
