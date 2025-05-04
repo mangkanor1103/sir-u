@@ -2,6 +2,10 @@
 // Include database connection
 include 'includes/session.php';
 
+// Initialize variables
+$showThankYou = false;
+$redirectDelay = 3; // Redirect after 3 seconds
+
 // Feedback submission logic
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['feedback_submit'])) {
     // Sanitize and retrieve form input
@@ -20,11 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['feedback_submit'])) {
     $sql = "INSERT INTO feedback (election_id, feedback) VALUES ('$election_id', '$feedback')";
     if ($conn->query($sql)) {
         // Feedback submitted successfully
-        // Destroy session after submission
-        session_unset();
-        session_destroy();
-        header("Location: index.php");
-        exit();
+        $showThankYou = true;
+        // We'll redirect with JavaScript after showing the thank you message
     } else {
         $_SESSION['error'] = $conn->error;
     }
@@ -60,7 +61,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['feedback_submit'])) {
         .float-animation {
             animation: float 3s ease-in-out infinite;
         }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
     </style>
+    <?php if ($showThankYou): ?>
+    <script>
+        // Redirect after showing thank you message
+        setTimeout(function() {
+            // Destroy session and redirect
+            window.location.href = 'index.php';
+        }, <?php echo $redirectDelay * 1000; ?>);
+    </script>
+    <?php endif; ?>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
     <div class="flex-grow flex items-center justify-center p-4">
@@ -75,6 +92,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['feedback_submit'])) {
                 <div class="h-2 w-32 bg-green-500 mx-auto mt-3 rounded-full"></div>
             </div>
             
+            <?php if ($showThankYou): ?>
+            <!-- Thank You Message -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden fade-in">
+                <div class="bg-gradient-to-r from-green-600 to-green-400 p-6 text-white text-center">
+                    <div class="text-6xl mb-4">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-2">Thank You For Your Feedback!</h2>
+                    <p class="text-white text-opacity-90">Your feedback has been successfully submitted.</p>
+                </div>
+                
+                <div class="p-6 text-center">
+                    <p class="text-gray-600 mb-4">We appreciate your participation in the election process.</p>
+                    <p class="text-sm text-gray-500">You will be redirected to the homepage in <?php echo $redirectDelay; ?> seconds...</p>
+                    
+                    <div class="mt-4">
+                        <a href="index.php" class="inline-block px-6 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors">
+                            <i class="fas fa-home mr-1"></i> Return to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <?php else: ?>
             <!-- Feedback Form -->
             <div class="bg-white rounded-lg shadow-lg overflow-hidden">
                 <div class="bg-gradient-to-r from-green-600 to-green-400 p-4 text-white">
@@ -118,10 +158,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['feedback_submit'])) {
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
             
             <!-- Footer -->
             <div class="mt-6 text-center">
-                <p class="text-gray-500 text-sm">© <?php echo date('Y'); ?> Votesys Election System</p>
+                <p class="text-gray-500 text-sm">© <?php echo date('Y'); ?> SIR-U Election System</p>
             </div>
         </div>
     </div>
