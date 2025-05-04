@@ -565,7 +565,7 @@ if (isset($_SESSION['admin'])) {
                         </div>
                     </li>
                     <li class="flex items-center gap-4">
-                        <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Francis Romero" class="w-12 h-12 rounded-full object-cover">
+                        <img src="pics/4.jpg" alt="Francis Romero" class="w-12 h-12 rounded-full object-cover">
                         <div>
                             <h5 class="font-semibold text-brand-green-800">Francis Romero</h5>
                             <p class="text-gray-700">Frontend Developer</p>
