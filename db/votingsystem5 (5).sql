@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 05, 2025 at 10:38 AM
+-- Generation Time: May 04, 2025 at 05:08 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -109,9 +109,27 @@ INSERT INTO `candidates` (`id`, `election_id`, `position_id`, `firstname`, `last
 (50, 25, 10, '10', 'Rodriguez ', 'uploads/67d626d7bd9ef.jpeg', 'Ejjeje', 10),
 (51, 26, 11, 'aa', 'aa', 'uploads/67d8b7e0d57ce.jpg', 'yy', 11),
 (52, 26, 12, 'Alpha', 'Valdez', 'uploads/67df6d6335253.jpg', 'ww', 11),
-(53, 29, 13, 'Kian', 'Rodriguez ', 'uploads/67eddbb9e8ec7.jpg', 'Kejdjdjd', 12),
 (62, 38, 0, '', '', 'uploads/67f0de8362517.png', '0', NULL),
-(63, 38, 18, 'Rodriguez', 'Kian A.', 'uploads/67f0df6914457.png', 'fwefwf', 17);
+(63, 38, 18, 'Rodriguez', 'Kian A.', 'uploads/67f0df6914457.png', 'fwefwf', 17),
+(83, 39, 35, 'Rodriguez', 'dsvdvghhkhkjhhrdhd', 'uploads/67f256fecb160.png', 'ffwfef', 27),
+(84, 26, 12, 'Rodriguez', 'dsvdvghhkhkjhhrdhd', 'uploads/67f30ed505f0c.png', 'vsdvsb', 28),
+(85, 26, 12, 'Rodriguez', 'dsvdvghhkhkjhhrdhd', 'uploads/67f30ee03753c.png', 'sgesg', 29),
+(86, 27, 36, 'Rodriguez', 'dsvdvghhkhkjhhrdhd', 'uploads/67f32361acf89.png', 'sgesg', 31),
+(87, 24, 37, 'Rodriguez', 'dsvdvghhkhkjhhrdhd', 'uploads/67f3b2a640e4a.png', 'feg', 32),
+(88, 24, 37, 'Rodriguez', 'dsvdvghhkhkjhhrdhd', 'uploads/67f3b2b08840f.png', 'grggr', 33),
+(89, 24, 37, 'Rodriguez', 'dsvdvghhkhkjhhrdhd', 'uploads/67f3b2bda78ce.png', 'fegvwgfegwg', 34),
+(90, 24, 37, 'Rodriguez', 'dsvdvghhkhkjhhrdhd', 'uploads/67f3b2d277980.png', 'gegege', 35),
+(91, 38, 38, 'Rodriguez', 'dsvdvghhkhkjhhrdhd', 'uploads/67f3b835521cb.png', 'dhhdh', 17),
+(92, 38, 39, 'Rodriguez', 'dsvdvghhkhkjhhrdhd', 'uploads/67f3b83e50d30.png', 'rhddr', 17),
+(93, 38, 40, 'Rodriguez', 'dsvdvghhkhkjhhrdhd', 'uploads/67f3b849c7a17.png', 'rhdhdr', 17),
+(94, 45, 41, 'kian', 'Rodriguez', 'uploads/681439a21379e.jpg', 'ffdfhdffb', 37),
+(98, 49, 45, 'kian', 'Rodriguez', 'uploads/6814d93a6ecbb.png', 'tjuty', 41),
+(99, 49, 46, 'kian', 'Rodriguez', 'uploads/6814d94e9a482.png', 'jyjtj', 41),
+(100, 49, 46, 'kian', 'Rodriguez', 'uploads/6814d95ab9f84.jpg', 'jtjyt', 41),
+(102, 43, 48, 'kian', 'Rodriguez', 'uploads/6814e8d790f77.png', 'thtj', 43),
+(103, 43, 49, 'kian', 'Rodriguez', 'uploads/6814e8e3c0048.png', 'utrjtr', 43),
+(104, 43, 49, 'kian', 'Rodriguez', 'uploads/6814e8ee368bb.jpg', 'fbffn', 43),
+(112, 56, 56, 'kianuu6yt', 'Rodriguez', 'uploads/6815b8030db26.png', 'egwg', 49);
 
 -- --------------------------------------------------------
 
@@ -130,7 +148,7 @@ CREATE TABLE `courses` (
 --
 
 INSERT INTO `courses` (`id`, `course`, `year_section`) VALUES
-(5, 'BSIT', '3F1');
+(7, 'BSIT', '3F1');
 
 -- --------------------------------------------------------
 
@@ -151,18 +169,7 @@ CREATE TABLE `elections` (
 --
 
 INSERT INTO `elections` (`id`, `name`, `election_code`, `status`, `end_time`) VALUES
-(18, 'its', 'QKJ4tE7aR9', 1, NULL),
-(19, 'itsa', 'mJx2qrt1Hi', 1, NULL),
-(22, 'ITS ', '8MTfn1iYbH', 1, NULL),
-(23, 'USG', 'n9frUgkVAH', 1, NULL),
-(24, 'ite2fwefwdvss', 'psyG46hMRc', 1, NULL),
-(25, 'Usg', 'vWQbMjJkuS', 1, NULL),
-(26, 'Hahaha', 'vX76qzRUwI', 1, NULL),
-(27, 'it2', 'RuXYn8eyEk', 1, NULL),
-(29, 'Crim', 'dFy94QmRCS', 1, NULL),
-(34, 'USG ELECTION 2025', 'BikA4bpTos', 1, '2025-04-05 10:02:30'),
-(37, 'fsgwsg', '8sSZOTPq5r', 0, NULL),
-(38, 'USG Election 2025', 'BxofsLFJbQ', 0, NULL);
+(56, 'final', 'Lfc57qA1Jz', 1, '2025-05-03 10:01:08');
 
 -- --------------------------------------------------------
 
@@ -203,7 +210,14 @@ INSERT INTO `feedback` (`id`, `election_id`, `feedback`, `created_at`) VALUES
 (7, 18, 'fwefw', '2025-03-07 02:23:55'),
 (8, 18, 'wgwgwegwg', '2025-03-07 02:29:06'),
 (9, 18, 'affa', '2025-03-07 02:37:13'),
-(11, 25, 'Jgggg', '2025-03-16 01:20:57');
+(11, 25, 'Jgggg', '2025-03-16 01:20:57'),
+(20, 27, 'jtrjrrjrjrt', '2025-04-07 02:02:03'),
+(21, 24, 'rdrd', '2025-04-07 11:13:35'),
+(22, 24, 'gdgds', '2025-04-07 11:15:37'),
+(23, 24, 'dhdhd', '2025-04-07 11:16:44'),
+(24, 24, 'FHFTHF', '2025-04-07 11:17:49'),
+(25, 24, 'dvdvxvdxv', '2025-04-07 11:24:20'),
+(26, 38, 'rtjjr', '2025-04-07 11:38:37');
 
 -- --------------------------------------------------------
 
@@ -227,21 +241,9 @@ CREATE TABLE `history` (
 --
 
 INSERT INTO `history` (`id`, `election_title`, `deleted_at`, `candidates`, `voters`, `votes`, `positions`, `partylists`) VALUES
-(1, 'usg election', '2025-03-05 20:37:34', '28|1|ad|asd|uploads/553838_Hollow Block picture.jpg|wfwwgw|2', '89|s72cwf9U7e;90|dp0Xn5aW3T;91|tCh7HtFfwf;92|4kWdFU8sRN;93|CCWUtuRGGO;94|aqSZlGQuzg;95|owP1VdX8s4;96|Oa97gF47YM;97|p5F1nNk1WF;98|516z4gl8VB;99|tEuoKidF1q;100|JlIiW0IqGk;101|UvnjPSRkyi;102|5otq4bWsmY;103|OZOYI8CyDq;104|pcteMPDJwS;105|48FMtyfsSU;106|y2RLS8g081;107|7nxuw3K8hB;108|DtCLgiLLBZ;109|kbEaaVuFbq;110|RBtDE34sJt;111|6Xd9zM0kD5;112|rNgoCwQfKP;113|JJla2BNGJ4;114|OnzgGxn1Po;115|ouLpXR7wds;116|ijSq3j4grB;117|U0L0zxcGou;118|HbGxM8rStG;119|F8m0oZostk;120|KGy5THJEM3;121|1lRO1Vqi1Y;122|FQmwThED4X;123|nk155DDyLq;124|YXXwF0weUF;125|Rz4z0E1iex;126|Iahd6b9Ygj;127|rbiLdEhpae;128|Ny861fNCbE;129|TEvSDqw5S9;130|oxtlyV8F97;131|6vn9B0huZt;132|hY6gDuIgR7;133|h6X9tlbqyO;134|md9cse88eq;135|dr78SYNchN;136|3yU81BFhr7;137|5yopbkPVuM;138|bZ1RByLKYw;139|YtrxQq6ZIL;140|PP8cM0bPi3;141|ba0540DnGg;142|qF4ynuUgfy;143|KaDgUDgSEc;144|rTbWoqmzLm;145|K0xASt1QvN;146|AwwDoiNyLo;147|ZrZplKnTcK;148|yr4oEJ0ANM;149|VxKcrzmlpw;150|ue1qIuPXLV;151|0tW4Fn5uTF;152|e63gbKxy0w;153|KRqlq6wwUw;154|z9QuNztfpA;155|iA99i10I81', '82|89|24|12|2025-03-02 18:43:25;83|90|25|1|2025-03-04 22:38:33;84|90|26|1|2025-03-04 22:38:33;85|91|25|1|2025-03-04 22:39:45;86|91|26|1|2025-03-04 22:39:45;87|92|25|1|2025-03-04 23:00:20;88|93|25|1|2025-03-04 23:04:55;90|94|25|1|2025-03-04 23:07:50;91|95|25|1|2025-03-04 23:16:35', '1|pres|1', '2|Republic Corp.'),
-(2, 'usg election', '2025-03-07 07:57:10', '29|2|ad|asd|uploads/4c1eb3fb-bf37-40f2-a495-f1d061784156.jpg|2r2r2|3', '156|sjtgYnNvX4;157|nyINhVQUM8;158|hvRBVSkn3Z;159|1jTEeGNjeB;160|C4TunqRZQ0;161|RTRFQFIMBXE8R;162|RTRJ9YM3H4LJB;163|RTRSWJ652Y9BY;164|RTR25J0S1NHND;165|RTRYLMJ6DKEO9;166|RTRD66BOI1GCI;167|RTR5A8JIDE2XE;168|RTRGCTNCUARA9;169|RTR3IHF68NNMA;170|RTRW7ASLNOQRU', '93|157|29|2|2025-03-05 20:48:09', '2|pres|1', '3|Republic Corp.'),
-(3, 'usg election', '2025-03-07 07:57:25', '30|3|eyey|erheh|uploads/rsz_republic_cement_2.jpg|eryeye|4;31|3|4y54y4|y4y45y|uploads/cheat.jpg|4y4y4|4;32|4|3y43yy|3y43y3|uploads/power_tools.jpg|3y3y43|4', '181|RTRTO8Y8H;182|RTR3K0QLL;183|RTRZYZUZ2;184|RTRPVPHPU;185|RTRB0L3HH;186|RTRZ6NZJN;187|RTRX5UQ39;188|RTRTH9YMN;189|RTR6AELCW;190|RTR2WNICS', '94|190|30|3|2025-03-07 07:56:46;95|190|32|4|2025-03-07 07:56:46', '3|pres|1;4|vpres|1', '4|Kian A. Rodriguez'),
-(4, 'usg election', '2025-03-07 08:02:04', NULL, '171|RTRA0BRZ4;172|RTRRD18KN;173|RTRHX7OB8;174|RTR7NBU1V;175|RTRZ7UQ4E;176|RTR3S58DH;177|RTRTF62SE;178|RTR1WRAA7;179|RTR00NTR4;180|RTR2F6W55', NULL, NULL, NULL),
-(5, 'usg election', '2025-03-07 09:41:29', NULL, NULL, NULL, NULL, '5|Republic Corp.'),
-(6, 'it', '2025-03-07 10:37:31', NULL, '191|RTRQI92NZ;192|RTR43RN6D;193|RTRITFT36;194|RTR67JGE9;195|RTRE51EAL;196|RTRR4U8FR;197|RTRGGUYCM;198|RTRTQWK0M;199|RTR84MJLW;200|RTR9VO60G', NULL, NULL, '6|Republic Corp.;7|Independent'),
-(7, 'it', '2025-03-10 05:17:52', '34|6|Rodriguez|Kian, Anthony|uploads/67caeac97f0f3.jpg|rt343t|9', '211|RTR6IPI3D;212|RTR6BC3RD;213|RTRFJGH4N;214|RTRKT7M73;215|RTRYNJMYF;216|RTRTVZP6B;217|RTR79CJWU;218|RTRJHZSJE;219|RTRJXWH3X;220|RTRV5EC8G', '101|220|34|6|2025-03-07 12:48:19', '6|pres|1', '9|Republic Corp.'),
-(8, 'ite2fwefw', '2025-03-13 12:15:52', NULL, '221|BSIT3F1-Y3WWMOA;222|BSIT3F1-RQCTWCO;223|BSIT3F1-AKPCDPL;224|BSIT3F1-T34S60K;225|BSIT3F1-4S197Y4;226|BSIT3F1-MH74OU9;227|BSIT3F1-0AVJQZO;228|BSIT3F1-4CGJTXG;229|BSIT3F1-72FN1MC;230|BSIT3F1-RW9M9JG', NULL, NULL, NULL),
-(9, 'USG ELECTION 2025', '2025-04-04 07:58:02', '54|14|Uriel|Melendres|uploads/67ef8c03b0ecb.jpg|EDFSDFDS|13;55|14|XYZ|ABC|uploads/67ef8cab99897.png|DFDSD|14;56|15|ERYTT|DFSDSD|uploads/67ef8d5734ea2.png|FSFS|13;57|15|TYTYU|GHDFHD|uploads/67ef8d89df8cf.png|SFSDFS|14;58|16|FSDFSD|SFDSD|uploads/67ef8db2113ea.jpg|FDSFS|14;59|16|DFGF|FDGD|uploads/67ef8ebd3e38e.png|ERERWE|13', '312|USG25MVC7;313|USG25JI37;314|USG25Z5D5;315|USG25F3IB;316|USG25F3VX;317|USG2584LB;318|USG25OKO3;319|USG254L3O;320|USG25TDXN;321|USG258N0H;322|USG254JH5;323|USG256TQ0;324|USG25KPWF;325|USG25MTHD;326|USG25NF3Y;327|USG25EAI7;328|USG25XN38;329|USG25ST9O;330|USG25IT8I;331|USG25VUAU;332|USG25JY30;333|USG25OOK6;334|USG25UVW4;335|USG25EERW;336|USG25IOKN;337|USG25JD17;338|USG25PMMD;339|USG25XRF3;340|USG25GPBR;341|USG25HO0P;342|USG25A4CN;343|USG255USK;344|USG254XJ1;345|USG25YB33;346|USG255VM2;347|USG2581A5;348|USG252KCD;349|USG250GY1;350|USG253IBN;351|USG25ASJK;352|USG25VMGK;353|USG25CSE9;354|USG257XFX;355|USG256DRY;356|USG25OR4N;357|USG25EJME;358|USG258XG6;359|USG255NV3;360|USG251SWU;361|USG25VF8F;362|USG256MC8;363|USG25CNT6;364|USG25ON8P;365|USG25V210;366|USG258OHD;367|USG25FFIC;368|USG25WRJT;369|USG259TXU;370|USG25ZWOQ;371|USG258EHQ;372|USG25WD0D;373|USG25L5MW;374|USG258KK8;375|USG25Z72Y;376|USG25K0YT;377|USG25L3NA;378|USG25KDW7;379|USG25J6TE;380|USG25A1H5;381|USG25NH2H;382|USG25WZH6;383|USG255REC;384|USG25AW8S;385|USG25PTZ9;386|USG25255K;387|USG25TLD3;388|USG25C50W;389|USG25248H;390|USG25BOZQ;391|USG25J7G7;392|USG25P1I1;393|USG25IWRC;394|USG2512PF;395|USG25007E;396|USG253XOE;397|USG25EK17;398|USG25OTFA;399|USG25WZQN;400|USG25O1G6;401|USG25AYKT;402|USG25MZQZ;403|USG25VWPJ;404|USG25MQ46;405|USG25C390;406|USG258IRG;407|USG25NSTS;408|USG25NVFG;409|USG25WD0E;410|USG25IRY1;411|USG25F3HA', '114|403|54|14|2025-04-04 07:53:23;115|403|57|15|2025-04-04 07:53:23;116|403|58|16|2025-04-04 07:53:23;117|410|55|14|2025-04-04 07:55:02;119|410|58|16|2025-04-04 07:55:02;120|402|54|14|2025-04-04 07:55:45;121|402|57|15|2025-04-04 07:55:45;122|402|58|16|2025-04-04 07:55:45', '14|PRESIDENT|1;15|V. PRESIDENT|1;16|SENATORS|8', '13|LAKAS;14|LIBERAL'),
-(10, 'usg election', '2025-04-05 14:32:35', '60|17|asas|kian1103|uploads/67f0c08d33543.png|sdfddndfn|15;61|17|votingsystem5|Kian A.|uploads/67f0c114f2c18.png|fwfwfwfwf|15', NULL, NULL, '17|treasurer|1', '15|nuketown'),
-(11, 'USG ELECTION 2025', '2025-04-05 14:34:10', NULL, NULL, NULL, NULL, NULL),
-(12, 'USG ELECTION 2025', '2025-04-05 14:38:56', NULL, NULL, NULL, NULL, NULL),
-(13, 'USG ELECTION 2025', '2025-04-05 14:46:56', NULL, NULL, NULL, NULL, NULL),
-(14, 'USG ELECTION 2025', '2025-04-05 14:57:39', NULL, NULL, NULL, NULL, NULL),
-(15, 'USG ELECTION 2025', '2025-04-05 14:58:49', NULL, NULL, NULL, NULL, NULL);
+(28, '1', '2025-05-03 09:14:34', '109|53|kianuu6yt|Rodriguez|uploads/68156d7f7ef93.jpg|hgtjf|46', '635|BSIT3F1QOPSJW;636|BSIT3F19ZYW54;637|BSIT3F1UVG2RU;638|BSIT3F14XELV9;639|BSIT3F14RES8E;640|BSIT3F1UIM7WP;641|BSIT3F1A268U4;642|BSIT3F1XIWVTS;643|BSIT3F1ZP7O88;644|BSIT3F16ICVSX;645|BSIT3F1LRQHT3;646|BSIT3F1M04WT8;647|BSIT3F18B9CQI;648|BSIT3F1SG32BQ;649|BSIT3F1MLDBDG;650|BSIT3F1EC13O5;651|BSIT3F1SNX1JU;652|BSIT3F1HSS5Z9;653|BSIT3F1DE4T4M;654|BSIT3F1DEN8Y5', NULL, '53|President|1', '46|Independent'),
+(29, 'final', '2025-05-03 12:47:27', '110|54|kianuu6yt|Rodriguez|uploads/68156e79dcf7d.jpg|fhfthf|47', '655|FINAL8YPNKO;656|FINALR4MTHQ;657|FINALMBB3OC;658|FINAL16YDL6;659|FINALNSYIN2', '153|658|110|54|2025-05-03 09:39:03', '54|President|1', '47|Independent'),
+(30, 'final', '2025-05-03 14:26:11', '111|55|kianuu6yt|Rodriguez|uploads/6815a02d9601b.jpg|sgfsgs|48', '660|BSIT3F1NRU0PX;661|BSIT3F11EITIS;662|BSIT3F1W4R65K;663|BSIT3F116ZAGI;664|BSIT3F12ATDQN;665|BSIT3F129J2D2;666|BSIT3F11P9E7S;667|BSIT3F1Q5H2DF;668|BSIT3F1F9FU7J;669|BSIT3F1ED78YR', '154|669|111|55|2025-05-03 12:49:49;156|667|111|55|2025-05-03 13:29:05;161|666|111|55|2025-05-03 13:49:02;162|665|111|55|2025-05-03 13:49:13;163|664|111|55|2025-05-03 13:49:27;165|662|111|55|2025-05-03 13:55:14', '55|President|1', '48|Independent');
 
 -- --------------------------------------------------------
 
@@ -414,8 +416,20 @@ INSERT INTO `partylists` (`partylist_id`, `election_id`, `name`) VALUES
 (8, 18, 'Republic Corp.'),
 (10, 25, 'Pangit party list '),
 (11, 26, 'MATATAG'),
-(12, 29, 'Bbm'),
-(17, 38, 'gfsgrsgsfwefw');
+(17, 38, 'gfsgrsgsfwefw'),
+(27, 39, 'rep'),
+(28, 26, 'gfsgrsgsfwefw'),
+(29, 26, 'vdvs'),
+(31, 27, 'rep'),
+(32, 24, 'rep'),
+(33, 24, 'gfsgrsgs'),
+(34, 24, 'gfsgrsgsfwefw'),
+(35, 24, 'egegeg'),
+(36, 38, 'rep'),
+(37, 45, 'Independent'),
+(41, 49, 'Independent'),
+(43, 43, 'Independent'),
+(49, 56, 'Independent');
 
 -- --------------------------------------------------------
 
@@ -453,8 +467,18 @@ INSERT INTO `positions` (`position_id`, `election_id`, `description`, `max_vote`
 (9, 25, 'secretary', 1),
 (10, 25, 'Senator ', 8),
 (12, 26, 'President', 1),
-(13, 29, 'president', 1),
-(18, 38, 'treasurerer', 1);
+(35, 39, 'treasurer', 1),
+(36, 27, 'treasurer', 1),
+(37, 24, 'treasurer', 1),
+(38, 38, 'president', 1),
+(39, 38, 'vice president', 1),
+(40, 38, 'treasurer', 1),
+(41, 45, 'President', 1),
+(45, 49, 'President', 1),
+(46, 49, 'Secretary', 2),
+(48, 43, 'President', 1),
+(49, 43, 'Secretary', 2),
+(56, 56, 'President', 1);
 
 -- --------------------------------------------------------
 
@@ -503,7 +527,6 @@ CREATE TABLE `students` (
   `name` varchar(255) NOT NULL,
   `year_section` varchar(50) NOT NULL,
   `course` varchar(100) NOT NULL,
-  `photo` varchar(255) DEFAULT NULL,
   `election_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -511,9 +534,16 @@ CREATE TABLE `students` (
 -- Dumping data for table `students`
 --
 
-INSERT INTO `students` (`id`, `voters_id`, `name`, `year_section`, `course`, `photo`, `election_id`) VALUES
-(16, 281, 'Rea Rodriguez', '4f1', 'it', 'pics/students/17420879706697898274083496114994.jpg', 25),
-(17, 302, 'Alpha', '3F1', 'BSIT', 'pics/students/17437421920748928579657440557269.jpg', 29);
+INSERT INTO `students` (`id`, `voters_id`, `name`, `year_section`, `course`, `election_id`) VALUES
+(26, 355, 'Rodriguez, Kian A.', '3F1', 'BSIT', 27),
+(27, 424, 'nuketown', '3F1', 'BSIT', 27),
+(28, 433, 'Rodriguez, Kian A.', '3F1', 'BSIT', 24),
+(29, 434, 'nuketown', '231', 'BSIT', 24),
+(30, 429, 'Rodriguez, Kian A.ef', '3F1', 'egrg', 24),
+(31, 428, 'Rodriguez, Kian A.efSFD', '3F1', 'BSIT', 24),
+(32, 430, 'nuketownsvava', '231', 'BSIT', 24),
+(33, 444, 'Rodriguez, Kian A.', '3F1', 'BSIT', 38),
+(47, 674, 'eevs', '3F1', 'BSIT', 56);
 
 -- --------------------------------------------------------
 
@@ -541,44 +571,161 @@ CREATE TABLE `users` (
 CREATE TABLE `voters` (
   `id` int(11) NOT NULL,
   `election_id` int(11) NOT NULL,
-  `voters_id` varchar(15) NOT NULL
+  `voters_id` varchar(15) NOT NULL,
+  `generation_batch` int(11) NOT NULL DEFAULT 1,
+  `prefix` varchar(10) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `voters`
 --
 
-INSERT INTO `voters` (`id`, `election_id`, `voters_id`) VALUES
-(1, 38, 'BSIT348XIBU'),
-(2, 38, 'BSIT3CKOMAP'),
-(3, 38, 'BSIT32PL17Y'),
-(4, 38, 'BSIT3YN0Y92'),
-(5, 38, 'BSIT3WEKSLP'),
-(6, 38, 'BSIT3FUQCGV'),
-(7, 38, 'BSIT3KGIGKH'),
-(8, 38, 'BSIT3KRNJEV'),
-(9, 38, 'BSIT3N0MDQ7'),
-(10, 38, 'BSIT3JD8ADF'),
-(11, 38, 'THRHRPF3JXG'),
-(12, 38, 'THRHRL7JRF1'),
-(13, 38, 'THRHRTVMO9V'),
-(14, 38, 'THRHRAFWCHL'),
-(15, 38, 'THRHRL2BUKQ'),
-(16, 38, 'THRHR8CX85B'),
-(17, 38, 'THRHR3IIZMI'),
-(18, 38, 'THRHR7KKMN6'),
-(19, 38, 'THRHR7UYMH9'),
-(20, 38, 'THRHR48ZX5C'),
-(21, 38, 'THRHREJI3PY'),
-(22, 38, 'THRHR2O4AO8'),
-(23, 38, 'THRHR9YCKJX'),
-(24, 38, 'THRHRMOSF9X'),
-(25, 38, 'THRHREG6LLX'),
-(26, 38, 'THRHRHTD3YI'),
-(27, 38, 'THRHRRYO4Z2'),
-(28, 38, 'THRHRY4QZGF'),
-(29, 38, 'THRHR78HVK9'),
-(30, 38, 'THRHRWI4N25');
+INSERT INTO `voters` (`id`, `election_id`, `voters_id`, `generation_batch`, `prefix`) VALUES
+(355, 27, 'BSIT3-1UH5OTK', 1, 'BSIT3-1'),
+(356, 27, 'BSIT3-143EH0C', 1, 'BSIT3-1'),
+(357, 27, 'BSIT3-1AIAVTZ', 1, 'BSIT3-1'),
+(358, 27, 'BSIT3-1ZPFEAL', 1, 'BSIT3-1'),
+(359, 27, 'BSIT3-1V4ZVDS', 1, 'BSIT3-1'),
+(360, 27, 'BSIT3-12NCCO7', 1, 'BSIT3-1'),
+(361, 27, 'BSIT3-1TPNM0Y', 1, 'BSIT3-1'),
+(362, 27, 'BSIT3-11CSL74', 1, 'BSIT3-1'),
+(363, 27, 'BSIT3-1RSJI6Y', 1, 'BSIT3-1'),
+(364, 27, 'BSIT3-1L4M332', 1, 'BSIT3-1'),
+(365, 27, 'BSIT3-2YZX4FN', 1, 'BSIT3-2'),
+(366, 27, 'BSIT3-2JKU87L', 1, 'BSIT3-2'),
+(367, 27, 'BSIT3-27LG3CY', 1, 'BSIT3-2'),
+(368, 27, 'BSIT3-2PQC5HG', 1, 'BSIT3-2'),
+(369, 27, 'BSIT3-2AJHBJ5', 1, 'BSIT3-2'),
+(370, 27, 'BSIT3-22JBDDY', 1, 'BSIT3-2'),
+(371, 27, 'BSIT3-2Q8PFMD', 1, 'BSIT3-2'),
+(372, 27, 'BSIT3-23PNZAR', 1, 'BSIT3-2'),
+(373, 27, 'BSIT3-2XDOWWN', 1, 'BSIT3-2'),
+(374, 27, 'BSIT3-2X3XUZP', 1, 'BSIT3-2'),
+(375, 27, 'BSIT3-1IC5UAY', 1, 'BSIT3-1'),
+(376, 27, 'BSIT3-1UNYRY5', 1, 'BSIT3-1'),
+(377, 27, 'BSIT3-1A5Q0OJ', 1, 'BSIT3-1'),
+(378, 27, 'BSIT3-1B074CZ', 1, 'BSIT3-1'),
+(379, 27, 'BSIT3-1GBIH7U', 1, 'BSIT3-1'),
+(380, 27, 'BSIT3-13AHU5A', 1, 'BSIT3-1'),
+(381, 27, 'BSIT3-1EMM0GQ', 1, 'BSIT3-1'),
+(382, 27, 'BSIT3-151TTEZ', 1, 'BSIT3-1'),
+(383, 27, 'BSIT3-1PBOQG7', 1, 'BSIT3-1'),
+(384, 27, 'BSIT3-1FYA0AR', 1, 'BSIT3-1'),
+(385, 27, 'BSIT3-1HZB8ON', 1, 'BSIT3-1'),
+(386, 27, 'BSIT3-13ZVQSG', 1, 'BSIT3-1'),
+(387, 27, 'BSIT3-162H7NV', 1, 'BSIT3-1'),
+(388, 27, 'BSIT3-1UHPZVI', 1, 'BSIT3-1'),
+(389, 27, 'BSIT3-1VH7OR4', 1, 'BSIT3-1'),
+(390, 27, 'BSIT3-1JY2B2T', 1, 'BSIT3-1'),
+(391, 27, 'BSIT3-1SGF45L', 1, 'BSIT3-1'),
+(392, 27, 'BSIT3-1BL4DA8', 1, 'BSIT3-1'),
+(393, 27, 'BSIT3-1XXW44K', 1, 'BSIT3-1'),
+(394, 27, 'BSIT3-18KUX60', 1, 'BSIT3-1'),
+(395, 27, 'BSIT3-1D9A3MS', 1, 'BSIT3-1'),
+(396, 27, 'BSIT3-1H8J2PI', 1, 'BSIT3-1'),
+(397, 27, 'BSIT3-16XQS4J', 1, 'BSIT3-1'),
+(398, 27, 'BSIT3-19CXAI3', 1, 'BSIT3-1'),
+(399, 27, 'BSIT3-1L8GDTE', 1, 'BSIT3-1'),
+(400, 27, 'BSIT3-1UZXBTS', 1, 'BSIT3-1'),
+(401, 27, 'BSIT3-15PPQFB', 1, 'BSIT3-1'),
+(402, 27, 'BSIT3-16JTOJ9', 1, 'BSIT3-1'),
+(403, 27, 'BSIT3-13AIOJG', 1, 'BSIT3-1'),
+(404, 27, 'BSIT3-1QSEG10', 1, 'BSIT3-1'),
+(405, 27, 'BSIT3-1TDH2RC', 1, 'BSIT3-1'),
+(406, 27, 'BSIT3-1PNA1VS', 1, 'BSIT3-1'),
+(407, 27, 'BSIT3-1C5BHHL', 1, 'BSIT3-1'),
+(408, 27, 'BSIT3-1YSV2KP', 1, 'BSIT3-1'),
+(409, 27, 'BSIT3-1WLQ12F', 1, 'BSIT3-1'),
+(410, 27, 'BSIT3-1YVBUUC', 1, 'BSIT3-1'),
+(411, 27, 'BSIT3-1BMWVG5', 1, 'BSIT3-1'),
+(412, 27, 'BSIT3-1V5POCC', 1, 'BSIT3-1'),
+(413, 27, 'BSIT3-1J0SUKO', 1, 'BSIT3-1'),
+(414, 27, 'BSIT3-1I6W7A5', 1, 'BSIT3-1'),
+(415, 27, 'BSIT3-16E7FAG', 1, 'BSIT3-1'),
+(416, 27, 'BSIT3-17FZIG4', 1, 'BSIT3-1'),
+(417, 27, 'BSIT3-19KMJLR', 1, 'BSIT3-1'),
+(418, 27, 'BSIT3-1FH9NK9', 1, 'BSIT3-1'),
+(419, 27, 'BSIT3-1C0F4WM', 1, 'BSIT3-1'),
+(420, 27, 'BSIT3-1DT3BYN', 1, 'BSIT3-1'),
+(421, 27, 'BSIT3-1K0FMXF', 1, 'BSIT3-1'),
+(422, 27, 'BSIT3-1IG90VA', 1, 'BSIT3-1'),
+(423, 27, 'BSIT3-1CLZICE', 1, 'BSIT3-1'),
+(424, 27, 'BSIT3-14RGDGX', 1, 'BSIT3-1'),
+(425, 24, 'BSIT3-12Y0MIS', 1, 'BSIT3-1'),
+(426, 24, 'BSIT3-12ZUKPB', 1, 'BSIT3-1'),
+(427, 24, 'BSIT3-1RDCLEC', 1, 'BSIT3-1'),
+(428, 24, 'BSIT3-1XGB7QA', 1, 'BSIT3-1'),
+(429, 24, 'BSIT3-18G504A', 1, 'BSIT3-1'),
+(430, 24, 'BSIT3-1ZKS0EK', 1, 'BSIT3-1'),
+(431, 24, 'BSIT3-12SLAB5', 1, 'BSIT3-1'),
+(432, 24, 'BSIT3-1K21SPZ', 1, 'BSIT3-1'),
+(433, 24, 'BSIT3-1FSD986', 1, 'BSIT3-1'),
+(434, 24, 'BSIT3-1T9PONL', 1, 'BSIT3-1'),
+(435, 38, 'BSIT30I0LMW', 1, 'BSIT3'),
+(436, 38, 'BSIT3G3P399', 1, 'BSIT3'),
+(437, 38, 'BSIT3K7EP09', 1, 'BSIT3'),
+(438, 38, 'BSIT3VFJIAZ', 1, 'BSIT3'),
+(439, 38, 'BSIT3S2PGYS', 1, 'BSIT3'),
+(440, 38, 'BSIT36SRE3Y', 1, 'BSIT3'),
+(441, 38, 'BSIT371DNPS', 1, 'BSIT3'),
+(442, 38, 'BSIT3IT9EEF', 1, 'BSIT3'),
+(443, 38, 'BSIT37AL27C', 1, 'BSIT3'),
+(444, 38, 'BSIT39Z2HBY', 1, 'BSIT3'),
+(445, 45, 'BSIT3F1HDMCBK', 1, 'BSIT3F1'),
+(446, 45, 'BSIT3F1Q0KP2Y', 1, 'BSIT3F1'),
+(447, 45, 'BSIT3F1OMXKQR', 1, 'BSIT3F1'),
+(448, 45, 'BSIT3F1ZCRJW7', 1, 'BSIT3F1'),
+(449, 45, 'BSIT3F1V99VXN', 1, 'BSIT3F1'),
+(450, 45, 'BSIT3F188UUER', 1, 'BSIT3F1'),
+(451, 45, 'BSIT3F1ZH97DU', 1, 'BSIT3F1'),
+(452, 45, 'BSIT3F1BX5C39', 1, 'BSIT3F1'),
+(453, 45, 'BSIT3F1PDWZK5', 1, 'BSIT3F1'),
+(454, 45, 'BSIT3F1HTGA3I', 1, 'BSIT3F1'),
+(455, 45, 'BSIT3F2W78JCS', 1, 'BSIT3F2'),
+(456, 45, 'BSIT3F2SYR0VE', 1, 'BSIT3F2'),
+(457, 45, 'BSIT3F2RHGLIF', 1, 'BSIT3F2'),
+(458, 45, 'BSIT3F2PRKORU', 1, 'BSIT3F2'),
+(459, 45, 'BSIT3F26Y1R9B', 1, 'BSIT3F2'),
+(460, 45, 'BSIT3F2VT40U0', 1, 'BSIT3F2'),
+(461, 45, 'BSIT3F2MR49IG', 1, 'BSIT3F2'),
+(462, 45, 'BSIT3F2Y2JKQB', 1, 'BSIT3F2'),
+(463, 45, 'BSIT3F2Y7ZOER', 1, 'BSIT3F2'),
+(464, 45, 'BSIT3F24TAMBR', 1, 'BSIT3F2'),
+(545, 49, 'BSIT3F1H7NEDI', 1, 'BSIT3F1'),
+(546, 49, 'BSIT3F1M9OTXI', 1, 'BSIT3F1'),
+(547, 49, 'BSIT3F15H04GO', 1, 'BSIT3F1'),
+(548, 49, 'BSIT3F1IAPO64', 1, 'BSIT3F1'),
+(549, 49, 'BSIT3F1D7P7SA', 1, 'BSIT3F1'),
+(550, 49, 'BSIT3F1LKZNLE', 1, 'BSIT3F1'),
+(551, 49, 'BSIT3F18WYA6S', 1, 'BSIT3F1'),
+(552, 49, 'BSIT3F1XRYXEA', 1, 'BSIT3F1'),
+(553, 49, 'BSIT3F1R6RUOF', 1, 'BSIT3F1'),
+(554, 49, 'BSIT3F121322E', 1, 'BSIT3F1'),
+(575, 43, 'BSIT3F1BTGHQQ', 1, 'BSIT3F1'),
+(576, 43, 'BSIT3F1ZXF0CC', 1, 'BSIT3F1'),
+(577, 43, 'BSIT3F1XCPHXB', 1, 'BSIT3F1'),
+(578, 43, 'BSIT3F1VP849Z', 1, 'BSIT3F1'),
+(579, 43, 'BSIT3F15O7TLN', 1, 'BSIT3F1'),
+(580, 43, 'BSIT3F1IWS9SN', 1, 'BSIT3F1'),
+(581, 43, 'BSIT3F17BU2VV', 1, 'BSIT3F1'),
+(582, 43, 'BSIT3F1V3WRFA', 1, 'BSIT3F1'),
+(583, 43, 'BSIT3F1OGPX4H', 1, 'BSIT3F1'),
+(584, 43, 'BSIT3F16DUR1X', 1, 'BSIT3F1'),
+(585, 43, 'BSIT3F1PRS6HH', 1, 'BSIT3F1'),
+(586, 43, 'BSIT3F1NZST12', 1, 'BSIT3F1'),
+(587, 43, 'BSIT3F1N7KRIH', 1, 'BSIT3F1'),
+(588, 43, 'BSIT3F1ESL5O2', 1, 'BSIT3F1'),
+(589, 43, 'BSIT3F1D22JO6', 1, 'BSIT3F1'),
+(590, 43, 'BSIT3F1SGBJGR', 1, 'BSIT3F1'),
+(591, 43, 'BSIT3F1UD6LLI', 1, 'BSIT3F1'),
+(592, 43, 'BSIT3F1FKYIGI', 1, 'BSIT3F1'),
+(593, 43, 'BSIT3F1FUQ0VH', 1, 'BSIT3F1'),
+(594, 43, 'BSIT3F123SZW0', 1, 'BSIT3F1'),
+(670, 56, 'BSIT3F1N72VT9', 1, 'BSIT3F1'),
+(671, 56, 'BSIT3F1F88C2S', 1, 'BSIT3F1'),
+(672, 56, 'BSIT3F1QDHW43', 1, 'BSIT3F1'),
+(673, 56, 'BSIT3F1BUM53E', 1, 'BSIT3F1'),
+(674, 56, 'BSIT3F1MXF7ES', 1, 'BSIT3F1');
 
 -- --------------------------------------------------------
 
@@ -600,18 +747,15 @@ CREATE TABLE `votes` (
 --
 
 INSERT INTO `votes` (`id`, `election_id`, `voters_id`, `candidate_id`, `position_id`, `timestamp`) VALUES
-(102, 25, 281, 35, 7, '2025-03-16 01:20:52'),
-(103, 25, 281, 37, 8, '2025-03-16 01:20:52'),
-(104, 25, 281, NULL, 9, '2025-03-16 01:20:52'),
-(105, 25, 281, 41, 10, '2025-03-16 01:20:52'),
-(106, 25, 281, 42, 10, '2025-03-16 01:20:52'),
-(107, 25, 281, 43, 10, '2025-03-16 01:20:52'),
-(108, 25, 281, 44, 10, '2025-03-16 01:20:52'),
-(109, 25, 281, 45, 10, '2025-03-16 01:20:52'),
-(110, 25, 281, 46, 10, '2025-03-16 01:20:52'),
-(111, 25, 281, 47, 10, '2025-03-16 01:20:52'),
-(112, 25, 281, 48, 10, '2025-03-16 01:20:52'),
-(113, 29, 302, NULL, 13, '2025-04-04 04:51:07');
+(136, 27, 424, 86, 36, '2025-04-07 10:01:58'),
+(137, 24, 433, 89, 37, '2025-04-07 19:13:31'),
+(138, 24, 434, 87, 37, '2025-04-07 19:15:33'),
+(139, 24, 429, 87, 37, '2025-04-07 19:16:37'),
+(140, 24, 428, 88, 37, '2025-04-07 19:17:45'),
+(141, 24, 430, 88, 37, '2025-04-07 19:24:17'),
+(142, 38, 444, 93, 40, '2025-04-07 19:38:34'),
+(143, 27, 355, 86, 36, '2025-05-02 12:12:37'),
+(166, 56, 674, NULL, 56, '2025-05-03 14:37:09');
 
 --
 -- Indexes for dumped tables
@@ -781,19 +925,19 @@ ALTER TABLE `votes`
 -- AUTO_INCREMENT for table `candidates`
 --
 ALTER TABLE `candidates`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=113;
 
 --
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `elections`
 --
 ALTER TABLE `elections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
 
 --
 -- AUTO_INCREMENT for table `failed_jobs`
@@ -805,13 +949,13 @@ ALTER TABLE `failed_jobs`
 -- AUTO_INCREMENT for table `feedback`
 --
 ALTER TABLE `feedback`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `history`
 --
 ALTER TABLE `history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `history_candidates`
@@ -853,19 +997,19 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT for table `partylists`
 --
 ALTER TABLE `partylists`
-  MODIFY `partylist_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `partylist_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- AUTO_INCREMENT for table `positions`
 --
 ALTER TABLE `positions`
-  MODIFY `position_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `position_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
 
 --
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -877,13 +1021,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `voters`
 --
 ALTER TABLE `voters`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=675;
 
 --
 -- AUTO_INCREMENT for table `votes`
 --
 ALTER TABLE `votes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=123;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=167;
 
 --
 -- Constraints for dumped tables
