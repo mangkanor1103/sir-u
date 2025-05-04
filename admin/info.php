@@ -109,11 +109,11 @@ $courses_result = $conn->query($courses_query);
                     <div class="box" style="border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
                         <div class="box-header with-border" style="background-color: #f0fdf0; border-bottom: 1px solid #e0f0e0; border-radius: 8px 8px 0 0; padding: 20px;">
                             <h3 class="box-title" style="color: #046a0f; font-weight: 600;">
-                                <i class="fa fa-book" style="margin-right: 10px;"></i> Course & Section Management
+                                <i class="fa fa-book" style="margin-right: 10px;"></i> Program & Section Management
                             </h3>
                             <div class="box-tools pull-right">
                                 <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#addCourseModal" style="background-color: #046a0f; border-color: #035a0d; padding: 5px 12px; font-weight: 600; transition: all 0.3s ease;">
-                                    <i class="fa fa-plus"></i> Add Course
+                                    <i class="fa fa-plus"></i> Add Program
                                 </button>
                             </div>
                         </div>
@@ -123,7 +123,7 @@ $courses_result = $conn->query($courses_query);
                                 <table id="courses-table" class="table table-bordered table-hover" style="width: 100%;">
                                     <thead style="background-color: #046a0f; color: white;">
                                         <tr>
-                                            <th width="50%">Course</th>
+                                            <th width="50%">Program</th>
                                             <th width="25%">Year and Section</th>
                                             <th width="25%">Actions</th>
                                         </tr>
@@ -161,7 +161,7 @@ $courses_result = $conn->query($courses_query);
                                                         <div class="modal-body" style="background-color: #fff; padding: 20px;">
                                                             <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
                                                             <div class="form-group">
-                                                                <label style="color: #046a0f; font-weight: 600;">Course Name:</label>
+                                                                <label style="color: #046a0f; font-weight: 600;">Program Name:</label>
                                                                 <input type="text" name="course" class="form-control" value="<?php echo htmlspecialchars($row['course']); ?>" required style="border: 1px solid #d0e0d0; border-radius: 4px; padding: 8px 12px;">
                                                             </div>
                                                             <div class="form-group">
@@ -204,7 +204,7 @@ $courses_result = $conn->query($courses_query);
                 <form method="POST" action="">
                     <div class="modal-body" style="background-color: #fff; padding: 20px;">
                         <div class="form-group">
-                            <label style="color: #046a0f; font-weight: 600;">Course Name:</label>
+                            <label style="color: #046a0f; font-weight: 600;">Program Name:</label>
                             <input type="text" name="course" class="form-control" placeholder="e.g. Bachelor of Science in Information Technology" required style="border: 1px solid #d0e0d0; border-radius: 4px; padding: 8px 12px;">
                         </div>
                         <div class="form-group">

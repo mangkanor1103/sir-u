@@ -27,6 +27,42 @@ if ($election_status == 1) {
     exit();
 }
 
+// Get counts for navigation validation
+$partylist_count_query = "SELECT COUNT(*) as count FROM partylists WHERE election_id = ?";
+$stmt = $conn->prepare($partylist_count_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$result_count = $stmt->get_result();
+$partylist_count = $result_count->fetch_assoc()['count'];
+
+$position_count_query = "SELECT COUNT(*) as count FROM positions WHERE election_id = ?";
+$stmt = $conn->prepare($position_count_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$result_count = $stmt->get_result();
+$position_count = $result_count->fetch_assoc()['count'];
+
+$candidate_count_query = "SELECT COUNT(*) as count FROM candidates WHERE election_id = ?";
+$stmt = $conn->prepare($candidate_count_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$result_count = $stmt->get_result();
+$candidate_count = $result_count->fetch_assoc()['count'];
+
+$voter_count_query = "SELECT COUNT(*) as count FROM voters WHERE election_id = ?";
+$stmt = $conn->prepare($voter_count_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$result_count = $stmt->get_result();
+$voter_count = $result_count->fetch_assoc()['count'];
+
+// Set flags for navigation validation
+$has_partylist = ($partylist_count > 0);
+$has_position = ($position_count > 0);
+$has_candidate = ($candidate_count > 0);
+$has_voter = ($voter_count > 0);
+$all_complete = ($has_partylist && $has_position && $has_candidate && $has_voter);
+
 // Function to fetch voters with pagination
 function getVoters($election_id, $limit = null, $offset = null) {
     global $conn;
@@ -216,7 +252,7 @@ $totalVoters = countVoters($election_id);
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/css/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
 
@@ -262,34 +298,58 @@ $totalVoters = countVoters($election_id);
                     <span>Dashboard</span>
                 </a>
                 
-                <!-- Partylist Link -->
+                <!-- Partylist Link - Always enabled as it's the first step -->
                 <a href="partylist.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'partylist.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
                     <i class="fas fa-flag w-5 h-5 mr-3 <?php echo $current_page == 'partylist.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
                     <span>Partylists</span>
                 </a>
                 
-                <!-- Positions Link -->
-                <a href="positions.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'positions.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                <!-- Positions Link - Only enabled if there are partylists -->
+                <a href="<?php echo $has_partylist ? 'positions.php' : '#'; ?>" 
+                   class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'positions.php' ? 'bg-primary-50 text-primary-700 font-medium' : ($has_partylist ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-sitemap w-5 h-5 mr-3 <?php echo $current_page == 'positions.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
                     <span>Positions</span>
+                    <?php if (!$has_partylist): ?>
+                        <span class="ml-auto text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
                 
-                <!-- Candidates Link -->
-                <a href="candidates.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'candidates.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                <!-- Candidates Link - Only enabled if there are positions -->
+                <a href="<?php echo $has_position ? 'candidates.php' : '#'; ?>" 
+                   class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'candidates.php' ? 'bg-primary-50 text-primary-700 font-medium' : ($has_position ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-user-tie w-5 h-5 mr-3 <?php echo $current_page == 'candidates.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
                     <span>Candidates</span>
+                    <?php if (!$has_position): ?>
+                        <span class="ml-auto text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
                 
-                <!-- Voters Link -->
-                <a href="voters.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'voters.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                <!-- Voters Link - Only enabled if there are candidates -->
+                <a href="<?php echo $has_candidate ? 'voters.php' : '#'; ?>" 
+                   class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'voters.php' ? 'bg-primary-50 text-primary-700 font-medium' : ($has_candidate ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-users w-5 h-5 mr-3 <?php echo $current_page == 'voters.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
                     <span>Voters</span>
+                    <?php if (!$has_candidate): ?>
+                        <span class="ml-auto text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
                 
-                <!-- Start Link -->
-                <a href="start.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'start.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                <!-- Start Election Link - Only enabled if all previous steps are complete -->
+                <a href="<?php echo $all_complete ? 'start.php' : '#'; ?>" 
+                   class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'start.php' ? 'bg-primary-50 text-primary-700 font-medium' : ($all_complete ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-play-circle w-5 h-5 mr-3 <?php echo $current_page == 'start.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
                     <span>Start Election</span>
+                    <?php if (!$all_complete): ?>
+                        <span class="ml-auto text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
                 
                 <hr class="my-4 border-gray-100">
@@ -311,17 +371,41 @@ $totalVoters = countVoters($election_id);
                 <a href="partylist.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'partylist.php' ? 'text-primary-700 font-medium' : ''; ?>">
                     <i class="fas fa-flag mr-2"></i> Partylists
                 </a>
-                <a href="positions.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'positions.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                <a href="<?php echo $has_partylist ? 'positions.php' : '#'; ?>" 
+                   class="block px-6 py-3 <?php echo $current_page == 'positions.php' ? 'text-primary-700 font-medium' : ($has_partylist ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-sitemap mr-2"></i> Positions
+                    <?php if (!$has_partylist): ?>
+                        <span class="ml-2 text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
-                <a href="candidates.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'candidates.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                <a href="<?php echo $has_position ? 'candidates.php' : '#'; ?>" 
+                   class="block px-6 py-3 <?php echo $current_page == 'candidates.php' ? 'text-primary-700 font-medium' : ($has_position ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-user-tie mr-2"></i> Candidates
+                    <?php if (!$has_position): ?>
+                        <span class="ml-2 text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
-                <a href="voters.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'voters.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                <a href="<?php echo $has_candidate ? 'voters.php' : '#'; ?>" 
+                   class="block px-6 py-3 <?php echo $current_page == 'voters.php' ? 'text-primary-700 font-medium' : ($has_candidate ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-users mr-2"></i> Voters
+                    <?php if (!$has_candidate): ?>
+                        <span class="ml-2 text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
-                <a href="start.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'start.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                <a href="<?php echo $all_complete ? 'start.php' : '#'; ?>" 
+                   class="block px-6 py-3 <?php echo $current_page == 'start.php' ? 'text-primary-700 font-medium' : ($all_complete ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-play-circle mr-2"></i> Start Election
+                    <?php if (!$all_complete): ?>
+                        <span class="ml-2 text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
                 <hr class="my-2 border-gray-100">
                 <a href="#" onclick="confirmLogout(event);" class="block px-6 py-3 text-red-600 hover:bg-red-50">
@@ -330,7 +414,7 @@ $totalVoters = countVoters($election_id);
             </nav>
         </div>
 
-        <!-- Main Content -->
+        <!-- Main Content Section -->
         <main class="flex-1 p-4 md:p-6 bg-gray-50">
             <!-- Mobile Election Name Badge -->
             <div class="md:hidden bg-white rounded-lg shadow-sm p-3 mb-6 flex items-center justify-between">
@@ -385,12 +469,12 @@ $totalVoters = countVoters($election_id);
                         <i class="fas fa-plus mr-2"></i> Generate New Codes
                     </button>
                     
-                    <a href="start.php" 
+                    <a href="<?php echo $all_complete ? 'start.php' : '#'; ?>" 
                        class="flex items-center px-4 py-2 rounded-lg transition-colors shadow-sm
-                              <?php echo ($totalVoters > 0) ? 
+                              <?php echo ($all_complete) ? 
                                     'bg-primary-600 hover:bg-primary-700 text-white' : 
                                     'bg-gray-300 text-gray-500 cursor-not-allowed'; ?>"
-                       <?php echo ($totalVoters > 0) ? '' : 'onclick="return false;"'; ?>>
+                       <?php echo ($all_complete) ? '' : 'onclick="return showRequiredMessage(event);"'; ?>>
                         Start Election <i class="fas fa-arrow-right ml-2"></i>
                     </a>
                 </div>
@@ -416,12 +500,17 @@ $totalVoters = countVoters($election_id);
             <?php if ($voters->num_rows > 0): ?>
                 <div class="bg-white rounded-lg shadow-sm p-4 mb-6 flex flex-wrap md:flex-nowrap items-center justify-between gap-4">
                     <div>
-                        <h3 class="font-semibold text-gray-800">Codes ready for printing</h3>
-                        <p class="text-sm text-gray-600">Print all voter codes for distribution</p>
+                        <h3 class="font-semibold text-gray-800">Codes ready for distribution</h3>
+                        <p class="text-sm text-gray-600">Print or export voter codes for distribution</p>
                     </div>
-                    <button onclick="printVoterCodes()" class="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors shadow-sm whitespace-nowrap">
-                        <i class="fas fa-print mr-2"></i> Print All Codes
-                    </button>
+                    <div class="flex gap-2">
+                        <button onclick="exportToExcel()" class="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors shadow-sm whitespace-nowrap">
+                            <i class="fas fa-file-excel mr-2"></i> Export All Codes (Excel)
+                        </button>
+                        <button onclick="printVoterCodes()" class="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors shadow-sm whitespace-nowrap">
+                            <i class="fas fa-print mr-2"></i> Print All Codes
+                        </button>
+                    </div>
                 </div>
             <?php endif; ?>
             
@@ -497,7 +586,7 @@ $totalVoters = countVoters($election_id);
         </main>
     </div>
 
-    <!-- Generate Voter Codes Modal -->
+    <!-- Generate Voter Codes Modal (Fixed) -->
     <div id="generateModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full transform transition-all">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -767,6 +856,74 @@ $totalVoters = countVoters($election_id);
             printWindow.print();
         }
 
+        // Function to export voter codes to Excel
+        function exportToExcel() {
+            // Create a new XHR request to get the data
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'export_voters.php?election_id=<?php echo $election_id; ?>', true);
+            
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    // Create a temporary anchor element
+                    const link = document.createElement('a');
+                    
+                    // Create a Blob with the Excel data
+                    const blob = new Blob([xhr.responseText], { type: 'application/vnd.ms-excel' });
+                    
+                    // Create a download link
+                    const url = URL.createObjectURL(blob);
+                    link.href = url;
+                    link.download = '<?php echo htmlspecialchars($election_name); ?>_All_Voter_Codes.xls';
+                    
+                    // Simulate click to trigger download
+                    document.body.appendChild(link);
+                    link.click();
+                    
+                    // Clean up
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    
+                    // Show success message with filtering instructions
+                    Swal.fire({
+                        title: 'Export Complete!',
+                        html: 'All voter codes have been exported to Excel.<br><br>' +
+                              '<span class="text-sm">💡 <b>Tip:</b> Click the filter button in the header row to filter by batch.</span>',
+                        icon: 'success',
+                        confirmButtonColor: '#16a34a',
+                        customClass: {
+                            popup: 'rounded-lg'
+                        }
+                    });
+                } else {
+                    // Show error message
+                    Swal.fire({
+                        title: 'Export Failed',
+                        text: 'There was an error exporting voter codes.',
+                        icon: 'error',
+                        confirmButtonColor: '#16a34a',
+                        customClass: {
+                            popup: 'rounded-lg'
+                        }
+                    });
+                }
+            };
+            
+            xhr.onerror = function() {
+                // Show error message
+                Swal.fire({
+                    title: 'Export Failed',
+                    text: 'There was an error exporting voter codes.',
+                    icon: 'error',
+                    confirmButtonColor: '#16a34a',
+                    customClass: {
+                        popup: 'rounded-lg'
+                    }
+                });
+            };
+            
+            xhr.send();
+        }
+
         // SweetAlert confirmation for logging out
         function confirmLogout(event) {
             event.preventDefault();
@@ -803,6 +960,54 @@ $totalVoters = countVoters($election_id);
             }
         });
         <?php endif; ?>
+
+        // New function to display required message
+        function showRequiredMessage(event) {
+            event.preventDefault();
+            
+            let message = 'You need to complete all setup steps before starting the election.';
+            if(!<?php echo $has_voter ? 'true' : 'false' ?>) {
+                message = 'You need to generate at least one voter code first.';
+            }
+            
+            Swal.fire({
+                title: 'Action Required',
+                text: message,
+                icon: 'warning',
+                confirmButtonColor: '#16a34a'
+            });
+            return false;
+        }
+
+        // Add tooltips for disabled links
+        document.addEventListener('DOMContentLoaded', function() {
+            const disabledLinks = document.querySelectorAll('.cursor-not-allowed');
+            disabledLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    let message = '';
+                    if (this.querySelector('span')?.textContent.includes('Positions')) {
+                        message = 'You need to create at least one partylist first.';
+                    } else if (this.querySelector('span')?.textContent.includes('Candidates')) {
+                        message = 'You need to create at least one position first.';
+                    } else if (this.querySelector('span')?.textContent.includes('Voters')) {
+                        message = 'You need to add at least one candidate first.';
+                    } else if (this.querySelector('span')?.textContent.includes('Start')) {
+                        message = 'You need to complete all setup steps before launching the election.';
+                    } else {
+                        message = 'Complete previous steps first.';
+                    }
+                    
+                    Swal.fire({
+                        title: 'Action Required',
+                        text: message,
+                        icon: 'warning',
+                        confirmButtonColor: '#16a34a'
+                    });
+                });
+            });
+        });
     </script>
 </body>
 </html>

@@ -2,26 +2,70 @@
 // Include session management and database connection
 include 'includes/session.php';
 
+// Get active election filter if set, use first available election if none selected
+$elections_sql = "SELECT id, name FROM elections ORDER BY name ASC";
+$elections_result = $conn->query($elections_sql);
+
+// If no election filter is set, redirect to the first election
+if (!isset($_GET['election']) || (int)$_GET['election'] === 0) {
+    if ($elections_result->num_rows > 0) {
+        $first_election = $elections_result->fetch_assoc();
+        header('Location: students.php?election=' . $first_election['id']);
+        exit();
+    } else {
+        // No elections available
+        $election_filter = 0;
+    }
+} else {
+    $election_filter = (int)$_GET['election'];
+}
+
+// Get filter values
+$course_filter = isset($_GET['course']) ? $_GET['course'] : '';
+$year_section_filter = isset($_GET['year_section']) ? $_GET['year_section'] : '';
+
 // Pagination setup
 $limit = 10; // Number of records per page
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
 $offset = ($page - 1) * $limit; // Offset for SQL query
 
-// Fetch total number of records
-$total_sql = "SELECT COUNT(*) AS total FROM students";
+// Build SQL query for selected election only
+$where_clause = "WHERE students.election_id = $election_filter";
+
+// Add additional filters if set
+if (!empty($course_filter)) {
+    $where_clause .= " AND students.course = '" . $conn->real_escape_string($course_filter) . "'";
+}
+if (!empty($year_section_filter)) {
+    $where_clause .= " AND students.year_section = '" . $conn->real_escape_string($year_section_filter) . "'";
+}
+
+// Fetch total number of records for this election with applied filters
+$total_sql = "SELECT COUNT(*) AS total FROM students $where_clause";
 $total_result = $conn->query($total_sql);
 $total_row = $total_result->fetch_assoc();
 $total_records = $total_row['total'];
 $total_pages = ceil($total_records / $limit); // Total number of pages
 
-// Fetch students data with election name
+// Fetch students data for the selected election with applied filters
 $sql = "
-    SELECT students.id, students.name, students.year_section, students.course, elections.name AS election_name 
+    SELECT students.id, students.student_id, students.name, students.year_section, students.course, elections.name AS election_name 
     FROM students 
     LEFT JOIN elections ON students.election_id = elections.id 
+    $where_clause
     ORDER BY students.name ASC 
     LIMIT $limit OFFSET $offset";
 $result = $conn->query($sql);
+
+// Get unique courses and year/sections for filters
+$courses_sql = "SELECT DISTINCT course FROM students WHERE election_id = $election_filter ORDER BY course ASC";
+$courses_result = $conn->query($courses_sql);
+
+$year_sections_sql = "SELECT DISTINCT year_section FROM students WHERE election_id = $election_filter ORDER BY year_section ASC";
+$year_sections_result = $conn->query($year_sections_sql);
+
+// Reset pointer for the elections dropdown
+mysqli_data_seek($elections_result, 0);
 ?>
 <?php include 'includes/header.php'; ?>
 <body class="hold-transition skin-green sidebar-mini">
@@ -31,7 +75,7 @@ $result = $conn->query($sql);
 
   <div class="content-wrapper" style="background-color: #f8faf8;">
     <section class="content-header">
-      <h1 style="color: #046a0f; font-weight: 700; margin-bottom: 15px;">Students Management</h1>
+      <h1 style="color: #046a0f; font-weight: 700; margin-bottom: 15px;">Election Students</h1>
       <ol class="breadcrumb" style="background-color: #ffffff; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
         <li><a href="home.php" style="color: #046a0f;"><i class="fa fa-dashboard"></i> Home</a></li>
         <li class="active">Students</li>
@@ -63,25 +107,131 @@ $result = $conn->query($sql);
           <div class="box" style="border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
             <div class="box-header with-border" style="background-color: #f0fdf0; border-bottom: 1px solid #e0f0e0; border-radius: 8px 8px 0 0; padding: 20px;">
               <h3 class="box-title" style="color: #046a0f; font-weight: 600;">
-                <i class="fa fa-users" style="margin-right: 10px;"></i> All Registered Students
+                <i class="fa fa-users" style="margin-right: 10px;"></i> Students Registered for Election
               </h3>
-              <div class="box-tools pull-right">
-                <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#addStudentModal" style="background-color: #046a0f; border-color: #035a0d; padding: 5px 12px; font-weight: 600; transition: all 0.3s ease;">
-                  <i class="fa fa-plus"></i> Add Student
-                </button>
+              
+              <!-- Election Selection Dropdown -->
+              <div class="pull-right">
+                <form method="GET" action="students.php" class="form-inline">
+                  <div class="form-group" style="margin-bottom: 0; margin-right: 10px;">
+                    <label for="election_filter" style="color: #046a0f; margin-right: 10px; font-weight: 600;">Election:</label>
+                    <select name="election" id="election_filter" class="form-control" style="border: 1px solid #d0e0d0; border-radius: 4px; padding: 6px 10px; width: 180px;" onchange="this.form.submit()">
+                      <?php
+                      while ($election = $elections_result->fetch_assoc()) {
+                        $selected = ($election_filter == $election['id']) ? 'selected' : '';
+                        echo "<option value='" . $election['id'] . "' $selected>" . htmlspecialchars($election['name']) . "</option>";
+                      }
+                      ?>
+                    </select>
+                  </div>
+                  
+                  <input type="hidden" name="page" value="1"> <!-- Reset to page 1 when filtering -->
+                  
+                  <?php if ($course_filter): ?>
+                  <input type="hidden" name="course" value="<?php echo htmlspecialchars($course_filter); ?>">
+                  <?php endif; ?>
+                  
+                  <?php if ($year_section_filter): ?>
+                  <input type="hidden" name="year_section" value="<?php echo htmlspecialchars($year_section_filter); ?>">
+                  <?php endif; ?>
+                </form>
+              </div>
+            </div>
+            
+            <!-- Filter Bar -->
+            <div class="box-header" style="background-color: #f8f8f8; border-bottom: 1px solid #e0e0e0; padding: 15px 20px;">
+              <div class="filter-container" style="display: flex; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div class="filter-label" style="color: #046a0f; font-weight: 600;">
+                  <i class="fa fa-filter" style="margin-right: 5px;"></i> Filter by:
+                </div>
+                
+                <!-- Course filter -->
+                <div class="filter-item">
+                  <form method="GET" action="students.php" class="form-inline" style="margin-bottom: 0;">
+                    <input type="hidden" name="election" value="<?php echo $election_filter; ?>">
+                    <input type="hidden" name="page" value="1"> <!-- Reset to page 1 when filtering -->
+                    
+                    <?php if ($year_section_filter): ?>
+                    <input type="hidden" name="year_section" value="<?php echo htmlspecialchars($year_section_filter); ?>">
+                    <?php endif; ?>
+                    
+                    <select name="course" class="form-control form-control-sm" style="border: 1px solid #d0e0d0; border-radius: 4px; padding: 6px 10px; width: 180px;" onchange="this.form.submit()">
+                      <option value="">All Courses</option>
+                      <?php
+                      while ($course = $courses_result->fetch_assoc()) {
+                        $selected = ($course_filter == $course['course']) ? 'selected' : '';
+                        echo "<option value='" . htmlspecialchars($course['course']) . "' $selected>" . htmlspecialchars($course['course']) . "</option>";
+                      }
+                      ?>
+                    </select>
+                  </form>
+                </div>
+                
+                <!-- Year & Section filter -->
+                <div class="filter-item">
+                  <form method="GET" action="students.php" class="form-inline" style="margin-bottom: 0;">
+                    <input type="hidden" name="election" value="<?php echo $election_filter; ?>">
+                    <input type="hidden" name="page" value="1"> <!-- Reset to page 1 when filtering -->
+                    
+                    <?php if ($course_filter): ?>
+                    <input type="hidden" name="course" value="<?php echo htmlspecialchars($course_filter); ?>">
+                    <?php endif; ?>
+                    
+                    <select name="year_section" class="form-control form-control-sm" style="border: 1px solid #d0e0d0; border-radius: 4px; padding: 6px 10px; width: 180px;" onchange="this.form.submit()">
+                      <option value="">All Year/Sections</option>
+                      <?php
+                      while ($year_section = $year_sections_result->fetch_assoc()) {
+                        $selected = ($year_section_filter == $year_section['year_section']) ? 'selected' : '';
+                        echo "<option value='" . htmlspecialchars($year_section['year_section']) . "' $selected>" . htmlspecialchars($year_section['year_section']) . "</option>";
+                      }
+                      ?>
+                    </select>
+                  </form>
+                </div>
+                
+                <!-- Reset filters button -->
+                <?php if ($course_filter || $year_section_filter): ?>
+                <div class="filter-reset">
+                  <a href="students.php?election=<?php echo $election_filter; ?>" class="btn btn-sm btn-default" style="border-color: #d0e0d0;">
+                    <i class="fa fa-times"></i> Clear Filters
+                  </a>
+                </div>
+                <?php endif; ?>
               </div>
             </div>
 
             <!-- Students Table -->
             <div class="box-body" style="padding: 20px; background-color: #fff; border-radius: 0 0 8px 8px;">
+              <?php 
+                // Get current election name for display
+                $current_election_sql = "SELECT name FROM elections WHERE id = ?";
+                $stmt = $conn->prepare($current_election_sql);
+                $stmt->bind_param("i", $election_filter);
+                $stmt->execute();
+                $election_name_result = $stmt->get_result();
+                $election_name = ($election_name_result->num_rows > 0) ? $election_name_result->fetch_assoc()['name'] : "Unknown Election";
+                
+                // Build filter description
+                $filter_desc = "";
+                if ($course_filter) {
+                  $filter_desc .= " | Course: <strong>" . htmlspecialchars($course_filter) . "</strong>";
+                }
+                if ($year_section_filter) {
+                  $filter_desc .= " | Year/Section: <strong>" . htmlspecialchars($year_section_filter) . "</strong>";
+                }
+              ?>
+              <div class="alert alert-info" style="background-color: #e8f4fb; color: #0c5460; border-color: #bee5eb; border-left: 4px solid #17a2b8;">
+                <i class="fa fa-info-circle"></i> Showing students registered for: <strong><?php echo htmlspecialchars($election_name); ?></strong><?php echo $filter_desc; ?>
+              </div>
+
               <div class="table-responsive">
                 <table id="students-table" class="table table-bordered table-hover" style="width: 100%;">
                   <thead style="background-color: #046a0f; color: white;">
                     <tr>
                       <th width="30%">Student Name</th>
+                      <th width="20%">Student ID</th>
                       <th width="20%">Year & Section</th>
-                      <th width="25%">Course</th>
-                      <th width="25%">Election</th>
+                      <th width="30%">Course</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -91,14 +241,14 @@ $result = $conn->query($sql);
                           echo "
                             <tr>
                               <td style='vertical-align: middle;'><strong>" . htmlspecialchars($row['name']) . "</strong></td>
+                              <td style='vertical-align: middle;'>" . htmlspecialchars($row['student_id']) . "</td>
                               <td style='vertical-align: middle;'>" . htmlspecialchars($row['year_section']) . "</td>
                               <td style='vertical-align: middle;'>" . htmlspecialchars($row['course']) . "</td>
-                              <td style='vertical-align: middle;'>" . (empty($row['election_name']) ? '<span class="label label-default" style="background-color: #777;">Not enrolled</span>' : '<span class="label label-success" style="background-color: #046a0f;">' . htmlspecialchars($row['election_name']) . '</span>') . "</td>
                             </tr>
                           ";
                         }
                       } else {
-                        echo "<tr><td colspan='4' class='text-center' style='padding: 20px; color: #777;'>No students found</td></tr>";
+                        echo "<tr><td colspan='4' class='text-center' style='padding: 20px; color: #777;'>No students found for this election</td></tr>";
                       }
                     ?>
                   </tbody>
@@ -112,9 +262,20 @@ $result = $conn->query($sql);
                 Showing <?php echo ($result->num_rows > 0) ? ($offset + 1) : 0; ?> to <?php echo min($offset + $limit, $total_records); ?> of <?php echo $total_records; ?> students
               </div>
               <ul class="pagination pagination-sm no-margin pull-right">
+                <?php 
+                // Build pagination URL with all active filters
+                $pagination_url = "students.php?election=$election_filter";
+                if (!empty($course_filter)) {
+                    $pagination_url .= "&course=" . urlencode($course_filter);
+                }
+                if (!empty($year_section_filter)) {
+                    $pagination_url .= "&year_section=" . urlencode($year_section_filter);
+                }
+                ?>
+                
                 <?php if($page > 1): ?>
-                  <li><a href="students.php?page=1" style="color: #046a0f; border-color: #d0e0d0;">&laquo;</a></li>
-                  <li><a href="students.php?page=<?php echo $page-1; ?>" style="color: #046a0f; border-color: #d0e0d0;">&lsaquo;</a></li>
+                  <li><a href="<?php echo $pagination_url; ?>&page=1" style="color: #046a0f; border-color: #d0e0d0;">&laquo;</a></li>
+                  <li><a href="<?php echo $pagination_url; ?>&page=<?php echo $page-1; ?>" style="color: #046a0f; border-color: #d0e0d0;">&lsaquo;</a></li>
                 <?php endif; ?>
                 
                 <?php
@@ -124,13 +285,13 @@ $result = $conn->query($sql);
                   
                   for ($i = $start_page; $i <= $end_page; $i++) {
                     $active = ($i == $page) ? 'active' : '';
-                    echo "<li class='$active'><a href='students.php?page=$i' style='" . ($active ? "background-color: #046a0f; border-color: #035a0d; color: #fff;" : "color: #046a0f; border-color: #d0e0d0;") . "'>$i</a></li>";
+                    echo "<li class='$active'><a href='$pagination_url&page=$i' style='" . ($active ? "background-color: #046a0f; border-color: #035a0d; color: #fff;" : "color: #046a0f; border-color: #d0e0d0;") . "'>$i</a></li>";
                   }
                 ?>
                 
                 <?php if($page < $total_pages): ?>
-                  <li><a href="students.php?page=<?php echo $page+1; ?>" style="color: #046a0f; border-color: #d0e0d0;">&rsaquo;</a></li>
-                  <li><a href="students.php?page=<?php echo $total_pages; ?>" style="color: #046a0f; border-color: #d0e0d0;">&raquo;</a></li>
+                  <li><a href="<?php echo $pagination_url; ?>&page=<?php echo $page+1; ?>" style="color: #046a0f; border-color: #d0e0d0;">&rsaquo;</a></li>
+                  <li><a href="<?php echo $pagination_url; ?>&page=<?php echo $total_pages; ?>" style="color: #046a0f; border-color: #d0e0d0;">&raquo;</a></li>
                 <?php endif; ?>
               </ul>
             </div>
@@ -141,51 +302,6 @@ $result = $conn->query($sql);
   </div>
 
   <?php include 'includes/footer.php'; ?>
-</div>
-
-<!-- Add Student Modal -->
-<div class="modal fade" id="addStudentModal" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content" style="border-radius: 8px; overflow: hidden; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
-      <div class="modal-header" style="background-color: #046a0f; color: #fff; border-bottom: none; padding: 15px 20px;">
-        <button type="button" class="close" data-dismiss="modal" style="color: #fff; opacity: 0.8;">&times;</button>
-        <h4 class="modal-title"><i class="fa fa-user-plus"></i> Add New Student</h4>
-      </div>
-      <form action="student_add.php" method="POST">
-        <div class="modal-body" style="background-color: #fff; padding: 20px;">
-          <div class="form-group">
-            <label for="student_name" style="color: #046a0f; font-weight: 600;">Full Name:</label>
-            <input type="text" class="form-control" id="student_name" name="name" required style="border: 1px solid #d0e0d0; border-radius: 4px; padding: 8px 12px;">
-          </div>
-          <div class="form-group">
-            <label for="year_section" style="color: #046a0f; font-weight: 600;">Year & Section:</label>
-            <input type="text" class="form-control" id="year_section" name="year_section" placeholder="e.g. 2nd Year - A" required style="border: 1px solid #d0e0d0; border-radius: 4px; padding: 8px 12px;">
-          </div>
-          <div class="form-group">
-            <label for="course" style="color: #046a0f; font-weight: 600;">Course:</label>
-            <input type="text" class="form-control" id="course" name="course" placeholder="e.g. Bachelor of Science in Information Technology" required style="border: 1px solid #d0e0d0; border-radius: 4px; padding: 8px 12px;">
-          </div>
-          <div class="form-group">
-            <label for="election" style="color: #046a0f; font-weight: 600;">Election:</label>
-            <select class="form-control" id="election" name="election_id" style="border: 1px solid #d0e0d0; border-radius: 4px; padding: 8px 12px;">
-              <option value="">-- Select Election (Optional) --</option>
-              <?php
-                $election_sql = "SELECT id, name FROM elections WHERE status = 1";
-                $election_result = $conn->query($election_sql);
-                while ($election_row = $election_result->fetch_assoc()) {
-                  echo "<option value='" . $election_row['id'] . "'>" . htmlspecialchars($election_row['name']) . "</option>";
-                }
-              ?>
-            </select>
-          </div>
-        </div>
-        <div class="modal-footer" style="background-color: #f0fdf0; border-top: 1px solid #e0f0e0; padding: 15px 20px;">
-          <button type="button" class="btn btn-default" data-dismiss="modal" style="background-color: #777; color: #fff; border: none;">Cancel</button>
-          <button type="submit" name="add" class="btn btn-success" style="background-color: #046a0f; border-color: #035a0d;">Save Student</button>
-        </div>
-      </form>
-    </div>
-  </div>
 </div>
 
 <style>
@@ -233,6 +349,21 @@ $result = $conn->query($sql);
   font-weight: 600;
   font-size: 12px;
 }
+#election_filter {
+  background-color: white;
+  transition: all 0.3s ease;
+}
+#election_filter:focus {
+  border-color: #046a0f;
+  box-shadow: 0 0 0 2px rgba(4, 106, 15, 0.25);
+}
+.filter-container {
+  display: flex;
+  align-items: center;
+}
+.filter-item {
+  margin-right: 10px;
+}
 </style>
 
 <?php include 'includes/scripts.php'; ?>
@@ -243,23 +374,17 @@ $(function() {
     $('#students-table').DataTable().destroy();
   }
   
-  // Then initialize the DataTable
+  // Then initialize the DataTable with search but no pagination (we use custom pagination)
   $('#students-table').DataTable({
     'responsive': true,
     'autoWidth': false,
+    'paging': false,
+    'info': false,
     'language': {
       'search': 'Search Students:',
-      'lengthMenu': 'Show _MENU_ entries per page',
-      'zeroRecords': 'No matching students found',
-      'info': 'Showing _START_ to _END_ of _TOTAL_ students',
-      'infoEmpty': 'Showing 0 to 0 of 0 students',
-      'infoFiltered': '(filtered from _MAX_ total students)'
+      'zeroRecords': 'No matching students found'
     },
-    'pagingType': 'full_numbers',
-    'dom': '<"top"lf>rt<"bottom"ip><"clear">',
-    'drawCallback': function() {
-      $('.dataTables_paginate > .pagination').addClass('pagination-sm');
-    }
+    'dom': '<"top"f>rt<"clear">'
   });
 });
 </script>

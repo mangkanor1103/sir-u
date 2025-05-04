@@ -494,7 +494,6 @@ if (isset($_SESSION['admin'])) {
                 <div>
                     <h4 class="text-2xl font-bold text-brand-green-800">Kian A. Rodriguez</h4>
                     <p class="text-brand-green-600 font-medium text-lg mb-4">Project Lead & Full-stack Developer</p>
-                    <p class="text-gray-700 mb-4">Led the entire development process, including frontend and backend integration, ensuring project success for Minsu Bongabong Campus, College of Computer Studies.</p>
                 </div>
             </div>
         </div>

@@ -27,6 +27,42 @@ if ($election_status == 1) {
     exit();
 }
 
+// Get counts for validation
+$partylist_count_query = "SELECT COUNT(*) as count FROM partylists WHERE election_id = ?";
+$stmt = $conn->prepare($partylist_count_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$result_count = $stmt->get_result();
+$partylist_count = $result_count->fetch_assoc()['count'];
+
+$position_count_query = "SELECT COUNT(*) as count FROM positions WHERE election_id = ?";
+$stmt = $conn->prepare($position_count_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$result_count = $stmt->get_result();
+$position_count = $result_count->fetch_assoc()['count'];
+
+$candidate_count_query = "SELECT COUNT(*) as count FROM candidates WHERE election_id = ?";
+$stmt = $conn->prepare($candidate_count_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$result_count = $stmt->get_result();
+$candidate_count = $result_count->fetch_assoc()['count'];
+
+$voter_count_query = "SELECT COUNT(*) as count FROM voters WHERE election_id = ?";
+$stmt = $conn->prepare($voter_count_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$result_count = $stmt->get_result();
+$voter_count = $result_count->fetch_assoc()['count'];
+
+// Set flags for navigation validation
+$has_partylist = ($partylist_count > 0);
+$has_position = ($position_count > 0);
+$has_candidate = ($candidate_count > 0);
+$has_voter = ($voter_count > 0);
+$all_complete = ($has_partylist && $has_position && $has_candidate && $has_voter);
+
 // Function to fetch positions
 function getPositions($election_id) {
     global $conn;
@@ -169,34 +205,58 @@ $positions = getPositions($election_id);
                     <span>Dashboard</span>
                 </a>
                 
-                <!-- Partylist Link -->
+                <!-- Partylist Link - Always enabled as it's the first step -->
                 <a href="partylist.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'partylist.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
                     <i class="fas fa-flag w-5 h-5 mr-3 <?php echo $current_page == 'partylist.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
                     <span>Partylists</span>
                 </a>
                 
-                <!-- Positions Link -->
-                <a href="positions.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'positions.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                <!-- Positions Link - Only enabled if there are partylists -->
+                <a href="<?php echo $has_partylist ? 'positions.php' : '#'; ?>" 
+                   class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'positions.php' ? 'bg-primary-50 text-primary-700 font-medium' : ($has_partylist ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-sitemap w-5 h-5 mr-3 <?php echo $current_page == 'positions.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
                     <span>Positions</span>
+                    <?php if (!$has_partylist): ?>
+                        <span class="ml-auto text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
                 
-                <!-- Candidates Link -->
-                <a href="candidates.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'candidates.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                <!-- Candidates Link - Only enabled if there are positions -->
+                <a href="<?php echo $has_position ? 'candidates.php' : '#'; ?>" 
+                   class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'candidates.php' ? 'bg-primary-50 text-primary-700 font-medium' : ($has_position ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-user-tie w-5 h-5 mr-3 <?php echo $current_page == 'candidates.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
                     <span>Candidates</span>
+                    <?php if (!$has_position): ?>
+                        <span class="ml-auto text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
                 
-                <!-- Voters Link -->
-                <a href="voters.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'voters.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                <!-- Voters Link - Only enabled if there are candidates -->
+                <a href="<?php echo $has_candidate ? 'voters.php' : '#'; ?>" 
+                   class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'voters.php' ? 'bg-primary-50 text-primary-700 font-medium' : ($has_candidate ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-users w-5 h-5 mr-3 <?php echo $current_page == 'voters.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
                     <span>Voters</span>
+                    <?php if (!$has_candidate): ?>
+                        <span class="ml-auto text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
                 
-                <!-- Start Link -->
-                <a href="start.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'start.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                <!-- Start Election Link - Only enabled if all previous steps are complete -->
+                <a href="<?php echo $all_complete ? 'start.php' : '#'; ?>" 
+                   class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'start.php' ? 'bg-primary-50 text-primary-700 font-medium' : ($all_complete ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-play-circle w-5 h-5 mr-3 <?php echo $current_page == 'start.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
                     <span>Start Election</span>
+                    <?php if (!$all_complete): ?>
+                        <span class="ml-auto text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
                 
                 <hr class="my-4 border-gray-100">
@@ -218,17 +278,41 @@ $positions = getPositions($election_id);
                 <a href="partylist.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'partylist.php' ? 'text-primary-700 font-medium' : ''; ?>">
                     <i class="fas fa-flag mr-2"></i> Partylists
                 </a>
-                <a href="positions.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'positions.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                <a href="<?php echo $has_partylist ? 'positions.php' : '#'; ?>" 
+                   class="block px-6 py-3 <?php echo $current_page == 'positions.php' ? 'text-primary-700 font-medium' : ($has_partylist ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-sitemap mr-2"></i> Positions
+                    <?php if (!$has_partylist): ?>
+                        <span class="ml-2 text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
-                <a href="candidates.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'candidates.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                <a href="<?php echo $has_position ? 'candidates.php' : '#'; ?>" 
+                   class="block px-6 py-3 <?php echo $current_page == 'candidates.php' ? 'text-primary-700 font-medium' : ($has_position ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-user-tie mr-2"></i> Candidates
+                    <?php if (!$has_position): ?>
+                        <span class="ml-2 text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
-                <a href="voters.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'voters.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                <a href="<?php echo $has_candidate ? 'voters.php' : '#'; ?>" 
+                   class="block px-6 py-3 <?php echo $current_page == 'voters.php' ? 'text-primary-700 font-medium' : ($has_candidate ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-users mr-2"></i> Voters
+                    <?php if (!$has_candidate): ?>
+                        <span class="ml-2 text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
-                <a href="start.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'start.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                <a href="<?php echo $all_complete ? 'start.php' : '#'; ?>" 
+                   class="block px-6 py-3 <?php echo $current_page == 'start.php' ? 'text-primary-700 font-medium' : ($all_complete ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-play-circle mr-2"></i> Start Election
+                    <?php if (!$all_complete): ?>
+                        <span class="ml-2 text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
                 <hr class="my-2 border-gray-100">
                 <a href="#" onclick="confirmLogout(event);" class="block px-6 py-3 text-red-600 hover:bg-red-50">
@@ -251,8 +335,7 @@ $positions = getPositions($election_id);
             <!-- Page Header -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
-
-                <i class="fas fa-sitemap text-primary-600 mr-3"></i>
+                    <i class="fas fa-sitemap text-primary-600 mr-3"></i>
                     Manage Positions
                 </h1>
                 <p class="mt-2 text-gray-600 max-w-3xl">
@@ -274,19 +357,17 @@ $positions = getPositions($election_id);
                         <i class="fas fa-plus mr-2"></i> Add Position
                     </button>
                     
-                    <a href="candidates.php" 
+                    <a href="<?php echo $has_position ? 'candidates.php' : '#'; ?>" 
                        class="flex items-center px-4 py-2 rounded-lg transition-colors shadow-sm
-                              <?php echo ($positions->num_rows > 0) ? 
-                                    'bg-primary-600 hover:bg-primary-700 text-white' : 
-                                    'bg-gray-300 text-gray-500 cursor-not-allowed'; ?>"
-                       <?php echo ($positions->num_rows > 0) ? '' : 'onclick="return false;"'; ?>>
+                              <?php echo ($has_position) ? 'bg-primary-600 hover:bg-primary-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'; ?>"
+                       <?php echo ($has_position) ? '' : 'onclick="return showRequiredMessage(event);"'; ?>>
                         Next: Candidates <i class="fas fa-arrow-right ml-2"></i>
                     </a>
                 </div>
             </div>
             
             <!-- Warning Message if no positions -->
-            <?php if ($positions->num_rows == 0): ?>
+            <?php if (!$has_position): ?>
                 <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-md">
                     <div class="flex items-start">
                         <div class="flex-shrink-0">
@@ -388,6 +469,7 @@ $positions = getPositions($election_id);
 
     <!-- Add Position Modal -->
     <div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <!-- Add Modal content remains unchanged -->
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full transform transition-all">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="text-lg font-medium text-gray-900 flex items-center">
@@ -456,7 +538,7 @@ $positions = getPositions($election_id);
             
             <form method="POST" action="" class="p-6 space-y-4">
                 <input type="hidden" name="action" value="update_position">
-                <input type="hidden" id="editPositionId" name="id">
+                <input type="hidden" name="id" id="editPositionId">
                 
                 <div>
                     <label for="editDescription" class="block text-sm font-medium text-gray-700 mb-1">Position Name</label>
@@ -466,7 +548,7 @@ $positions = getPositions($election_id);
                         </div>
                         <input type="text" name="description" id="editDescription" 
                                class="focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" 
-                               placeholder="Enter position name" required>
+                               placeholder="Enter position name (e.g. President)" required>
                     </div>
                 </div>
                 
@@ -503,7 +585,7 @@ $positions = getPositions($election_id);
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                 <h3 class="text-lg font-medium text-gray-900 flex items-center">
                     <i class="fas fa-trash-alt text-red-500 mr-2"></i>
-                    Delete Position
+                    Confirm Deletion
                 </h3>
                 <button type="button" onclick="closeDeleteModal()" class="text-gray-400 hover:text-gray-500">
                     <i class="fas fa-times"></i>
@@ -511,17 +593,21 @@ $positions = getPositions($election_id);
             </div>
             
             <div class="p-6">
-                <div class="flex items-center justify-center bg-red-100 rounded-full w-16 h-16 mx-auto mb-4">
-                    <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                    <i class="fas fa-exclamation-triangle text-red-600"></i>
                 </div>
-                
-                <p class="text-center text-gray-800 font-medium">Are you sure you want to delete this position?</p>
-                <p id="deletePositionName" class="text-center text-gray-600 mt-1"></p>
-                <p class="text-center text-red-600 text-sm mt-4">This will also delete all candidates assigned to this position.</p>
+                <div class="text-center">
+                    <h3 class="text-lg font-medium text-gray-900">Delete Position</h3>
+                    <div class="mt-2">
+                        <p class="text-sm text-gray-500">
+                            Are you sure you want to delete the position: <strong id="positionToDelete"></strong>? This action cannot be undone.
+                        </p>
+                    </div>
+                </div>
                 
                 <form method="POST" action="" class="mt-6">
                     <input type="hidden" name="action" value="delete_position">
-                    <input type="hidden" id="deletePositionId" name="id">
+                    <input type="hidden" name="id" id="deletePositionId">
                     
                     <div class="flex justify-center space-x-3">
                         <button type="button" onclick="closeDeleteModal()" 
@@ -529,8 +615,8 @@ $positions = getPositions($election_id);
                             Cancel
                         </button>
                         <button type="submit" 
-                               class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                            <i class="fas fa-trash-alt mr-2"></i> Delete Permanently
+                                class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            <i class="fas fa-trash-alt mr-2"></i> Delete Position
                         </button>
                     </div>
                 </form>
@@ -569,15 +655,57 @@ $positions = getPositions($election_id);
             document.getElementById('editModal').classList.add('hidden');
         }
 
-        function openDeleteModal(id, name) {
+        function openDeleteModal(id, description) {
             document.getElementById('deletePositionId').value = id;
-            document.getElementById('deletePositionName').textContent = name;
+            document.getElementById('positionToDelete').textContent = description;
             document.getElementById('deleteModal').classList.remove('hidden');
         }
 
         function closeDeleteModal() {
             document.getElementById('deleteModal').classList.add('hidden');
         }
+
+        // New function to display required message
+        function showRequiredMessage(event) {
+            event.preventDefault();
+            Swal.fire({
+                title: 'Action Required',
+                text: 'You need to create at least one position first.',
+                icon: 'warning',
+                confirmButtonColor: '#16a34a'
+            });
+            return false;
+        }
+
+        // Add tooltips for disabled links
+        document.addEventListener('DOMContentLoaded', function() {
+            const disabledLinks = document.querySelectorAll('.cursor-not-allowed');
+            disabledLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    let message = '';
+                    if (this.querySelector('span')?.textContent.includes('Positions')) {
+                        message = 'You need to create at least one partylist first.';
+                    } else if (this.querySelector('span')?.textContent.includes('Candidates')) {
+                        message = 'You need to create at least one position first.';
+                    } else if (this.querySelector('span')?.textContent.includes('Voters')) {
+                        message = 'You need to add at least one candidate first.';
+                    } else if (this.querySelector('span')?.textContent.includes('Start')) {
+                        message = 'You need to complete all setup steps before launching the election.';
+                    } else {
+                        message = 'Complete previous steps first.';
+                    }
+                    
+                    Swal.fire({
+                        title: 'Action Required',
+                        text: message,
+                        icon: 'warning',
+                        confirmButtonColor: '#16a34a'
+                    });
+                });
+            });
+        });
 
         // SweetAlert confirmation for logging out
         function confirmLogout(event) {

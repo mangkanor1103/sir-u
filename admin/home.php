@@ -57,8 +57,8 @@ include 'includes/header.php';
                                     <i class="fa fa-book"></i>
                                 </span>
                                 <div class="info-box-content">
-                                    <h3 style="color: #035a0d; font-size: 22px; font-weight: 600; margin-bottom: 10px;">Courses</h3>
-                                    <p style="color: #555; font-size: 15px;">Manage courses, year and sections</p>
+                                    <h3 style="color: #035a0d; font-size: 22px; font-weight: 600; margin-bottom: 10px;">Programs</h3>
+                                    <p style="color: #555; font-size: 15px;">Manage programs, year and sections</p>
                                 </div>
                             </div>
                         </a>

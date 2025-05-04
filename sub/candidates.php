@@ -27,6 +27,42 @@ if ($election_status == 1) {
     exit();
 }
 
+// Get counts for validation
+$partylist_count_query = "SELECT COUNT(*) as count FROM partylists WHERE election_id = ?";
+$stmt = $conn->prepare($partylist_count_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$result_count = $stmt->get_result();
+$partylist_count = $result_count->fetch_assoc()['count'];
+
+$position_count_query = "SELECT COUNT(*) as count FROM positions WHERE election_id = ?";
+$stmt = $conn->prepare($position_count_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$result_count = $stmt->get_result();
+$position_count = $result_count->fetch_assoc()['count'];
+
+$candidate_count_query = "SELECT COUNT(*) as count FROM candidates WHERE election_id = ?";
+$stmt = $conn->prepare($candidate_count_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$result_count = $stmt->get_result();
+$candidate_count = $result_count->fetch_assoc()['count'];
+
+$voter_count_query = "SELECT COUNT(*) as count FROM voters WHERE election_id = ?";
+$stmt = $conn->prepare($voter_count_query);
+$stmt->bind_param("i", $election_id);
+$stmt->execute();
+$result_count = $stmt->get_result();
+$voter_count = $result_count->fetch_assoc()['count'];
+
+// Set flags for navigation validation
+$has_partylist = ($partylist_count > 0);
+$has_position = ($position_count > 0);
+$has_candidate = ($candidate_count > 0);
+$has_voter = ($voter_count > 0);
+$all_complete = ($has_partylist && $has_position && $has_candidate && $has_voter);
+
 // Function to delete a candidate
 function deleteCandidate($id) {
     global $conn;
@@ -304,34 +340,58 @@ $partylists = getPartylists($election_id);
                     <span>Dashboard</span>
                 </a>
                 
-                <!-- Partylist Link -->
+                <!-- Partylist Link - Always enabled as it's the first step -->
                 <a href="partylist.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'partylist.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
                     <i class="fas fa-flag w-5 h-5 mr-3 <?php echo $current_page == 'partylist.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
                     <span>Partylists</span>
                 </a>
                 
-                <!-- Positions Link -->
-                <a href="positions.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'positions.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                <!-- Positions Link - Only enabled if there are partylists -->
+                <a href="<?php echo $has_partylist ? 'positions.php' : '#'; ?>" 
+                   class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'positions.php' ? 'bg-primary-50 text-primary-700 font-medium' : ($has_partylist ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-sitemap w-5 h-5 mr-3 <?php echo $current_page == 'positions.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
                     <span>Positions</span>
+                    <?php if (!$has_partylist): ?>
+                        <span class="ml-auto text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
                 
-                <!-- Candidates Link -->
-                <a href="candidates.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'candidates.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                <!-- Candidates Link - Only enabled if there are positions -->
+                <a href="<?php echo $has_position ? 'candidates.php' : '#'; ?>" 
+                   class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'candidates.php' ? 'bg-primary-50 text-primary-700 font-medium' : ($has_position ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-user-tie w-5 h-5 mr-3 <?php echo $current_page == 'candidates.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
                     <span>Candidates</span>
+                    <?php if (!$has_position): ?>
+                        <span class="ml-auto text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
                 
-                <!-- Voters Link -->
-                <a href="voters.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'voters.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                <!-- Voters Link - Only enabled if there are candidates -->
+                <a href="<?php echo $has_candidate ? 'voters.php' : '#'; ?>" 
+                   class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'voters.php' ? 'bg-primary-50 text-primary-700 font-medium' : ($has_candidate ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-users w-5 h-5 mr-3 <?php echo $current_page == 'voters.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
                     <span>Voters</span>
+                    <?php if (!$has_candidate): ?>
+                        <span class="ml-auto text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
                 
-                <!-- Start Link -->
-                <a href="start.php" class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'start.php' ? 'bg-primary-50 text-primary-700 font-medium' : 'hover:bg-gray-50'; ?>">
+                <!-- Start Election Link - Only enabled if all previous steps are complete -->
+                <a href="<?php echo $all_complete ? 'start.php' : '#'; ?>" 
+                   class="flex items-center px-4 py-3 mb-1 rounded-lg <?php echo $current_page == 'start.php' ? 'bg-primary-50 text-primary-700 font-medium' : ($all_complete ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-play-circle w-5 h-5 mr-3 <?php echo $current_page == 'start.php' ? 'text-primary-700' : 'text-gray-400'; ?>"></i>
                     <span>Start Election</span>
+                    <?php if (!$all_complete): ?>
+                        <span class="ml-auto text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
                 
                 <hr class="my-4 border-gray-100">
@@ -353,17 +413,41 @@ $partylists = getPartylists($election_id);
                 <a href="partylist.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'partylist.php' ? 'text-primary-700 font-medium' : ''; ?>">
                     <i class="fas fa-flag mr-2"></i> Partylists
                 </a>
-                <a href="positions.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'positions.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                <a href="<?php echo $has_partylist ? 'positions.php' : '#'; ?>" 
+                   class="block px-6 py-3 <?php echo $current_page == 'positions.php' ? 'text-primary-700 font-medium' : ($has_partylist ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-sitemap mr-2"></i> Positions
+                    <?php if (!$has_partylist): ?>
+                        <span class="ml-2 text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
-                <a href="candidates.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'candidates.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                <a href="<?php echo $has_position ? 'candidates.php' : '#'; ?>" 
+                   class="block px-6 py-3 <?php echo $current_page == 'candidates.php' ? 'text-primary-700 font-medium' : ($has_position ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-user-tie mr-2"></i> Candidates
+                    <?php if (!$has_position): ?>
+                        <span class="ml-2 text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
-                <a href="voters.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'voters.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                <a href="<?php echo $has_candidate ? 'voters.php' : '#'; ?>" 
+                   class="block px-6 py-3 <?php echo $current_page == 'voters.php' ? 'text-primary-700 font-medium' : ($has_candidate ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-users mr-2"></i> Voters
+                    <?php if (!$has_candidate): ?>
+                        <span class="ml-2 text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
-                <a href="start.php" class="block px-6 py-3 hover:bg-gray-50 <?php echo $current_page == 'start.php' ? 'text-primary-700 font-medium' : ''; ?>">
+                <a href="<?php echo $all_complete ? 'start.php' : '#'; ?>" 
+                   class="block px-6 py-3 <?php echo $current_page == 'start.php' ? 'text-primary-700 font-medium' : ($all_complete ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'); ?>">
                     <i class="fas fa-play-circle mr-2"></i> Start Election
+                    <?php if (!$all_complete): ?>
+                        <span class="ml-2 text-xs text-red-500">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    <?php endif; ?>
                 </a>
                 <hr class="my-2 border-gray-100">
                 <a href="#" onclick="confirmLogout(event);" class="block px-6 py-3 text-red-600 hover:bg-red-50">
@@ -435,19 +519,17 @@ $partylists = getPartylists($election_id);
                         <i class="fas fa-plus mr-2"></i> Add New Candidate
                     </button>
                     
-                    <a href="voters.php" 
+                    <a href="<?php echo $has_candidate ? 'voters.php' : '#'; ?>" 
                        class="flex items-center px-4 py-2 rounded-lg transition-colors shadow-sm
-                              <?php echo ($candidates->num_rows > 0) ? 
-                                    'bg-primary-600 hover:bg-primary-700 text-white' : 
-                                    'bg-gray-300 text-gray-500 cursor-not-allowed'; ?>"
-                       <?php echo ($candidates->num_rows > 0) ? '' : 'onclick="return false;"'; ?>>
+                              <?php echo ($has_candidate) ? 'bg-primary-600 hover:bg-primary-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'; ?>"
+                       <?php echo ($has_candidate) ? '' : 'onclick="return showRequiredMessage(event);"'; ?>>
                         Next: Voters <i class="fas fa-arrow-right ml-2"></i>
                     </a>
                 </div>
             </div>
 
             <!-- Warning Message if no candidates -->
-            <?php if ($candidates->num_rows == 0): ?>
+            <?php if (!$has_candidate): ?>
                 <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-md">
                     <div class="flex items-start">
                         <div class="flex-shrink-0">
@@ -495,6 +577,7 @@ $partylists = getPartylists($election_id);
                                     </th>
                                 </tr>
                             </thead>
+                            <!-- Fix for candidate table row -->
                             <tbody class="bg-white divide-y divide-gray-200">
                                 <?php
                                 mysqli_data_seek($candidates, 0); // Reset pointer
@@ -583,7 +666,7 @@ $partylists = getPartylists($election_id);
         </main>
     </div>
 
-    <!-- Add Candidate Modal -->
+    <!-- Add Candidate Modal (Fixed) -->
     <div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full transform transition-all">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -908,6 +991,48 @@ $partylists = getPartylists($election_id);
         function closeDeleteModal() {
             document.getElementById('deleteModal').classList.add('hidden');
         }
+
+        // New function to display required message
+        function showRequiredMessage(event) {
+            event.preventDefault();
+            Swal.fire({
+                title: 'Action Required',
+                text: 'You need to add at least one candidate first.',
+                icon: 'warning',
+                confirmButtonColor: '#16a34a'
+            });
+            return false;
+        }
+
+        // Add tooltips for disabled links
+        document.addEventListener('DOMContentLoaded', function() {
+            const disabledLinks = document.querySelectorAll('.cursor-not-allowed');
+            disabledLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    let message = '';
+                    if (this.querySelector('span')?.textContent.includes('Positions')) {
+                        message = 'You need to create at least one partylist first.';
+                    } else if (this.querySelector('span')?.textContent.includes('Candidates')) {
+                        message = 'You need to create at least one position first.';
+                    } else if (this.querySelector('span')?.textContent.includes('Voters')) {
+                        message = 'You need to add at least one candidate first.';
+                    } else if (this.querySelector('span')?.textContent.includes('Start')) {
+                        message = 'You need to complete all setup steps before launching the election.';
+                    } else {
+                        message = 'Complete previous steps first.';
+                    }
+                    
+                    Swal.fire({
+                        title: 'Action Required',
+                        text: message,
+                        icon: 'warning',
+                        confirmButtonColor: '#16a34a'
+                    });
+                });
+            });
+        });
 
         // SweetAlert confirmation for logging out
         function confirmLogout(event) {

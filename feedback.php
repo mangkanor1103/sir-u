@@ -162,7 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['feedback_submit'])) {
             
             <!-- Footer -->
             <div class="mt-6 text-center">
-                <p class="text-gray-500 text-sm">© <?php echo date('Y'); ?> SIR-U Election System</p>
+                <p class="text-gray-500 text-sm">© <?php echo date('Y'); ?> Votesys Election System</p>
             </div>
         </div>
     </div>

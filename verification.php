@@ -38,10 +38,11 @@ if (isset($_POST['register'])) {
     $name = trim($_POST['name']);
     $year_section = trim($_POST['year_section']);
     $course = trim($_POST['course']);
+    $student_id = trim($_POST['student_id']);
 
     // Check if the student has already registered for this specific election
-    $stmt = $conn->prepare("SELECT * FROM students WHERE name = ? AND election_id = ?");
-    $stmt->bind_param("si", $name, $election_id);
+    $stmt = $conn->prepare("SELECT * FROM students WHERE (name = ? OR student_id = ?) AND election_id = ?");
+    $stmt->bind_param("ssi", $name, $student_id, $election_id);
     $stmt->execute();
     $name_result = $stmt->get_result();
 
@@ -52,8 +53,8 @@ if (isset($_POST['register'])) {
     }
 
     // Insert voter details into students table with election_id
-    $stmt = $conn->prepare("INSERT INTO students (voters_id, name, year_section, course, election_id) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssi", $voter_id, $name, $year_section, $course, $election_id);
+    $stmt = $conn->prepare("INSERT INTO students (voters_id, student_id, name, year_section, course, election_id) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssi", $voter_id, $student_id, $name, $year_section, $course, $election_id);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = 'Registration successful!';
@@ -156,6 +157,17 @@ if (isset($_POST['register'])) {
                 </div>
                 
                 <div class="space-y-1">
+                    <label for="student_id" class="block text-gray-700 font-medium text-sm">Student ID</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                            <i class="fas fa-id-card"></i>
+                        </span>
+                        <input type="text" id="student_id" name="student_id" placeholder="e.g. mbc2022-0197" 
+                               class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50 form-input" required>
+                    </div>
+                </div>
+                
+                <div class="space-y-1">
                     <label for="course" class="block text-gray-700 font-medium text-sm">Course</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
@@ -220,15 +232,19 @@ if (isset($_POST['register'])) {
 </div>
 
 <script>
-    // Add some simple form validation feedback
+    // Add form validation feedback
     document.querySelector('form').addEventListener('submit', function(e) {
         const name = document.getElementById('name').value.trim();
         const yearSection = document.getElementById('year_section').value;
         const course = document.getElementById('course').value;
+        const studentId = document.getElementById('student_id').value.trim();
         
-        if (!name || !yearSection || !course) {
+        if (!name || !yearSection || !course || !studentId) {
             e.preventDefault();
             alert('Please fill in all required fields');
+        } else if (!/^[a-zA-Z0-9]+-\d+$/.test(studentId)) {
+            e.preventDefault();
+            alert('Please enter a valid student ID format (e.g. mbc2022-0197)');
         }
     });
 </script>
