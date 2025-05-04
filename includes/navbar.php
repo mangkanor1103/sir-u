@@ -24,7 +24,11 @@
       <!-- Navbar Right Menu -->
       <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
-          <li><a href="logout.php"><i class="fa fa-sign-out"></i> LOGOUT</a></li>  
+          <li>
+            <a href="javascript:void(0);" onclick="confirmLogout()" class="dropdown-item">
+              <i class="fa fa-sign-out mr-2"></i> Logout
+            </a>
+          </li>  
         </ul>
       </div>
       <!-- /.navbar-custom-menu -->

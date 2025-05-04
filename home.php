@@ -261,6 +261,11 @@
 
                                 // Check if there are candidates
                                 if ($candidates_query && $candidates_query->num_rows > 0) {
+                                    echo "<div class='mb-3 text-center'>
+                                            <span class='inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium'>
+                                                <i class='fa fa-info-circle mr-1'></i> Max selections allowed: <strong>" . htmlspecialchars($position['max_vote']) . "</strong>
+                                            </span>
+                                          </div>";
                                     echo "<div class='candidate-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5'>"; // Mobile-responsive grid
 
                                     while ($candidate = $candidates_query->fetch_assoc()) {
@@ -273,7 +278,7 @@
                                                 <img src='sub/" . htmlspecialchars($candidate['photo']) . "' 
                                                     class='absolute inset-0 w-full h-full object-cover candidate-img'>
                                                 <div class='hidden absolute top-3 right-3 bg-green-500 rounded-full w-10 h-10 flex items-center justify-center check-icon shadow-lg'>
-                                                    <i class='fa fa-check text-white text-lg'></i>
+                                                    <i class='fa fa-check text-white'></i>
                                                 </div>
                                             </div>
                                             <div class='p-4 text-center'>
@@ -370,12 +375,31 @@ function showConfirmation() {
         return;
     }
 
+    // Get all positions
+    const positions = {};
+    document.querySelectorAll("[id^='']").forEach(position => {
+        if (position.id && !isNaN(position.id)) {
+            const positionHeading = position.querySelector("h3");
+            if (positionHeading) {
+                positions[position.id] = {
+                    name: positionHeading.textContent,
+                    maxVote: position.querySelector(".text-sm.text-gray-600 .font-bold").textContent
+                };
+            }
+        }
+    });
+
     // Add selected candidates to the review list
     selectedCandidates.forEach(candidate => {
         let candidateName = candidate.querySelector("h4").textContent;
-        let partylistElement = candidate.querySelector(".text-xs");
-        let partylistInfo = partylistElement ? " • " + partylistElement.textContent : "";
+        let partylistElement = candidate.querySelector(".bg-gray-100");
+        let partylistInfo = partylistElement ? partylistElement.textContent : "";
         let candidateImg = candidate.querySelector("img").src;
+        
+        // Get position information
+        let positionId = candidate.closest("[id]").id;
+        let positionName = positions[positionId]?.name || "Position";
+        let maxVote = positions[positionId]?.maxVote || "1";
 
         let listItem = document.createElement("div");
         listItem.className = 'flex items-center p-3 border-b border-gray-100';
@@ -383,9 +407,13 @@ function showConfirmation() {
             <div class="w-12 h-12 rounded-full overflow-hidden mr-3 bg-gray-100 flex-shrink-0">
                 <img src="${candidateImg}" class="w-full h-full object-cover">
             </div>
-            <div>
+            <div class="flex-grow">
                 <p class="font-medium text-gray-800">${candidateName}</p>
                 <p class="text-gray-500 text-sm">${partylistInfo}</p>
+            </div>
+            <div class="text-right">
+                <p class="bg-green-100 text-green-800 px-3 py-1 rounded-lg text-xs font-medium">${positionName}</p>
+                <p class="text-gray-500 text-xs mt-1">Max votes: ${maxVote}</p>
             </div>
         `;
         voteReviewList.appendChild(listItem);
@@ -394,7 +422,8 @@ function showConfirmation() {
     // Add abstained positions to the review list
     abstainOptions.forEach(option => {
         let positionId = option.value;
-        let positionName = document.querySelector(`.box[id='${positionId}'] .box-title b, div[id='${positionId}'] h3`).textContent;
+        let positionName = positions[positionId]?.name || "Position";
+        let maxVote = positions[positionId]?.maxVote || "1";
 
         let listItem = document.createElement("div");
         listItem.className = 'flex items-center p-3 border-b border-gray-100 bg-gray-50';
@@ -402,9 +431,12 @@ function showConfirmation() {
             <div class="w-12 h-12 rounded-full bg-gray-200 mr-3 flex items-center justify-center flex-shrink-0">
                 <i class="fa fa-ban text-gray-400"></i>
             </div>
-            <div>
+            <div class="flex-grow">
                 <p class="font-medium text-gray-800">${positionName}</p>
                 <p class="text-gray-500 text-sm">ABSTAINED</p>
+            </div>
+            <div class="text-right">
+                <p class="text-gray-500 text-xs">Max votes: ${maxVote}</p>
             </div>
         `;
         voteReviewList.appendChild(listItem);
@@ -530,36 +562,6 @@ function viewPlatform(candidateId, candidateName) {
         </div>
     `;
     
-    // Find the candidate card to extract image and partylist
-    const candidateCards = document.querySelectorAll('.candidate-card');
-    let candidateCard = null;
-    
-    candidateCards.forEach(card => {
-        const inputElement = card.querySelector('input');
-        if (inputElement && inputElement.name.includes(`candidates[`) && card.querySelector('h4').textContent.trim() === candidateName) {
-            candidateCard = card;
-        }
-    });
-    
-    if (candidateCard) {
-        // Set candidate image
-        const imageUrl = candidateCard.querySelector('img').src;
-        document.getElementById('platformCandidateImage').innerHTML = `
-            <img src="${imageUrl}" class="w-full h-full object-cover">
-        `;
-        
-        // Set candidate name
-        document.getElementById('platformCandidateName').textContent = candidateName;
-        
-        // Set partylist if available
-        const partylistElement = candidateCard.querySelector('.bg-gray-100');
-        if (partylistElement) {
-            document.getElementById('platformCandidatePartylist').textContent = partylistElement.textContent;
-        } else {
-            document.getElementById('platformCandidatePartylist').textContent = "Independent";
-        }
-    }
-    
     // Show the modal
     $('#platformModal').modal('show');
     
@@ -575,17 +577,9 @@ function viewPlatform(candidateId, candidateName) {
             // Successful response
             if (data.success) {
                 document.getElementById('platformContent').innerHTML = `
-                    <div class="bg-green-50 p-6 rounded-lg shadow-sm border-l-4 border-green-500">
-                        <h4 class="font-bold text-green-800 mb-3 flex items-center text-lg">
-                            <i class="fa fa-bullhorn mr-2"></i>Platform Statement
-                        </h4>
+                    <div class="bg-white p-6 rounded-lg">
                         <div class="text-gray-700 leading-relaxed">
                             ${data.platform.vision || 'No platform statement provided.'}
-                        </div>
-                        <div class="mt-4 flex justify-end">
-                            <span class="text-green-600 text-sm italic">
-                                <i class="fa fa-quote-right mr-1"></i> Candidate's vision
-                            </span>
                         </div>
                     </div>
                 `;
@@ -593,9 +587,8 @@ function viewPlatform(candidateId, candidateName) {
                 // Error from the server
                 document.getElementById('platformContent').innerHTML = `
                     <div class="text-center py-8">
-                        <div class="text-5xl text-green-200 mb-4"><i class="fa fa-lightbulb-o"></i></div>
                         <h3 class="text-xl font-bold text-gray-700 mb-3">No Platform Details</h3>
-                        <p class="text-gray-500 bg-green-50 inline-block px-4 py-2 rounded-full">
+                        <p class="text-gray-500">
                             <i class="fa fa-info-circle mr-2"></i>This candidate has not provided any platform details yet.
                         </p>
                     </div>
@@ -605,16 +598,54 @@ function viewPlatform(candidateId, candidateName) {
         .catch(error => {
             // Network or other error
             document.getElementById('platformContent').innerHTML = `
-                <div class="bg-green-50 p-6 rounded-lg text-center shadow-sm">
-                    <div class="text-3xl text-green-400 mb-4"><i class="fa fa-exclamation-circle"></i></div>
-                    <h3 class="font-bold text-green-700 text-lg mb-2">Error Loading Platform</h3>
-                    <p class="text-gray-600 bg-white inline-block px-4 py-2 rounded-lg shadow-inner">
+                <div class="bg-white p-6 rounded-lg text-center">
+                    <h3 class="font-bold text-gray-700 text-lg mb-2">Error Loading Platform</h3>
+                    <p class="text-gray-600">
                         <i class="fa fa-refresh mr-2"></i>There was a problem loading this candidate's platform. Please try again later.
                     </p>
                 </div>
             `;
             console.error('Error fetching platform:', error);
         });
+}
+</script>
+
+<script>
+function confirmLogout() {
+    Swal.fire({
+        title: 'Ready to Leave?',
+        text: 'Are you sure you want to logout?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10B981',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: '<i class="fa fa-sign-out mr-2"></i>Yes, Logout',
+        cancelButtonText: '<i class="fa fa-times mr-2"></i>Cancel',
+        background: '#fff',
+        iconColor: '#3B82F6',
+        customClass: {
+            confirmButton: 'px-4 py-2 rounded-lg',
+            cancelButton: 'px-4 py-2 rounded-lg',
+            title: 'text-xl font-bold text-gray-800',
+            popup: 'rounded-lg shadow-lg'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show a brief loading message
+            Swal.fire({
+                title: 'Logging out...',
+                text: 'Please wait',
+                timer: 800,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            }).then(() => {
+                // Redirect to logout page
+                window.location.href = 'logout.php';
+            });
+        }
+    });
 }
 </script>
 
@@ -637,7 +668,7 @@ function viewPlatform(candidateId, candidateName) {
                 <button type="button" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg flex items-center transition duration-200" data-dismiss="modal">
                     <i class="fa fa-edit mr-2"></i> Edit Choices
                 </button>
-                <button type="submit" name="submit_votes" class="bg-gradient-to-r from-green-600 to-green-400 hover:from-green-700 hover:to-green-500 text-white font-bold py-3 px-6 rounded-lg flex items-center transition duration-200" form="voteForm">
+                <button type="button" class="bg-gradient-to-r from-green-600 to-green-400 hover:from-green-700 hover:to-green-500 text-white font-bold py-3 px-6 rounded-lg flex items-center transition duration-200" onclick="confirmSubmitVotes()">
                     <i class="fa fa-check-circle mr-2"></i> Submit Votes
                 </button>
             </div>
@@ -647,23 +678,13 @@ function viewPlatform(candidateId, candidateName) {
 
 <!-- Platform Modal -->
 <div id="platformModal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-lg overflow-hidden shadow-lg">
             <div class="modal-header bg-gradient-to-r from-green-600 to-green-400 text-white border-0">
-                <h4 class="modal-title font-bold text-xl md:text-2xl" id="platformModalTitle">Candidate Platform</h4>
+                <h4 class="modal-title font-bold text-xl" id="platformModalTitle">Candidate Platform</h4>
                 <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="flex items-center mb-6">
-                    <div id="platformCandidateImage" class="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-green-100 mr-4 flex-shrink-0">
-                        <!-- Candidate image will be inserted here -->
-                    </div>
-                    <div>
-                        <h3 id="platformCandidateName" class="text-xl md:text-2xl font-bold text-gray-800"></h3>
-                        <p id="platformCandidatePartylist" class="text-green-600 font-medium"></p>
-                    </div>
-                </div>
-                
                 <div class="space-y-4" id="platformContent">
                     <div class="p-12 flex items-center justify-center">
                         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
