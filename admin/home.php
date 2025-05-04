@@ -7,29 +7,32 @@ include 'includes/header.php';
     <?php include 'includes/navbar.php'; ?>
     <?php include 'includes/menubar1.php'; ?>
 
-    <div class="content-wrapper" style="background-color: #f8faf8;">
-        <section class="content-header text-center" style="padding: 30px 0 20px;">
-            <h1 style="color: #046a0f; font-weight: 700; margin-bottom: 15px; font-size: 32px;">Welcome to the Student Voting System</h1>
-            <div style="max-width: 700px; margin: 0 auto;">
-                <p style="color: #388e3c; font-size: 18px; margin-bottom: 10px;">Select an option below to get started</p>
-                <p style="color: #388e3c; font-size: 16px;">Manage courses, view elections, and handle student feedbacks efficiently.</p>
+    <div class="content-wrapper bg-gradient-to-br from-green-50 to-white">
+        <section class="content-header text-center py-8">
+            <div class="container">
+                <h1 class="text-green-800 font-bold text-3xl mb-3">Welcome to the Student Voting System</h1>
+                <div class="max-w-3xl mx-auto px-4">
+                    <p class="text-green-700 text-lg mb-2">Select an option below to get started</p>
+                    <p class="text-green-600 opacity-80">Manage courses, view elections, and handle student feedbacks efficiently.</p>
+                </div>
             </div>
         </section>
 
-        <section class="content" style="padding-top: 10px; padding-bottom: 40px;">
+        <section class="content pb-12">
             <div class="container">
                 <div class="row justify-content-center">
                     <!-- Elections -->
                     <div class="col-lg-4 col-md-6 mb-4">
                         <a href="sub_admins.php" class="text-decoration-none">
-                            <div class="info-box" style="background: white; border-left: 5px solid #046a0f; padding: 25px 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                                <span class="info-box-icon" style="font-size: 42px; color: #046a0f;">
+                            <div class="dashboard-card">
+                                <div class="card-icon">
                                     <i class="fa fa-check-square-o"></i>
-                                </span>
-                                <div class="info-box-content">
-                                    <h3 style="color: #035a0d; font-size: 22px; font-weight: 600; margin-bottom: 10px;">Elections</h3>
-                                    <p style="color: #555; font-size: 15px;">View and manage ongoing elections</p>
                                 </div>
+                                <div class="card-content">
+                                    <h3>Elections</h3>
+                                    <p>View and manage ongoing elections</p>
+                                </div>
+                                <div class="card-indicator"></div>
                             </div>
                         </a>
                     </div>
@@ -37,14 +40,15 @@ include 'includes/header.php';
                     <!-- Students -->
                     <div class="col-lg-4 col-md-6 mb-4">
                         <a href="students.php" class="text-decoration-none">
-                            <div class="info-box" style="background: white; border-left: 5px solid #046a0f; padding: 25px 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                                <span class="info-box-icon" style="font-size: 42px; color: #046a0f;">
+                            <div class="dashboard-card">
+                                <div class="card-icon">
                                     <i class="fa fa-users"></i>
-                                </span>
-                                <div class="info-box-content">
-                                    <h3 style="color: #035a0d; font-size: 22px; font-weight: 600; margin-bottom: 10px;">Students</h3>
-                                    <p style="color: #555; font-size: 15px;">Manage student accounts and voters</p>
                                 </div>
+                                <div class="card-content">
+                                    <h3>Students</h3>
+                                    <p>Manage student accounts and voters</p>
+                                </div>
+                                <div class="card-indicator"></div>
                             </div>
                         </a>
                     </div>
@@ -52,14 +56,15 @@ include 'includes/header.php';
                     <!-- Courses -->
                     <div class="col-lg-4 col-md-6 mb-4">
                         <a href="info.php" class="text-decoration-none">
-                            <div class="info-box" style="background: white; border-left: 5px solid #046a0f; padding: 25px 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                                <span class="info-box-icon" style="font-size: 42px; color: #046a0f;">
+                            <div class="dashboard-card">
+                                <div class="card-icon">
                                     <i class="fa fa-book"></i>
-                                </span>
-                                <div class="info-box-content">
-                                    <h3 style="color: #035a0d; font-size: 22px; font-weight: 600; margin-bottom: 10px;">Courses</h3>
-                                    <p style="color: #555; font-size: 15px;">Manage courses, year and sections</p>
                                 </div>
+                                <div class="card-content">
+                                    <h3>Courses</h3>
+                                    <p>Manage courses, year and sections</p>
+                                </div>
+                                <div class="card-indicator"></div>
                             </div>
                         </a>
                     </div>
@@ -67,14 +72,15 @@ include 'includes/header.php';
                     <!-- History -->
                     <div class="col-lg-4 col-md-6 mb-4">
                         <a href="history.php" class="text-decoration-none">
-                            <div class="info-box" style="background: white; border-left: 5px solid #046a0f; padding: 25px 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                                <span class="info-box-icon" style="font-size: 42px; color: #046a0f;">
+                            <div class="dashboard-card">
+                                <div class="card-icon">
                                     <i class="fa fa-history"></i>
-                                </span>
-                                <div class="info-box-content">
-                                    <h3 style="color: #035a0d; font-size: 22px; font-weight: 600; margin-bottom: 10px;">History</h3>
-                                    <p style="color: #555; font-size: 15px;">View past election results</p>
                                 </div>
+                                <div class="card-content">
+                                    <h3>History</h3>
+                                    <p>View past election results</p>
+                                </div>
+                                <div class="card-indicator"></div>
                             </div>
                         </a>
                     </div>
@@ -82,66 +88,92 @@ include 'includes/header.php';
                     <!-- Feedbacks -->
                     <div class="col-lg-4 col-md-6 mb-4">
                         <a href="feedback.php" class="text-decoration-none">
-                            <div class="info-box" style="background: white; border-left: 5px solid #046a0f; padding: 25px 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                                <span class="info-box-icon" style="font-size: 42px; color: #046a0f;">
+                            <div class="dashboard-card">
+                                <div class="card-icon">
                                     <i class="fa fa-comments"></i>
-                                </span>
-                                <div class="info-box-content">
-                                    <h3 style="color: #035a0d; font-size: 22px; font-weight: 600; margin-bottom: 10px;">Feedbacks</h3>
-                                    <p style="color: #555; font-size: 15px;">View student feedbacks and suggestions</p>
                                 </div>
+                                <div class="card-content">
+                                    <h3>Feedbacks</h3>
+                                    <p>View student feedbacks and suggestions</p>
+                                </div>
+                                <div class="card-indicator"></div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Settings -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <a href="#" data-toggle="modal" data-target="#config" class="text-decoration-none">
+                            <div class="dashboard-card">
+                                <div class="card-icon">
+                                    <i class="fa fa-cog"></i>
+                                </div>
+                                <div class="card-content">
+                                    <h3>Settings</h3>
+                                    <p>Configure system preferences</p>
+                                </div>
+                                <div class="card-indicator"></div>
                             </div>
                         </a>
                     </div>
                 </div>
-            </div>
-        </section>
-    </div>
-
-    <?php include 'includes/footer.php'; ?>
-</div>
-
-<style>
-.info-box {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    height: 100%;
-    position: relative;
-    overflow: hidden;
-}
-.info-box:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    border-left-width: 8px;
-}
-.info-box:after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background-color: #046a0f;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-.info-box:hover:after {
-    opacity: 1;
-}
-.text-decoration-none {
-    text-decoration: none !important;
-}
-.info-box-content {
-    margin-left: 60px;
-}
-.info-box-icon {
-    position: absolute;
-    transition: transform 0.3s ease;
-}
-.info-box:hover .info-box-icon {
-    transform: scale(1.1);
-}
-</style>
-
-<?php include 'includes/scripts.php'; ?>
-</body>
-</html>
+                
+                <!-- Quick Stats Section -->
+                <div class="stats-section mt-5">
+                    <h2 class="stats-title">Quick Statistics</h2>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fa fa-user-o"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h4>Total Students</h4>
+                                    <div class="stat-value">
+                                        <?php
+                                        $sql = "SELECT COUNT(*) as total FROM voters";
+                                        $query = $conn->query($sql);
+                                        $row = $query->fetch_assoc();
+                                        echo number_format($row['total']);
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fa fa-check-circle-o"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h4>Active Elections</h4>
+                                    <div class="stat-value">
+                                        <?php
+                                        $sql = "SELECT COUNT(*) as total FROM elections WHERE status = 'Active'";
+                                        $query = $conn->query($sql);
+                                        $row = $query->fetch_assoc();
+                                        echo number_format($row['total']);
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fa fa-graduation-cap"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h4>Total Programs</h4>
+                                    <div class="stat-value">
+                                        <?php
+                                        $sql = "SELECT COUNT(*) as total FROM info";
+                                        $query = $conn->query($sql);
+                                        $row = $query->fetch_assoc();
+                                        echo number_format($row['total']);
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
