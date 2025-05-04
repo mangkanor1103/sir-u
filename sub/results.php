@@ -35,7 +35,7 @@ function getVotesByPosition($election_id) {
                CONCAT(c.firstname, ' ', c.lastname) AS candidate,
                c.photo,
                c.platform,
-               pl.name AS partylist,
+               pl.name AS partylists,
                COALESCE(COUNT(v.candidate_id), 0) AS total_votes,
                p.position_id,
                p.max_vote,
@@ -80,11 +80,15 @@ while ($row = $results->fetch_assoc()) {
         ];
     }
     
-    // Store candidate data
+    // Store candidate data - add all fields including partylists, photo, platform
     $positionsData[$position]['candidates'][] = [
         'candidate' => $row['candidate'],
-        'partylist' => $row['partylist'],
-        'total_votes' => $row['total_votes']
+        'partylists' => $row['partylists'],
+        'photo' => $row['photo'],
+        'platform' => $row['platform'],
+        'total_votes' => $row['total_votes'],
+        'is_winner' => false,
+        'is_tie' => false
     ];
 }
 
@@ -312,13 +316,13 @@ $turnout_percentage = $total_voters > 0 ? round(($votes_cast / $total_voters) * 
                                 <tr class="<?php echo $index % 2 === 0 ? 'bg-gray-50' : 'bg-white'; ?> border-b">
                                     <td class="py-2 px-4"><?php echo $index + 1; ?></td>
                                     <td class="py-2 px-4 font-medium"><?php echo htmlspecialchars($candidate['candidate']); ?></td>
-                                    <td class="py-2 px-4"><?php echo !empty($candidate['partylist']) ? htmlspecialchars($candidate['partylist']) : '-'; ?></td>
+                                    <td class="py-2 px-4"><?php echo !empty($candidate['partylists']) ? htmlspecialchars($candidate['partylists']) : '-'; ?></td>
                                     <td class="py-2 px-4 font-bold"><?php echo number_format($candidate['total_votes']); ?></td>
                                     <td class="py-2 px-4"><?php echo $percentage; ?>%</td>
                                     <td class="py-2 px-4">
-                                        <?php if ($candidate['is_winner']): ?>
+                                        <?php if ($candidate['is_winner'] ?? false): ?>
                                             <span class="winner-tag">WINNER</span>
-                                        <?php elseif ($candidate['is_tie']): ?>
+                                        <?php elseif ($candidate['is_tie'] ?? false): ?>
                                             <span class="tie-tag">TIED</span>
                                         <?php else: ?>
                                             -

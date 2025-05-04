@@ -197,12 +197,39 @@ function getVotesByPosition($election_id) {
     return $stmt->get_result();
 }
 
+// Add new function to get abstain votes per position
+function getAbstainVotesByPosition($election_id) {
+    global $conn;
+    $sql = "
+        SELECT p.position_id, 
+               p.description AS position, 
+               COUNT(v.id) AS abstain_votes
+        FROM positions p
+        LEFT JOIN votes v ON p.position_id = v.position_id AND v.election_id = ? AND v.candidate_id IS NULL
+        WHERE p.election_id = ?
+        GROUP BY p.position_id, p.description
+        ORDER BY p.position_id;
+    ";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ii", $election_id, $election_id);
+    $stmt->execute();
+    return $stmt->get_result();
+}
+
+// Get abstain votes by position
+$abstainVotesByPosition = [];
+$abstainResults = getAbstainVotesByPosition($election_id);
+while ($row = $abstainResults->fetch_assoc()) {
+    $abstainVotesByPosition[$row['position']] = $row['abstain_votes'];
+}
+
 $results = getVotesByPosition($election_id);
 $positionsData = [];
 while ($row = $results->fetch_assoc()) {
     $candidate_count = $row['candidate_count'];
     $max_vote = $row['max_vote'];
     $position_id = $row['position_id'];
+    $position_name = $row['position'];
 
     // Determine if the candidate is a winner
     $is_winner = false;
@@ -221,25 +248,31 @@ while ($row = $results->fetch_assoc()) {
         } else if ($requires_majority) {
             // Position requires majority (50%+1)
             $is_winner = ($row['total_votes'] >= $winning_threshold && 
-                         count($positionsData[$row['position']] ?? []) < $max_vote);
+                         count($positionsData[$position_name] ?? []) < $max_vote);
         } else {
             // Position only requires highest vote count
-            $is_winner = count($positionsData[$row['position']] ?? []) < $max_vote;
+            $is_winner = count($positionsData[$position_name] ?? []) < $max_vote;
         }
     } else {
         // For positions with max_vote > 1, select up to max_vote candidates with highest votes
-        $current_winners = $positionsData[$row['position']] ?? [];
+        $current_winners = $positionsData[$position_name] ?? [];
         if (count($current_winners) < $max_vote) {
             $is_winner = true;
         }
     }
 
-    $positionsData[$row['position']][] = [
+    $positionsData[$position_name][] = [
         'candidate' => $row['candidate'],
         'total_votes' => $row['total_votes'],
         'is_winner' => $is_winner
     ];
+    
+    // Store the position_id for each position
+    if (!isset($positionsData[$position_name]['position_id'])) {
+        $positionsData[$position_name]['position_id'] = $position_id;
+    }
 }
+
 
 // Add this function to determine which positions require majority voting
 function positionRequiresMajority($position_id, $conn) {
@@ -249,6 +282,7 @@ function positionRequiresMajority($position_id, $conn) {
     
     return in_array($position_id, $majority_positions);
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -601,7 +635,37 @@ function positionRequiresMajority($position_id, $conn) {
         </div>
         
         <!-- Results Tables -->
-        <?php foreach ($positionsData as $position => $candidates): ?>
+        <?php foreach ($positionsData as $position => $candidates): 
+            // Skip 'position_id' which is not a candidate
+            if ($position === 'position_id') continue;
+            
+            // Get the abstain votes for this position
+            $abstain_votes_for_position = $abstainVotesByPosition[$position] ?? 0;
+            
+            // Calculate total votes for this position (including abstains)
+            $total_position_votes = $abstain_votes_for_position;
+            foreach ($candidates as $candidate) {
+                if (is_array($candidate)) { // Check if this is a candidate entry
+                    $total_position_votes += $candidate['total_votes'];
+                }
+            }
+            
+            // Calculate abstain percentage
+            $abstain_percentage = $total_position_votes > 0 ? 
+                round(($abstain_votes_for_position / $total_position_votes) * 100, 1) : 0;
+            
+            // Calculate relative percentage for the abstain bar width
+            // This is for visual comparison with candidate bars - we need to use max_votes as reference
+            $max_votes = 0;
+            foreach ($candidates as $candidate) {
+                if (is_array($candidate) && $candidate['total_votes'] > $max_votes) {
+                    $max_votes = $candidate['total_votes'];
+                }
+            }
+            // Don't let max_votes be 0 to avoid division by zero
+            $max_votes = max(1, $max_votes);
+            $relative_abstain_percentage = ($abstain_votes_for_position / $max_votes) * 100;
+        ?>
             <div class="bg-white shadow-lg rounded-xl p-6 mt-8 card-hover fade-in">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-green-700 flex items-center">
@@ -615,11 +679,14 @@ function positionRequiresMajority($position_id, $conn) {
                     $vote_counts = array_column($candidates, 'total_votes');
                     $max_votes = max($vote_counts);
                     $tied_candidates = array_filter($candidates, function($c) use ($max_votes) { 
-                        return $c['total_votes'] == $max_votes; 
+                        return is_array($c) && $c['total_votes'] == $max_votes; 
                     });
                     $is_tie = count($tied_candidates) > 1 && $max_votes > 0;
                     
-                    foreach ($candidates as $index => $candidate): 
+                    foreach ($candidates as $index => $candidate):
+                        // Skip non-candidate entries like position_id
+                        if (!is_array($candidate)) continue;
+                        
                         $percentage = $total_voters > 0 ? round(($candidate['total_votes'] / $total_voters) * 100, 1) : 0;
                         $status_class = '';
                         $status_text = '';
@@ -675,11 +742,42 @@ function positionRequiresMajority($position_id, $conn) {
                             </div>
                         </div>
                         <div class="flex justify-between items-center text-xs text-gray-500">
-                            <div>0 votes</div>
+                            <div><?php echo $candidate['total_votes']; ?> votes</div>
                             <div><?php echo $percentage; ?>% of total voters</div>
                         </div>
                     </div>
                     <?php endforeach; ?>
+
+                    <!-- Add Abstain Votes bar here -->
+                    <div class="bg-gray-50 p-4 rounded-xl hover:shadow-md transition-shadow duration-200 mt-6 border-l-4 border-yellow-500">
+                        <div class="flex flex-wrap justify-between items-center mb-3">
+                            <div class="font-medium text-lg flex items-center">
+                                <i class="fas fa-ban mr-2 text-yellow-600"></i>
+                                <span>Abstain / Null Votes</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="font-bold text-lg flex items-center">
+                                    <span><?php echo $abstain_votes_for_position; ?></span>
+                                    <span class="text-gray-500 text-sm ml-1">votes</span>
+                                </div>
+                                <div class="text-yellow-600 bg-yellow-100 px-3 py-1 rounded-full flex items-center">
+                                    <i class="fas fa-info-circle mr-1.5 text-sm"></i>
+                                    Abstain
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Abstain Bar representation -->
+                        <div class="relative vote-bar-bg rounded-full overflow-hidden mb-1">
+                            <div class="absolute top-0 left-0 h-full bg-yellow-500 vote-bar transition-all duration-1000 rounded-full" 
+                                 style="width: <?php echo $relative_abstain_percentage; ?>%;" data-width="<?php echo $relative_abstain_percentage; ?>">
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                            <div><?php echo $abstain_votes_for_position; ?> votes</div>
+                            <div><?php echo $abstain_percentage; ?>% of position votes</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         <?php endforeach; ?>
@@ -1042,14 +1140,25 @@ function positionRequiresMajority($position_id, $conn) {
             }
         }
         
-        // Animate voting bars on page load
+        // Modified animateBars function to specifically target both types of abstain bars
         function animateBars() {
             setTimeout(() => {
+                // Animate all vote bars (including position-specific abstain bars)
                 const voteBars = document.querySelectorAll('.vote-bar');
                 voteBars.forEach(bar => {
                     const targetWidth = bar.getAttribute('data-width') + '%';
                     bar.style.width = targetWidth;
                 });
+                
+                // Animate the global abstain bar
+                const abstainBar = document.getElementById('abstain-votes-bar');
+                if (abstainBar) {
+                    const votesCast = <?php echo $votes_cast; ?>;
+                    const abstainVotes = <?php echo $abstain_votes; ?>;
+                    const abstainPercentage = votesCast > 0 ? ((abstainVotes / votesCast) * 100).toFixed(1) : 0;
+                    document.getElementById('abstain-votes-percentage').textContent = abstainPercentage + '%';
+                    abstainBar.style.width = abstainPercentage + '%';
+                }
             }, 500);
         }
 
