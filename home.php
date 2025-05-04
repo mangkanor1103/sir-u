@@ -649,6 +649,64 @@ function confirmLogout() {
 }
 </script>
 
+<script>
+// Add this function to handle vote submission
+function confirmSubmitVotes() {
+    // Close the modal first
+    $('#confirmationModal').modal('hide');
+    
+    // Prevent double submission
+    if (window.isSubmitting) return;
+    
+    Swal.fire({
+        title: 'Submit Your Votes?',
+        text: 'Once submitted, you cannot change your selections.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#10B981',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: '<i class="fa fa-check-circle mr-2"></i>Yes, Submit Now',
+        cancelButtonText: '<i class="fa fa-times-circle mr-2"></i>Review Again',
+        reverseButtons: true,
+        focusCancel: true,
+        background: '#fff',
+        iconColor: '#10B981',
+        customClass: {
+            confirmButton: 'px-4 py-2 rounded-lg',
+            cancelButton: 'px-4 py-2 rounded-lg',
+            title: 'text-xl font-bold text-gray-800',
+            popup: 'rounded-lg shadow-lg'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Mark as submitting to prevent double clicks
+            window.isSubmitting = true;
+            
+            // Show loading state
+            Swal.fire({
+                title: 'Submitting...',
+                text: 'Please wait while your votes are being recorded',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Add a hidden field for submission
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'submit_votes';
+            hiddenInput.value = '1';
+            document.getElementById('voteForm').appendChild(hiddenInput);
+            
+            // Submit the form
+            document.getElementById('voteForm').submit();
+        }
+    });
+}
+</script>
+
 <div id="confirmationModal" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content rounded-lg overflow-hidden shadow-lg">

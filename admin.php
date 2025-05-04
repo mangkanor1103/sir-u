@@ -300,30 +300,29 @@ if (isset($_SESSION['admin'])) {
             <img src="pics/logo.png" alt="University Logo">
             <div class="votesys">Votesys.Online</div>
         </div>
-        <div class="login-box-body"></div>
-            <p class="login-box-msg">Manage an Election</p>
-            <div class="admin-buttons">
-                <a href="admin/index.php" class="btn btn-admin">
-                    <i class="fas fa-user-shield"></i> Admin
-                </a>
-                <a href="sub/index.php" class="btn btn-subadmin">
-                    <i class="fas fa-user-cog"></i> Sub Admin
-                </a>
-            </div>
-
-            <?php
-                if (isset($_SESSION['error'])) {
-                    echo "
-                        <div class='callout callout-danger text-center'>
-                            <p>" . $_SESSION['error'] . "</p>
-                        </div>
-                    ";
-                    unset($_SESSION['error']);
-                }
-            ?>
-
-            <p class="mt20">Go <a href="index.php">Back to Homepage</a></p>
+        
+        <p class="login-box-msg">Manage an Election</p>
+        <div class="admin-buttons">
+            <a href="admin/index.php" class="btn btn-admin">
+                <i class="fas fa-user-shield"></i> Admin
+            </a>
+            <a href="sub/index.php" class="btn btn-subadmin">
+                <i class="fas fa-user-cog"></i> Sub Admin
+            </a>
         </div>
+
+        <?php
+            if (isset($_SESSION['error'])) {
+                echo "
+                    <div class='callout callout-danger text-center'>
+                        <p>" . $_SESSION['error'] . "</p>
+                    </div>
+                ";
+                unset($_SESSION['error']);
+            }
+        ?>
+
+        <p class="mt20">Go <a href="index.php">Back to Homepage</a></p>
     </div>
 
     <?php include 'includes/scripts.php' ?>
