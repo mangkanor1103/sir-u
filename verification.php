@@ -162,9 +162,10 @@ if (isset($_POST['register'])) {
                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
                             <i class="fas fa-user"></i>
                         </span>
-                        <input type="text" id="name" name="name" placeholder="Enter your full name" 
+                        <input type="text" id="name" name="name" placeholder="Lastname, Firstname M." 
                                class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50 form-input" required>
                     </div>
+                    <p class="text-xs text-gray-500 mt-1">Format: Lastname, Firstname Middle Initial</p>
                 </div>
                 
                 <div class="space-y-1">
