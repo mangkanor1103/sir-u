@@ -2,22 +2,47 @@
 // Include session management and database connection
 include 'includes/session.php';
 
-// Get active election filter if set, use first available election if none selected
-$elections_sql = "SELECT id, name FROM elections ORDER BY name ASC";
+// Update students table to set election_name if it's null
+$conn->query("
+    UPDATE students s
+    JOIN elections e ON s.election_id = e.id
+    SET s.election_name = e.name
+    WHERE s.election_name IS NULL
+");
+
+// Get all elections including those that only exist in students table
+$elections_sql = "
+    SELECT id, name FROM elections 
+    UNION 
+    SELECT DISTINCT election_id as id, election_name as name 
+    FROM students 
+    WHERE election_id NOT IN (SELECT id FROM elections)
+    ORDER BY name ASC";
 $elections_result = $conn->query($elections_sql);
 
-// If no election filter is set, redirect to the first election
-if (!isset($_GET['election']) || (int)$_GET['election'] === 0) {
+// Get election filter from URL (name instead of ID)
+$election_filter_name = isset($_GET['election']) ? $_GET['election'] : '';
+
+// If no election name filter is set, redirect to the first election
+if (empty($election_filter_name)) {
     if ($elections_result->num_rows > 0) {
         $first_election = $elections_result->fetch_assoc();
-        header('Location: students.php?election=' . $first_election['id']);
+        header('Location: students.php?election=' . urlencode($first_election['name']));
         exit();
     } else {
         // No elections available
-        $election_filter = 0;
+        $election_filter_name = '';
     }
-} else {
-    $election_filter = (int)$_GET['election'];
+}
+
+// Find the election ID for the given name
+$election_filter = 0;
+mysqli_data_seek($elections_result, 0); // Reset pointer
+while ($election = $elections_result->fetch_assoc()) {
+    if ($election['name'] === $election_filter_name) {
+        $election_filter = $election['id'];
+        break;
+    }
 }
 
 // Get filter values
@@ -29,8 +54,14 @@ $limit = 10; // Number of records per page
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
 $offset = ($page - 1) * $limit; // Offset for SQL query
 
-// Build SQL query for selected election only
-$where_clause = "WHERE students.election_id = $election_filter";
+// Build SQL query - first try by election ID, fallback to election name
+$where_clause = "";
+if ($election_filter > 0) {
+    $where_clause = "WHERE students.election_id = $election_filter";
+} else if (!empty($election_filter_name)) {
+    $safe_election_name = $conn->real_escape_string($election_filter_name);
+    $where_clause = "WHERE students.election_name = '$safe_election_name'";
+}
 
 // Add additional filters if set
 if (!empty($course_filter)) {
@@ -49,7 +80,8 @@ $total_pages = ceil($total_records / $limit); // Total number of pages
 
 // Fetch students data for the selected election with applied filters
 $sql = "
-    SELECT students.id, students.student_id, students.name, students.year_section, students.course, elections.name AS election_name 
+    SELECT students.id, students.student_id, students.name, students.year_section, 
+           students.course, COALESCE(elections.name, students.election_name) AS election_name 
     FROM students 
     LEFT JOIN elections ON students.election_id = elections.id 
     $where_clause
@@ -58,10 +90,10 @@ $sql = "
 $result = $conn->query($sql);
 
 // Get unique courses and year/sections for filters
-$courses_sql = "SELECT DISTINCT course FROM students WHERE election_id = $election_filter ORDER BY course ASC";
+$courses_sql = "SELECT DISTINCT course FROM students $where_clause ORDER BY course ASC";
 $courses_result = $conn->query($courses_sql);
 
-$year_sections_sql = "SELECT DISTINCT year_section FROM students WHERE election_id = $election_filter ORDER BY year_section ASC";
+$year_sections_sql = "SELECT DISTINCT year_section FROM students $where_clause ORDER BY year_section ASC";
 $year_sections_result = $conn->query($year_sections_sql);
 
 // Reset pointer for the elections dropdown
@@ -118,8 +150,8 @@ mysqli_data_seek($elections_result, 0);
                     <select name="election" id="election_filter" class="form-control" style="border: 1px solid #d0e0d0; border-radius: 4px; padding: 6px 10px; width: 180px;" onchange="this.form.submit()">
                       <?php
                       while ($election = $elections_result->fetch_assoc()) {
-                        $selected = ($election_filter == $election['id']) ? 'selected' : '';
-                        echo "<option value='" . $election['id'] . "' $selected>" . htmlspecialchars($election['name']) . "</option>";
+                        $selected = ($election_filter_name == $election['name']) ? 'selected' : '';
+                        echo "<option value='" . htmlspecialchars($election['name']) . "' $selected>" . htmlspecialchars($election['name']) . "</option>";
                       }
                       ?>
                     </select>
@@ -148,7 +180,7 @@ mysqli_data_seek($elections_result, 0);
                 <!-- Course filter -->
                 <div class="filter-item">
                   <form method="GET" action="students.php" class="form-inline" style="margin-bottom: 0;">
-                    <input type="hidden" name="election" value="<?php echo $election_filter; ?>">
+                    <input type="hidden" name="election" value="<?php echo htmlspecialchars($election_filter_name); ?>">
                     <input type="hidden" name="page" value="1"> <!-- Reset to page 1 when filtering -->
                     
                     <?php if ($year_section_filter): ?>
@@ -170,7 +202,7 @@ mysqli_data_seek($elections_result, 0);
                 <!-- Year & Section filter -->
                 <div class="filter-item">
                   <form method="GET" action="students.php" class="form-inline" style="margin-bottom: 0;">
-                    <input type="hidden" name="election" value="<?php echo $election_filter; ?>">
+                    <input type="hidden" name="election" value="<?php echo htmlspecialchars($election_filter_name); ?>">
                     <input type="hidden" name="page" value="1"> <!-- Reset to page 1 when filtering -->
                     
                     <?php if ($course_filter): ?>
@@ -192,7 +224,7 @@ mysqli_data_seek($elections_result, 0);
                 <!-- Reset filters button -->
                 <?php if ($course_filter || $year_section_filter): ?>
                 <div class="filter-reset">
-                  <a href="students.php?election=<?php echo $election_filter; ?>" class="btn btn-sm btn-default" style="border-color: #d0e0d0;">
+                  <a href="students.php?election=<?php echo urlencode($election_filter_name); ?>" class="btn btn-sm btn-default" style="border-color: #d0e0d0;">
                     <i class="fa fa-times"></i> Clear Filters
                   </a>
                 </div>
@@ -203,14 +235,6 @@ mysqli_data_seek($elections_result, 0);
             <!-- Students Table -->
             <div class="box-body" style="padding: 20px; background-color: #fff; border-radius: 0 0 8px 8px;">
               <?php 
-                // Get current election name for display
-                $current_election_sql = "SELECT name FROM elections WHERE id = ?";
-                $stmt = $conn->prepare($current_election_sql);
-                $stmt->bind_param("i", $election_filter);
-                $stmt->execute();
-                $election_name_result = $stmt->get_result();
-                $election_name = ($election_name_result->num_rows > 0) ? $election_name_result->fetch_assoc()['name'] : "Unknown Election";
-                
                 // Build filter description
                 $filter_desc = "";
                 if ($course_filter) {
@@ -221,7 +245,7 @@ mysqli_data_seek($elections_result, 0);
                 }
               ?>
               <div class="alert alert-info" style="background-color: #e8f4fb; color: #0c5460; border-color: #bee5eb; border-left: 4px solid #17a2b8;">
-                <i class="fa fa-info-circle"></i> Showing students registered for: <strong><?php echo htmlspecialchars($election_name); ?></strong><?php echo $filter_desc; ?>
+                <i class="fa fa-info-circle"></i> Showing students registered for: <strong><?php echo htmlspecialchars($election_filter_name); ?></strong><?php echo $filter_desc; ?>
               </div>
 
               <div class="table-responsive">
@@ -264,7 +288,7 @@ mysqli_data_seek($elections_result, 0);
               <ul class="pagination pagination-sm no-margin pull-right">
                 <?php 
                 // Build pagination URL with all active filters
-                $pagination_url = "students.php?election=$election_filter";
+                $pagination_url = "students.php?election=" . urlencode($election_filter_name);
                 if (!empty($course_filter)) {
                     $pagination_url .= "&course=" . urlencode($course_filter);
                 }

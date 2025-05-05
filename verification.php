@@ -17,6 +17,17 @@ if (!isset($_SESSION['voter']) || !isset($_SESSION['election_id'])) {
 $voter_id = $_SESSION['voter'];
 $election_id = $_SESSION['election_id'];
 
+// Get election name for the current election
+$election_stmt = $conn->prepare("SELECT name FROM elections WHERE id = ?");
+$election_stmt->bind_param("i", $election_id);
+$election_stmt->execute();
+$election_result = $election_stmt->get_result();
+$election_name = "";
+if ($election_row = $election_result->fetch_assoc()) {
+    $election_name = $election_row['name'];
+}
+$election_stmt->close();
+
 // Check if voter is already registered for this specific election
 $stmt = $conn->prepare("SELECT * FROM students WHERE voters_id = ? AND election_id = ?");
 $stmt->bind_param("si", $voter_id, $election_id);
@@ -52,9 +63,9 @@ if (isset($_POST['register'])) {
         exit();
     }
 
-    // Insert voter details into students table with election_id
-    $stmt = $conn->prepare("INSERT INTO students (voters_id, student_id, name, year_section, course, election_id) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssssi", $voter_id, $student_id, $name, $year_section, $course, $election_id);
+    // Insert voter details into students table with election_id and election_name
+    $stmt = $conn->prepare("INSERT INTO students (voters_id, student_id, name, year_section, course, election_id, election_name) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssis", $voter_id, $student_id, $name, $year_section, $course, $election_id, $election_name);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = 'Registration successful!';

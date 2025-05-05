@@ -223,56 +223,84 @@ while ($row = $abstainResults->fetch_assoc()) {
     $abstainVotesByPosition[$row['position']] = $row['abstain_votes'];
 }
 
+// Modify the position winner selection logic
 $results = getVotesByPosition($election_id);
 $positionsData = [];
+$position_candidates = [];
+
+// First pass: collect all candidates by position
 while ($row = $results->fetch_assoc()) {
-    $candidate_count = $row['candidate_count'];
-    $max_vote = $row['max_vote'];
-    $position_id = $row['position_id'];
     $position_name = $row['position'];
+    $candidate = [
+        'candidate' => $row['candidate'],
+        'total_votes' => $row['total_votes'],
+        'is_winner' => false
+    ];
+    
+    if (!isset($position_candidates[$position_name])) {
+        $position_candidates[$position_name] = [
+            'position_id' => $row['position_id'],
+            'max_vote' => $row['max_vote'],
+            'candidates' => []
+        ];
+    }
+    
+    $position_candidates[$position_name]['candidates'][] = $candidate;
+}
 
-    // Determine if the candidate is a winner
-    $is_winner = false;
-
-    // For positions where max_vote = 1, we need to check 50%+1 rule for specific positions
+// Second pass: determine winners correctly for each position
+foreach ($position_candidates as $position_name => $position) {
+    $candidates = $position['candidates'];
+    $position_id = $position['position_id'];
+    $max_vote = $position['max_vote'];
+    
+    // Sort candidates by votes (highest first)
+    usort($candidates, function($a, $b) {
+        return $b['total_votes'] - $a['total_votes'];
+    });
+    
     if ($max_vote == 1) {
-        // Check if this is a position that needs 50%+1 
+        // For single-winner positions
         $requires_majority = positionRequiresMajority($position_id, $conn);
-        
-        // Check if this is the only candidate in the position
-        $is_single_candidate = ($candidate_count == 1);
+        $is_single_candidate = count($candidates) == 1;
         
         if ($is_single_candidate) {
             // For single candidates, they must get 50% + 1 of total votes to win
-            $is_winner = ($row['total_votes'] >= $winning_threshold);
+            $candidates[0]['is_winner'] = ($candidates[0]['total_votes'] >= $winning_threshold);
         } else if ($requires_majority) {
             // Position requires majority (50%+1)
-            $is_winner = ($row['total_votes'] >= $winning_threshold && 
-                         count($positionsData[$position_name] ?? []) < $max_vote);
+            $candidates[0]['is_winner'] = ($candidates[0]['total_votes'] >= $winning_threshold);
         } else {
             // Position only requires highest vote count
-            $is_winner = count($positionsData[$position_name] ?? []) < $max_vote;
+            $candidates[0]['is_winner'] = true;
         }
     } else {
         // For positions with max_vote > 1, select up to max_vote candidates with highest votes
-        $current_winners = $positionsData[$position_name] ?? [];
-        if (count($current_winners) < $max_vote) {
-            $is_winner = true;
+        // Account for ties: include all candidates with the same vote count as the last winner
+        $min_winning_votes = 0;
+        $winner_count = 0;
+        
+        // Mark the top candidates as winners
+        foreach ($candidates as $i => $candidate) {
+            if ($winner_count < $max_vote) {
+                $candidates[$i]['is_winner'] = true;
+                $min_winning_votes = $candidate['total_votes'];
+                $winner_count++;
+            } else if ($candidate['total_votes'] == $min_winning_votes) {
+                // Tie with the last winner, include this candidate too
+                $candidates[$i]['is_winner'] = true;
+                $winner_count++;
+            } else {
+                // Not a winner
+                $candidates[$i]['is_winner'] = false;
+            }
         }
     }
-
-    $positionsData[$position_name][] = [
-        'candidate' => $row['candidate'],
-        'total_votes' => $row['total_votes'],
-        'is_winner' => $is_winner
-    ];
     
-    // Store the position_id for each position
-    if (!isset($positionsData[$position_name]['position_id'])) {
-        $positionsData[$position_name]['position_id'] = $position_id;
-    }
+    // Store results in positionsData
+    $positionsData[$position_name] = $candidates;
+    $positionsData[$position_name]['position_id'] = $position_id;
 }
-
 
 // Add this function to determine which positions require majority voting
 function positionRequiresMajority($position_id, $conn) {

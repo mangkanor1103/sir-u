@@ -340,6 +340,7 @@
 <?php include 'includes/scripts.php'; ?>
 <!-- Your JavaScript code -->
 <script>
+// Update the showConfirmation function to create larger review elements
 function showConfirmation() {
     let voteReviewList = document.getElementById("voteReviewList");
     voteReviewList.innerHTML = "";
@@ -375,71 +376,114 @@ function showConfirmation() {
         return;
     }
 
-    // Get all positions
+    // Get all positions - Fix the selector to correctly find position containers
     const positions = {};
-    document.querySelectorAll("[id^='']").forEach(position => {
-        if (position.id && !isNaN(position.id)) {
-            const positionHeading = position.querySelector("h3");
+    document.querySelectorAll("div[id]").forEach(position => {
+        // Check if it's a position container (has a numeric ID and contains the position heading)
+        if (position.id && !isNaN(position.id) && position.querySelector(".bg-gradient-to-r h3")) {
+            const positionHeading = position.querySelector(".bg-gradient-to-r h3");
             if (positionHeading) {
                 positions[position.id] = {
-                    name: positionHeading.textContent,
-                    maxVote: position.querySelector(".text-sm.text-gray-600 .font-bold").textContent
+                    name: positionHeading.textContent.trim(),
+                    maxVote: position.querySelector(".text-sm.text-gray-600 .font-bold")?.textContent || "1"
                 };
             }
         }
     });
 
-    // Add selected candidates to the review list
+    // Group votes by position
+    const votesByPosition = {};
+    
+    // Process selected candidates
     selectedCandidates.forEach(candidate => {
         let candidateName = candidate.querySelector("h4").textContent;
         let partylistElement = candidate.querySelector(".bg-gray-100");
         let partylistInfo = partylistElement ? partylistElement.textContent : "";
         let candidateImg = candidate.querySelector("img").src;
         
-        // Get position information
-        let positionId = candidate.closest("[id]").id;
-        let positionName = positions[positionId]?.name || "Position";
-        let maxVote = positions[positionId]?.maxVote || "1";
+        // Get position information - Fix to properly get the closest container with ID
+        let positionContainer = candidate.closest("div[id]");
+        if (positionContainer) {
+            let positionId = positionContainer.id;
+            let positionName = positions[positionId]?.name || "Unknown Position";
+            
+            // Initialize position group if not exists
+            if (!votesByPosition[positionName]) {
+                votesByPosition[positionName] = [];
+            }
 
-        let listItem = document.createElement("div");
-        listItem.className = 'flex items-center p-3 border-b border-gray-100';
-        listItem.innerHTML = `
-            <div class="w-12 h-12 rounded-full overflow-hidden mr-3 bg-gray-100 flex-shrink-0">
-                <img src="${candidateImg}" class="w-full h-full object-cover">
-            </div>
-            <div class="flex-grow">
-                <p class="font-medium text-gray-800">${candidateName}</p>
-                <p class="text-gray-500 text-sm">${partylistInfo}</p>
-            </div>
-            <div class="text-right">
-                <p class="bg-green-100 text-green-800 px-3 py-1 rounded-lg text-xs font-medium">${positionName}</p>
-                <p class="text-gray-500 text-xs mt-1">Max votes: ${maxVote}</p>
-            </div>
-        `;
-        voteReviewList.appendChild(listItem);
+            // Add candidate to position group
+            votesByPosition[positionName].push({
+                type: 'candidate',
+                name: candidateName,
+                partylist: partylistInfo,
+                image: candidateImg
+            });
+        }
     });
 
-    // Add abstained positions to the review list
+    // Process abstained positions
     abstainOptions.forEach(option => {
         let positionId = option.value;
-        let positionName = positions[positionId]?.name || "Position";
-        let maxVote = positions[positionId]?.maxVote || "1";
+        let positionName = positions[positionId]?.name || "Unknown Position";
+        
+        // Initialize position group if not exists
+        if (!votesByPosition[positionName]) {
+            votesByPosition[positionName] = [];
+        }
 
-        let listItem = document.createElement("div");
-        listItem.className = 'flex items-center p-3 border-b border-gray-100 bg-gray-50';
-        listItem.innerHTML = `
-            <div class="w-12 h-12 rounded-full bg-gray-200 mr-3 flex items-center justify-center flex-shrink-0">
-                <i class="fa fa-ban text-gray-400"></i>
-            </div>
-            <div class="flex-grow">
-                <p class="font-medium text-gray-800">${positionName}</p>
-                <p class="text-gray-500 text-sm">ABSTAINED</p>
-            </div>
-            <div class="text-right">
-                <p class="text-gray-500 text-xs">Max votes: ${maxVote}</p>
-            </div>
+        // Add abstain to position group
+        votesByPosition[positionName].push({
+            type: 'abstain'
+        });
+    });
+
+    // Sort positions alphabetically and render the vote review list
+    Object.keys(votesByPosition).sort().forEach(positionName => {
+        // Create position header
+        let positionHeader = document.createElement("div");
+        positionHeader.className = 'bg-green-50 p-4 border-b-2 border-green-200';
+        positionHeader.innerHTML = `
+            <h3 class="font-bold text-xl text-green-800">${positionName}</h3>
         `;
-        voteReviewList.appendChild(listItem);
+        voteReviewList.appendChild(positionHeader);
+        
+        // Add selected candidates or abstain for this position
+        votesByPosition[positionName].forEach(vote => {
+            let listItem = document.createElement("div");
+            
+            if (vote.type === 'candidate') {
+                listItem.className = 'flex items-center p-5 border-b border-gray-100';
+                listItem.innerHTML = `
+                    <div class="w-20 h-20 rounded-full overflow-hidden mr-5 bg-gray-100 flex-shrink-0 border-2 border-green-200">
+                        <img src="${vote.image}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-grow">
+                        <p class="font-bold text-xl text-gray-800">${vote.name}</p>
+                        <p class="text-gray-600 text-lg">${vote.partylist || 'Independent'}</p>
+                    </div>
+                    <div class="bg-green-100 rounded-full p-2 flex-shrink-0">
+                        <i class="fa fa-check text-green-600 text-xl"></i>
+                    </div>
+                `;
+            } else {
+                listItem.className = 'flex items-center p-5 border-b border-gray-100 bg-gray-50';
+                listItem.innerHTML = `
+                    <div class="w-20 h-20 rounded-full bg-gray-200 mr-5 flex items-center justify-center flex-shrink-0 border-2 border-gray-300">
+                        <i class="fa fa-ban text-gray-400 text-3xl"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="font-bold text-xl text-gray-800">ABSTAINED</p>
+                        <p class="text-gray-600 text-lg">No selection made for this position</p>
+                    </div>
+                    <div class="bg-gray-200 rounded-full p-2 flex-shrink-0">
+                        <i class="fa fa-circle-o text-gray-500 text-xl"></i>
+                    </div>
+                `;
+            }
+            
+            voteReviewList.appendChild(listItem);
+        });
     });
 
     $("#confirmationModal").modal("show");  // Show modal
@@ -708,15 +752,16 @@ function confirmSubmitVotes() {
 </script>
 
 <div id="confirmationModal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 800px;">
         <div class="modal-content rounded-lg overflow-hidden shadow-lg">
             <div class="modal-header bg-gradient-to-r from-green-600 to-green-400 text-white border-0">
-                <h4 class="modal-title font-bold text-xl md:text-2xl">Review Your Votes</h4>
+                <h4 class="modal-title font-bold text-2xl">Review Your Votes</h4>
                 <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body p-0">
-                <div class="p-5 bg-gray-50">
-                    <h5 class="text-center text-gray-800 text-lg md:text-xl font-bold mb-3">Please confirm your selections:</h5>
+                <div class="p-5 bg-gray-50 border-b">
+                    <h5 class="text-center text-gray-800 text-xl font-bold mb-1">Please confirm your selections:</h5>
+                    <p class="text-center text-gray-600">Review your votes before final submission</p>
                 </div>
                 <div id="voteReviewList" class="max-h-96 overflow-y-auto">
                     <!-- Vote list will be inserted here via JavaScript -->
@@ -844,6 +889,82 @@ function confirmSubmitVotes() {
         #platformCandidateImage {
             width: 3.5rem;
             height: 3.5rem;
+        }
+    }
+
+    /* Enhanced modal styles */
+    #confirmationModal .modal-content {
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+    
+    #confirmationModal .modal-header {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+    
+    #voteReviewList {
+        scrollbar-width: thin;
+        scrollbar-color: #10B981 #F3F4F6;
+    }
+    
+    #voteReviewList::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    #voteReviewList::-webkit-scrollbar-track {
+        background: #F3F4F6;
+    }
+    
+    #voteReviewList::-webkit-scrollbar-thumb {
+        background-color: #10B981;
+        border-radius: 6px;
+    }
+    
+    /* Animation for modal items */
+    #voteReviewList > div {
+        animation: fadeInUp 0.4s ease-out forwards;
+        opacity: 0;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Add delay to each item */
+    #voteReviewList > div:nth-child(2) { animation-delay: 0.1s; }
+    #voteReviewList > div:nth-child(3) { animation-delay: 0.15s; }
+    #voteReviewList > div:nth-child(4) { animation-delay: 0.2s; }
+    #voteReviewList > div:nth-child(5) { animation-delay: 0.25s; }
+    #voteReviewList > div:nth-child(6) { animation-delay: 0.3s; }
+    #voteReviewList > div:nth-child(7) { animation-delay: 0.35s; }
+    #voteReviewList > div:nth-child(8) { animation-delay: 0.4s; }
+    
+    /* Responsive adjustments for extra-large modal */
+    @media (max-width: 992px) {
+        .modal-xl {
+            max-width: 95% !important;
+            margin: 0.5rem auto;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        #voteReviewList > div {
+            padding: 1rem !important;
+        }
+        
+        #voteReviewList .text-xl {
+            font-size: 1.1rem;
+        }
+        
+        #voteReviewList .text-lg {
+            font-size: 0.95rem;
         }
     }
 </style>
