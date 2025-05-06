@@ -188,12 +188,16 @@ if (isset($_POST['register'])) {
                         <select id="course" name="course" 
                                 class="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50 appearance-none form-input" required>
                             <option value="" disabled selected>Select Course</option>
-                            <?php
-                            $courses_result = $conn->query($courses_query); // Re-fetch courses
-                            while ($row = $courses_result->fetch_assoc()) {
-                                echo "<option value='" . htmlspecialchars($row['course']) . "'>" . htmlspecialchars($row['course']) . "</option>";
-                            }
-                            ?>
+                            <option value="BSIT">BSIT</option>
+                            <option value="BSHM">BSHM</option>
+                            <option value="BSTM">BSTM</option>
+                            <option value="BSENTREP">BSENTREP</option>
+                            <option value="BSCRIM">BSCRIM</option>
+                            <option value="BSED">BSED</option>
+                            <option value="BEED">BEED</option>
+                            <option value="BSCPE">BSCPE</option>
+                            <option value="BSFI">BSFI</option>
+                            <option value="ABPOLSCI">ABPOLSCI</option>
                         </select>
                         <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 pointer-events-none">
                             <i class="fas fa-chevron-down"></i>
@@ -202,20 +206,18 @@ if (isset($_POST['register'])) {
                 </div>
                 
                 <div class="space-y-1">
-                    <label for="year_section" class="block text-gray-700 font-medium text-sm">Year and Section</label>
+                    <label for="year_section" class="block text-gray-700 font-medium text-sm">Year Level</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
                             <i class="fas fa-layer-group"></i>
                         </span>
                         <select id="year_section" name="year_section" 
                                 class="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/50 appearance-none form-input" required>
-                            <option value="" disabled selected>Select Year and Section</option>
-                            <?php
-                            mysqli_data_seek($courses_result, 0); // Reset pointer
-                            while ($row = $courses_result->fetch_assoc()) {
-                                echo "<option value='" . htmlspecialchars($row['year_section']) . "'>" . htmlspecialchars($row['year_section']) . "</option>";
-                            }
-                            ?>
+                            <option value="" disabled selected>Select Year Level</option>
+                            <option value="1st Year">1st Year</option>
+                            <option value="2nd Year">2nd Year</option>
+                            <option value="3rd Year">3rd Year</option>
+                            <option value="4th Year">4th Year</option>
                         </select>
                         <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 pointer-events-none">
                             <i class="fas fa-chevron-down"></i>

@@ -40,11 +40,6 @@
           <i class="fa fa-users" style="width: 24px; margin-right: 10px; text-align: center;"></i> <span>Students</span>
         </a>
       </li>
-      <li class="sidebar-item">
-        <a href="info.php" style="color: #fff; border-left: 4px solid transparent; padding: 14px 15px; margin: 5px 10px; transition: all 0.3s; border-radius: 8px; display: flex; align-items: center;">
-          <i class="fa fa-book" style="width: 24px; margin-right: 10px; text-align: center;"></i> <span>Programs</span>
-        </a>
-      </li>
       
       <li class="sidebar-footer" style="margin-top: 30px; padding: 15px; text-align: center; font-size: 12px; color: rgba(255,255,255,0.7);">
         <p>© 2025 Votesys Admin Panel</p>

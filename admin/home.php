@@ -49,21 +49,6 @@ include 'includes/header.php';
                         </a>
                     </div>
 
-                    <!-- Courses -->
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <a href="info.php" class="text-decoration-none">
-                            <div class="info-box" style="background: white; border-left: 5px solid #046a0f; padding: 25px 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                                <span class="info-box-icon" style="font-size: 42px; color: #046a0f;">
-                                    <i class="fa fa-book"></i>
-                                </span>
-                                <div class="info-box-content">
-                                    <h3 style="color: #035a0d; font-size: 22px; font-weight: 600; margin-bottom: 10px;">Programs</h3>
-                                    <p style="color: #555; font-size: 15px;">Manage programs, year and sections</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-
                     <!-- History -->
                     <div class="col-lg-4 col-md-6 mb-4">
                         <a href="history.php" class="text-decoration-none">
