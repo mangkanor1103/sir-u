@@ -10,6 +10,13 @@ if (isset($_GET['election_id'])) {
     $election = $stmt->get_result()->fetch_assoc();
     
     if ($election) {
+        // Fetch voter count for calculating thresholds
+        $stmt = $conn->prepare('SELECT COUNT(*) as voter_count FROM voters WHERE election_id = ?');
+        $stmt->bind_param('i', $_GET['election_id']);
+        $stmt->execute();
+        $voter_result = $stmt->get_result()->fetch_assoc();
+        $total_voter_count = $voter_result['voter_count'];
+
         // Fetch positions for this election
         $stmt = $conn->prepare('
             SELECT
@@ -74,6 +81,13 @@ if (isset($_GET['election_id'])) {
         
         // Calculate winners
         foreach ($positions as $position_id => &$position) {
+            // Get position information to determine if this requires majority vote
+            $stmt = $conn->prepare('SELECT max_vote FROM positions WHERE position_id = ?');
+            $stmt->bind_param('i', $position_id);
+            $stmt->execute();
+            $pos_info = $stmt->get_result()->fetch_assoc();
+            $max_vote = $pos_info['max_vote'];
+            
             // Find the maximum vote count for this position
             $max_votes = 0;
             foreach ($position['candidates'] as &$candidate) {
@@ -90,24 +104,50 @@ if (isset($_GET['election_id'])) {
                 }
             }
             
-            // Check if this position requires majority vote (e.g., President position)
+            // Check if this position requires majority vote
             $needs_majority = ($position_id == 1); // Assuming position ID 1 is President
-            $minimum_votes_to_win = $needs_majority ? floor($position['total_votes'] / 2) + 1 : 0;
+            
+            // For single candidate positions, they need 50%+1 of TOTAL VOTERS to win
+            $single_candidate = (count($position['candidates']) == 1);
+            
+            // Calculate appropriate threshold
+            if ($single_candidate) {
+                $minimum_votes_to_win = ceil($total_voter_count / 2) + 1; // 50%+1 of TOTAL VOTERS
+            } else if ($needs_majority) {
+                $minimum_votes_to_win = floor($position['total_votes'] / 2) + 1; // 50%+1 of VOTES CAST
+            } else {
+                $minimum_votes_to_win = 0; // Simple plurality
+            }
             
             // Mark winners and set status
             foreach ($position['candidates'] as &$candidate) {
                 $is_max_vote = ($candidate['vote_count'] == $max_votes && $max_votes > 0);
-                $has_required_majority = (!$needs_majority || $candidate['vote_count'] >= $minimum_votes_to_win);
                 
-                // Store information for display
-                $candidate['is_winner'] = ($is_max_vote && $has_required_majority);
-                $candidate['is_tie'] = ($is_max_vote && $max_votes_count > 1);
-                $candidate['needs_reelection'] = ($needs_majority && $is_max_vote && !$has_required_majority);
+                if ($single_candidate) {
+                    // Single candidate needs to reach threshold of total voters
+                    $has_required_votes = ($candidate['vote_count'] >= $minimum_votes_to_win);
+                    $candidate['is_winner'] = $has_required_votes;
+                    $candidate['is_tie'] = false;
+                    $candidate['needs_reelection'] = !$has_required_votes;
+                } else if ($needs_majority) {
+                    // Position requiring majority
+                    $has_required_majority = ($candidate['vote_count'] >= $minimum_votes_to_win);
+                    $candidate['is_winner'] = ($is_max_vote && $has_required_majority);
+                    $candidate['is_tie'] = ($is_max_vote && $max_votes_count > 1);
+                    $candidate['needs_reelection'] = ($is_max_vote && !$has_required_majority);
+                } else {
+                    // Standard positions - top N candidates win based on max_vote
+                    $candidate['is_winner'] = ($is_max_vote && !($max_votes_count > $max_vote));
+                    $candidate['is_tie'] = ($is_max_vote && $max_votes_count > $max_vote);
+                    $candidate['needs_reelection'] = false;
+                }
             }
             
-            // Add majority voting info to position
-            $position['needs_majority'] = $needs_majority;
+            // Add voting info to position
+            $position['needs_majority'] = $needs_majority || $single_candidate;
             $position['minimum_votes_to_win'] = $minimum_votes_to_win;
+            $position['single_candidate'] = $single_candidate;
+            $position['total_voter_count'] = $total_voter_count; // Add total voter count for reference
         }
     } else {
         exit('Election with that ID does not exist.');
@@ -206,7 +246,11 @@ function getOrdinal($number) {
                                                 <td class="text-center">
                                                     <?php 
                                                     if($needs_reelection) {
-                                                        echo "<span class='badge bg-warning' style='background-color: #ffc107; color: #212529; padding: 5px 10px; border-radius: 4px;'><i class='fa fa-exclamation-triangle mr-1'></i> RE-ELECTION NEEDED</span>";
+                                                        if($position['single_candidate']) {
+                                                            echo "<span class='badge bg-warning' style='background-color: #ffc107; color: #212529; padding: 5px 10px; border-radius: 4px;'><i class='fa fa-exclamation-triangle mr-1'></i> FAILED TO MEET 50%+1 THRESHOLD</span>";
+                                                        } else {
+                                                            echo "<span class='badge bg-warning' style='background-color: #ffc107; color: #212529; padding: 5px 10px; border-radius: 4px;'><i class='fa fa-exclamation-triangle mr-1'></i> RE-ELECTION NEEDED</span>";
+                                                        }
                                                     } elseif($is_tie) {
                                                         echo "<span class='badge bg-info' style='background-color: #17a2b8; color: white; padding: 5px 10px; border-radius: 4px;'><i class='fa fa-balance-scale mr-1'></i> TIE - " . getOrdinal($rank) . " PLACE</span>";
                                                     } elseif($is_max_vote) {
@@ -243,14 +287,23 @@ function getOrdinal($number) {
                                     </tbody>
                                     <tfoot>
                                         <tr class="table-info" style="background-color: #e3f2fd;">
-                                            <td colspan="3"><strong>Total Votes:</strong></td>
+                                            <td colspan="3"><strong>Total Votes Cast:</strong></td>
                                             <td><strong><?php echo $position['total_votes']; ?></strong></td>
                                             <td><strong>100%</strong></td>
                                         </tr>
                                         
-                                        <?php if($position['needs_majority']): ?>
+                                        <?php if($position['single_candidate']): ?>
                                         <tr class="table-warning" style="background-color: #fff3cd;">
-                                            <td colspan="3"><strong>Votes Needed to Win (50%+1):</strong></td>
+                                            <td colspan="3"><strong>Total Registered Voters:</strong></td>
+                                            <td colspan="2"><strong><?php echo $position['total_voter_count']; ?> voters</strong></td>
+                                        </tr>
+                                        <tr class="table-warning" style="background-color: #fff3cd;">
+                                            <td colspan="3"><strong>Votes Needed to Win (50%+1 of Total Voters):</strong></td>
+                                            <td colspan="2"><strong><?php echo $position['minimum_votes_to_win']; ?> votes</strong></td>
+                                        </tr>
+                                        <?php elseif($position['needs_majority']): ?>
+                                        <tr class="table-warning" style="background-color: #fff3cd;">
+                                            <td colspan="3"><strong>Votes Needed to Win (50%+1 of Votes Cast):</strong></td>
                                             <td colspan="2"><strong><?php echo $position['minimum_votes_to_win']; ?> votes</strong></td>
                                         </tr>
                                         <?php endif; ?>

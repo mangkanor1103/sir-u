@@ -142,6 +142,7 @@ foreach ($positionsData as $position => $data) {
     $max_vote = $data['max_vote'];
     $position_id = $data['position_id'];
     $requires_majority = positionRequiresMajority($position_id, $conn);
+    $candidate_count = count($data['all_candidates']);
     
     // Sort candidates by votes in descending order
     usort($data['all_candidates'], function($a, $b) {
@@ -155,8 +156,13 @@ foreach ($positionsData as $position => $data) {
     foreach ($data['all_candidates'] as $index => $candidate) {
         $is_winner = false;
         
+        // For single candidate positions
+        if ($candidate_count == 1) {
+            // Winner needs 50%+1 of total voters
+            $is_winner = ($candidate['total_votes'] >= $winning_threshold);
+        }
         // For single winner positions that require majority
-        if ($max_vote == 1 && $requires_majority) {
+        else if ($max_vote == 1 && $requires_majority) {
             // Winner needs 50%+1 of total votes
             $is_winner = ($candidate['total_votes'] >= $winning_threshold);
         }
